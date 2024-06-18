@@ -40,10 +40,13 @@
                         <!-- Nav items (admin, new_item, account, login, register) -->
                         {% if user.is_authenticated %}
                             {% if request.user.username == 'kafetzisthomas' %}
-                                <a class="nav-item nav-link" href="{% url 'admin' %}">Admin</a>
+                                <a class="nav-item nav-link" href="{% url 'admin:index' %}">Admin</a>
                             {% endif %}
                             <a class="nav-item nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'new_item' %}">New Item</a>
-                            <a class="nav-item nav-link" href="{% url 'users:logout' %}">Logout</a>
+                            <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
+                                {% csrf_token %}
+                            </form>
+                            <a class="nav-item nav-link" href="#" onclick="document.getElementById('logout-form').submit();">Logout</a>                            
                         {% else %}
                             <a class="nav-item nav-link {% if request.path == '/users/login/' %}active{% endif %}" href="{% url 'users:login' %}">Login</a>
                             <a class="nav-item nav-link {% if request.path == '/users/register/' %}active{% endif %}" href="{% url 'users:register' %}">Register</a>
