@@ -30,14 +30,24 @@
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
                         <!-- Nav items (vault, password_generator, home) -->
-                        <a href="{% url 'users:register' %}">Register</a>
-                        <form method="post" action="{% url 'users:logout' %}">
-                            {% csrf_token %}
-                            <button type="submit">Log out</button>
-                            <p>logged out</p>
-                        </form>
+                        {% if user.is_authenticated %}
+                            <a class="nav-item nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'vault' %}">My Vault</a>    
+                        {% else %}
+                            <a class="nav-item nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+                        {% endif %}
+                    </div>
                     <div class="navbar-nav">
                         <!-- Nav items (admin, new_item, account, login, register) -->
+                        {% if user.is_authenticated %}
+                            {% if request.user.username == 'kafetzisthomas' %}
+                                <a class="nav-item nav-link" href="{% url 'admin' %}">Admin</a>
+                            {% endif %}
+                            <a class="nav-item nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'new_item' %}">New Item</a>
+                            <a class="nav-item nav-link" href="{% url 'users:logout' %}">Logout</a>
+                        {% else %}
+                            <a class="nav-item nav-link {% if request.path == '/users/login/' %}active{% endif %}" href="{% url 'users:login' %}">Login</a>
+                            <a class="nav-item nav-link {% if request.path == '/users/register/' %}active{% endif %}" href="{% url 'users:register' %}">Register</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
