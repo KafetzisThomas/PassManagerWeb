@@ -1,0 +1,20 @@
+{% extends "passmanager/base.html" %}
+{% load static %}
+{% block content %}
+    <article class="media content-section">
+        <div class="media-body">
+            <table>
+                <tr>
+                    <td align="center" valign="top">
+                        <img src="{% static 'images/logo.png' %}" width="80%">
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" valign="top" style="vertical-align: top; padding-top: 20px;">
+                        <p class="article-content" style="text-align: center;">A password manager that allows you to securely manage your saved passwords of your online accounts.</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+</article>
+{% endblock content %}
