@@ -10,7 +10,7 @@ def home(request):
 
 @login_required
 def vault(request):
-    items = Item.objects.all()
+    items = Item.objects.filter(owner=request.user).order_by("date_added")
     context = {"items": items}
     return render(request, "passmanager/vault.html", context)
 
@@ -20,6 +20,8 @@ def new_item(request):
     if request.method == "POST":
         form = ItemForm(data=request.POST)
         if form.is_valid():
+            obj = form.save(commit=False)
+            obj.owner = request.user
             form.save()
             return redirect("vault")
     else:
