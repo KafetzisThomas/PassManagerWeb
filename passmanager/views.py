@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .models import Item
 from .forms import ItemForm
 
@@ -7,12 +8,14 @@ def home(request):
     return render(request, "passmanager/home.html")
 
 
+@login_required
 def vault(request):
     items = Item.objects.all()
     context = {"items": items}
     return render(request, "passmanager/vault.html", context)
 
 
+@login_required
 def new_item(request):
     if request.method == "POST":
         form = ItemForm(data=request.POST)
@@ -26,6 +29,7 @@ def new_item(request):
     return render(request, "passmanager/new_item.html", context)
 
 
+@login_required
 def edit_item(request, item_id):
     item = Item.objects.get(id=item_id)
 
