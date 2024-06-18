@@ -6,3 +6,35 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = ["name", "website", "username", "password", "notes"]
+
+
+class PasswordGeneratorForm(forms.Form):
+    length = forms.IntegerField(
+        label="Length",
+        min_value=8,
+        max_value=16,
+        initial=8,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control form-control-lg lengthfield-size"}
+        ),
+    )
+    letters = forms.BooleanField(
+        label="A-Z/a-z",
+        initial=True,
+        required=True,
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "disabled": True}
+        ),
+    )
+    digits = forms.BooleanField(
+        label="0-9",
+        initial=True,
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+    special_chars = forms.BooleanField(
+        label="!@#$%^&*",
+        initial=True,
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )

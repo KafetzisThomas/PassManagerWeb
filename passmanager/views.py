@@ -1,8 +1,10 @@
+import string
+import random
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Item
 from django.http import Http404
-from .forms import ItemForm
+from .forms import ItemForm, PasswordGeneratorForm
 
 
 def home(request):
@@ -48,3 +50,38 @@ def edit_item(request, item_id):
 
     context = {"item": item, "form": form}
     return render(request, "passmanager/edit_item.html", context)
+
+
+def generate_password(length, include_letters, include_digits, include_special_chars):
+    characters = ""
+    if include_letters:
+        characters += string.ascii_letters
+    if include_digits:
+        characters += string.digits
+    if include_special_chars:
+        characters += string.punctuation
+    return "".join(random.choice(characters) for _ in range(length))
+
+
+def password_generator(request):
+    form = PasswordGeneratorForm()
+    password = ""  # Initialize password variable
+
+    if request.method == "POST":
+        form = PasswordGeneratorForm(request.POST)
+        if form.is_valid():
+            length = form.cleaned_data["length"]
+            include_letters = form.cleaned_data["letters"]
+            include_digits = form.cleaned_data["digits"]
+            include_special_chars = form.cleaned_data["special_chars"]
+            password = generate_password(
+                length, include_letters, include_digits, include_special_chars
+            )
+
+    context = {"form": form, "password": password}
+
+    return render(
+        request,
+        "passmanager/password_generator.html",
+        context,
+    )

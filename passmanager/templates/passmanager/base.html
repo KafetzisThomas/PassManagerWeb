@@ -31,7 +31,8 @@
                     <div class="navbar-nav mr-auto">
                         <!-- Nav items (vault, password_generator, home) -->
                         {% if user.is_authenticated %}
-                            <a class="nav-item nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'vault' %}">My Vault</a>    
+                            <a class="nav-item nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'vault' %}">My Vault</a>
+                            <a class="nav-item nav-link {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'password_generator' %}">Password Generator</a>
                         {% else %}
                             <a class="nav-item nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Home</a>
                         {% endif %}
