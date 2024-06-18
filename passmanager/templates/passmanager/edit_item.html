@@ -1,0 +1,9 @@
+{% extends "passmanager/base.html" %}
+{% block content %}
+    <p>Edit item:</p>    
+    <form action="{% url 'edit_item' item.id %}" method='post'>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button name="submit">Save changes</button>
+    </form>
+{% endblock content %}
