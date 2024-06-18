@@ -6,4 +6,6 @@ from . import views
 urlpatterns = [
     # Home page
     path("", views.home, name="home"),
+    # Vault page
+    path("vault/", views.vault, name="vault"),
 ]

@@ -1,0 +1,26 @@
+{% extends "passmanager/base.html" %}
+{% block content %}
+    <div class="container d-flex align-items-center justify-content-center">
+        <h1>My Vault</h1>
+    </div>
+    <div class="row g-0">
+        <div class="col-md-12">
+            <hr style="margin-top: 0;">
+        </div>
+    </div>
+    {% for item in items %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <small class="text-muted">{{ item.date_added }}</small>
+                </div>
+                <!-- Edit item page-->
+                <h2><a class="article-title" href="#">{{ item.name }}</a></h2>
+            </div>
+        </article>
+    {% empty %}
+        <div class="container text-center mt-3">
+            <h5>There are no items in the list.</h5>
+        </div>
+    {% endfor %}
+{% endblock content %}
