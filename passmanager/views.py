@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Item
+from .forms import ItemForm
 
 
 def home(request):
@@ -10,3 +11,16 @@ def vault(request):
     items = Item.objects.all()
     context = {"items": items}
     return render(request, "passmanager/vault.html", context)
+
+
+def new_item(request):
+    if request.method == "POST":
+        form = ItemForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("vault")
+    else:
+        form = ItemForm()
+
+    context = {"form": form}
+    return render(request, "passmanager/new_item.html", context)
