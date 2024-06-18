@@ -1,0 +1,16 @@
+{% extends "passmanager/base.html" %}
+{% block content %}
+    {% if form.errors %}
+        <p>Your username and password didn't match. Please try again.</p>
+    {% endif %}
+
+    <form action="{% url 'users:login' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button name="submit">Log in</button>
+        <input type="hidden" name="next"
+            value="{% url 'vault' %}" />
+    </form>
+
+{% endblock content %}
