@@ -30,6 +30,7 @@
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
                         <!-- Nav items (vault, password_generator, home) -->
+                        <a href="{% url 'users:register' %}">Register</a>
                         <form method="post" action="{% url 'users:logout' %}">
                             {% csrf_token %}
                             <button type="submit">Log out</button>
