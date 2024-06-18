@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Item
+from django.http import Http404
 from .forms import ItemForm
 
 
@@ -34,6 +35,8 @@ def new_item(request):
 @login_required
 def edit_item(request, item_id):
     item = Item.objects.get(id=item_id)
+    if item.owner != request.user:
+        raise Http404
 
     if request.method == "POST":
         form = ItemForm(instance=item, data=request.POST)
