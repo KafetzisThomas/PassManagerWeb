@@ -30,6 +30,11 @@
                 <div class="collapse navbar-collapse" id="navbarToggle">
                     <div class="navbar-nav mr-auto">
                         <!-- Nav items (vault, password_generator, home) -->
+                        <form method="post" action="{% url 'users:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit">Log out</button>
+                            <p>logged out</p>
+                        </form>
                     <div class="navbar-nav">
                         <!-- Nav items (admin, new_item, account, login, register) -->
                     </div>
