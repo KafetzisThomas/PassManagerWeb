@@ -121,6 +121,15 @@ def edit_item(request, item_id):
     return render(request, "passmanager/edit_item.html", context)
 
 
+@login_required
+def delete_item(request, item_id):
+    item = Item.objects.get(id=item_id)
+    if item.owner != request.user:
+        raise Http404
+    item.delete()
+    return redirect("vault")
+
+
 def generate_password(length, include_letters, include_digits, include_special_chars):
     characters = ""
     if include_letters:
