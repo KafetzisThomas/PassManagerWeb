@@ -1,3 +1,4 @@
+import os
 import string
 import random
 from django.shortcuts import render, redirect
@@ -5,6 +6,10 @@ from django.contrib.auth.decorators import login_required
 from .models import Item
 from django.http import Http404
 from .forms import ItemForm, PasswordGeneratorForm
+from .utils import encrypt, decrypt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def home(request):
@@ -24,7 +29,25 @@ def new_item(request):
         form = ItemForm(data=request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
+            website_entry = obj.website
+            username_entry = obj.username
+            password_entry = obj.password
+            notes_entry = obj.notes
+
+            obj.website = encrypt(
+                website_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.username = encrypt(
+                username_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.password = encrypt(
+                password_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.notes = encrypt(
+                notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
             obj.owner = request.user
+
             form.save()
             return redirect("vault")
     else:
@@ -43,10 +66,52 @@ def edit_item(request, item_id):
     if request.method == "POST":
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
+            obj = form.save(commit=False)
+
+            website_entry = obj.website
+            username_entry = obj.username
+            password_entry = obj.password
+            notes_entry = obj.notes
+
+            obj.website = encrypt(
+                website_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.username = encrypt(
+                username_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.password = encrypt(
+                password_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.notes = encrypt(
+                notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
+            ).decode("utf-8")
+            obj.owner = request.user
+
             form.save()
             return redirect("vault")
     else:
-        form = ItemForm(instance=item)
+        # Decrypt the fields for display in the form
+        decrypted_website = decrypt(
+            item.website.encode(), os.getenv("ENCRYPTION_KEY")
+        ).decode("utf-8")
+        decrypted_username = decrypt(
+            item.username.encode(), os.getenv("ENCRYPTION_KEY")
+        ).decode("utf-8")
+        decrypted_password = decrypt(
+            item.password.encode(), os.getenv("ENCRYPTION_KEY")
+        ).decode("utf-8")
+        decrypted_notes = decrypt(
+            item.notes.encode(), os.getenv("ENCRYPTION_KEY")
+        ).decode("utf-8")
+
+        initial_data = {
+            "name": item.name,
+            "website": decrypted_website,
+            "username": decrypted_username,
+            "password": decrypted_password,
+            "notes": decrypted_notes,
+        }
+        form = ItemForm(instance=item, initial=initial_data)
 
     context = {"item": item, "form": form}
     return render(request, "passmanager/edit_item.html", context)
