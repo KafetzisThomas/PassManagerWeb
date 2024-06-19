@@ -1,10 +1,14 @@
 body {
   background: #fafafa;
   color: #333333;
-  margin-top: 5rem;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #444444;
 }
 
@@ -116,6 +120,7 @@ a.article-title:hover {
   padding: 10px;
 }
 
-.copyright-notice-footer, .copyright-notice-footer2 {
+.copyright-notice-footer,
+.copyright-notice-footer2 {
   position: flex;
 }
