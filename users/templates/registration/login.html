@@ -1,14 +1,17 @@
 {% extends "passmanager/base.html" %}
+{% load bootstrap5 %}
 {% block content %}
     {% if form.errors %}
         <p>Your username and password didn't match. Please try again.</p>
     {% endif %}
 
-    <form action="{% url 'users:login' %}" method="post">
+    <form action="{% url 'users:login' %}" method="post" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button name="submit" class="btn btn-primary">Log in</button>
+        {% endbuttons %}
 
-        <button name="submit">Log in</button>
         <input type="hidden" name="next"
             value="{% url 'vault' %}" />
     </form>

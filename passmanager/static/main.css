@@ -16,16 +16,20 @@ h6 {
   background-color: #5f788a;
 }
 
-.site-header .navbar-nav .nav-link {
-  color: #cbd5db;
-}
-
-.site-header .navbar-nav .nav-link:hover {
-  color: #ffffff;
-}
-
-.site-header .navbar-nav .nav-link.active {
+/* Navigation link styles */
+.nav-link {
+  color: #808080;
   font-weight: 500;
+}
+
+/* Hover state styles for navigation links */
+.nav-link:hover {
+  color: #fff;
+}
+
+/* Active state styles for navigation links */
+.nav-link.active {
+  color: #fff;
 }
 
 .content-section {
