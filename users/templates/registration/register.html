@@ -16,3 +16,29 @@
         <input type="hidden" name="next" value="{% url 'vault' %}" />
     </form>
 {% endblock content %}
+
+{% block footer %}
+    <!-- footer start -->
+    <footer class="footer bg-light text-dark py-3 fixed-bottom">
+        <div class="container">
+            <hr class="border-dark mb-1" width="100%">
+            <div class="row">
+                <div class="col-md-6 mt-3">
+                    <p>&copy; 2024 KafetzisThomas</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="#" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="#" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
+                        <i class="bi bi-envelope-fill"></i>
+                    </a>
+                    <a href="#" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
+                        <i class="bi bi-github"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- footer end -->
+{% endblock footer %}
