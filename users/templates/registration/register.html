@@ -1,9 +1,18 @@
 {% extends "passmanager/base.html" %}
+{% load bootstrap5 %}
+
+{% block page_header %}
+    <h2>Create a free account.</h2>
+{% endblock page_header %}
+
 {% block content %}
-    <form method="post" action="{% url 'users:register' %}">
+    <form method="post" action="{% url 'users:register' %}" class="form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button name="submit">Register</button>
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button name="submit" class="btn btn-primary">Sign up</button>
+        {% endbuttons %}
+
         <input type="hidden" name="next" value="{% url 'vault' %}" />
     </form>
 {% endblock content %}

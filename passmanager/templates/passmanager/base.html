@@ -48,7 +48,7 @@
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if user.is_authenticated %}
-                    {% if request.user.username == 'kafetzisthomas' %}
+                    {% if request.user.is_superuser == 1 %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
                         </li>
@@ -60,7 +60,7 @@
                         {% csrf_token %}
                     </form>
                     <li class="nav-item">
-                        <a class="nav-link me-5" href="#" onclick="document.getElementById('logout-form').submit();">Logout</a>
+                        <a class="nav-link me-5" href="#" onclick="document.getElementById('logout-form').submit();">Log out</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
@@ -79,6 +79,9 @@
     <!-- custom content start -->
     <main role="main" class="container">
         <div class="row justify-content-center mt-5">
+            <div class="col-md-8 pb-2 mb-2">
+                {% block page_header %}{% endblock page_header %}
+            </div>
             <div class="col-md-8">
                 <!-- Display messages -->
                 {% block content %}{% endblock %}
