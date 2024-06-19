@@ -58,6 +58,9 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'new_item' %}">New Item</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/users/account/' %}active{% endif %}" href="{% url 'users:account' %}">Account</a>
+                    </li>
                     <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
                         {% csrf_token %}
                     </form>

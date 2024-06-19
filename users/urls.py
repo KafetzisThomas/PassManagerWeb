@@ -8,6 +8,8 @@ app_name = "users"
 urlpatterns = [
     # Include default auth urls.
     path("", include("django.contrib.auth.urls")),
+    # Account page
+    path("account/", views.account, name="account"),
     # Registration page
     path("register/", views.register, name="register"),
     # Logout page
