@@ -28,44 +28,46 @@
     {% endfor %}
     <div class="pagination justify-content-center me-4 mt-4">
         <ul class="pagination">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link bg-dark text-white text-decoration-none"
-                       href="?page={{ page_obj.previous_page_number }}"
-                       style="outline: none;"
-                       onclick="this.blur();">
-                       &lt;&lt;
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <a class="page-link bg-dark text-white text-decoration-none"
-                       href="#"
-                       style="pointer-events: none; opacity: 0.6; cursor: not-allowed; outline: none;"
-                       onclick="event.preventDefault();">
-                       &lt;&lt;
-                    </a>
-                </li>
-            {% endif %}
-    
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link bg-dark text-white text-decoration-none"
-                       href="?page={{ page_obj.next_page_number }}"
-                       style="outline: none;"
-                       onclick="this.blur();">
-                       &gt;&gt;
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <a class="page-link bg-dark text-white text-decoration-none"
-                       href="#"
-                       style="pointer-events: none; opacity: 0.6; cursor: not-allowed; outline: none;"
-                       onclick="event.preventDefault();">
-                       &gt;&gt;
-                    </a>
-                </li>
+            {% if page_obj %}
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link bg-dark text-white text-decoration-none"
+                        href="?page={{ page_obj.previous_page_number }}"
+                        style="outline: none;"
+                        onclick="this.blur();">
+                        &lt;&lt;
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link bg-dark text-white text-decoration-none"
+                        href="#"
+                        style="pointer-events: none; opacity: 0.6; cursor: not-allowed; outline: none;"
+                        onclick="event.preventDefault();">
+                        &lt;&lt;
+                        </a>
+                    </li>
+                {% endif %}
+        
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link bg-dark text-white text-decoration-none"
+                        href="?page={{ page_obj.next_page_number }}"
+                        style="outline: none;"
+                        onclick="this.blur();">
+                        &gt;&gt;
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link bg-dark text-white text-decoration-none"
+                        href="#"
+                        style="pointer-events: none; opacity: 0.6; cursor: not-allowed; outline: none;"
+                        onclick="event.preventDefault();">
+                        &gt;&gt;
+                        </a>
+                    </li>
+                {% endif %}
             {% endif %}
         </ul>
     </div>
