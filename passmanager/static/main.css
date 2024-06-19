@@ -41,28 +41,30 @@ h6 {
 }
 
 .article-title {
-  color: #444444;
+  color: #666666;
   font-size: 25px;
-}
-
-a.article-title:hover {
-  color: #428bca;
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-.article-content {
-  white-space: pre-line;
+.article-title:hover {
+  color: #333333;
 }
 
 .article-metadata {
   padding-bottom: 1px;
   margin-bottom: 4px;
-  border-bottom: 1px solid #e3e3e3
+  border-bottom: 1px solid #e3e3e3;
+}
+
+.article-metadata a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .article-metadata a:hover {
-  color: #333;
-  text-decoration: none;
+  color: #333333;
 }
 
 .article-svg {
