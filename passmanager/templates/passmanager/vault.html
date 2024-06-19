@@ -15,7 +15,7 @@
                     <small class="text-muted">{{ item.date_added }}</small>
                 </div>
                 <!-- Edit item page-->
-                <h2><a class="article-title" href="#">{{ item.name }}</a></h2>
+                <h2><a class="article-title" href="{% url 'edit_item' item.id %}">{{ item.name }}</a></h2>
             </div>
         </article>
     {% empty %}
