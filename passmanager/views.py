@@ -3,6 +3,7 @@ import string
 import random
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from .models import Item
 from django.http import Http404
 from .forms import ItemForm, PasswordGeneratorForm
@@ -18,8 +19,11 @@ def home(request):
 
 @login_required
 def vault(request):
-    items = Item.objects.filter(owner=request.user).order_by("date_added")
-    context = {"items": items}
+    items = Item.objects.filter(owner=request.user).order_by("-date_added")
+    paginator = Paginator(items, 3)  # Display 3 items per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    context = {"page_obj": page_obj}
     return render(request, "passmanager/vault.html", context)
 
 
