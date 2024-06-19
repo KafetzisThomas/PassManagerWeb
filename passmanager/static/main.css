@@ -3,15 +3,6 @@ body {
   color: #333333;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #444444;
-}
-
 .bg-steel {
   background-color: #5f788a;
 }
@@ -113,4 +104,41 @@ h6 {
 
 .lengthfield-size {
   max-width: 100px;
+}
+
+
+/* Hero section styles */
+.hero-section {
+  background: #212529 no-repeat center;
+  background-size: cover;
+  width: 100%;
+  height: 55vh;
+  position: relative;
+}
+
+/* Overlay styles for hero section */
+.hero-section::before {
+  background-color: #212529;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Container styles within hero section */
+.hero-section .container {
+  height: 100vh;
+  z-index: 1;
+  position: relative;
+}
+
+
+/* Subheading styles within hero section */
+.hero-section h2 {
+  /* Font size for larger screens */
+  font-size: 0.7em;
 }

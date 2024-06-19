@@ -1,47 +1,57 @@
-{% extends "passmanager/base.html" %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block content %}
-    <article class="media content-section">
-        <div class="media-body">
-            <table>
-                <tr>
-                    <td align="center" valign="top">
-                        <img src="{% static 'images/logo.png' %}" width="80%">
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center" valign="top" style="vertical-align: top; padding-top: 20px;">
-                        <p class="article-content" style="text-align: center;">A password manager that allows you to securely manage your saved passwords of your online accounts.</p>
-                    </td>
-                </tr>
-            </table>
-        </div>
-</article>
-{% endblock content %}
+    <!-- Bootstrap CSS -->
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
 
-{% block footer %}
-    <!-- footer start -->
-    <footer class="footer bg-light text-dark py-3 fixed-bottom">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.png' %}">
+
+    <title>PassManager</title>
+</head>
+<body>
+    <!--navbar start-->
+    <nav class="navbar navbar-expand-lg bg-dark border-body" data-bs-theme="dark">
         <div class="container">
-            <hr class="border-dark mb-1" width="100%">
-            <div class="row">
-                <div class="col-md-6 mt-3">
-                    <p>&copy; 2024 KafetzisThomas</p>
-                </div>
-                <div class="col-md-6 text-end">
-                    <a href="#" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
-                        <i class="bi bi-linkedin"></i>
-                    </a>
-                    <a href="#" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
-                        <i class="bi bi-envelope-fill"></i>
-                    </a>
-                    <a href="#" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
-                        <i class="bi bi-github"></i>
-                    </a>
-                </div>
+            <a class="navbar-brand ms-5" href="{% url 'home' %}">
+                <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
+              </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link me-5 border rounded" href="{% url 'users:register' %}">Register</a>
+                </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+    <!-- navbar end -->
+
+
+    <!-- header start -->
+    <section id="home" class="hero-section">
+        <div class="container d-flex align-items-center text-white flex-column">
+            <h1 class="mt-5 pt-5">Securely manage your passwords of</h1>
+            <h1 class="text-center">your online accounts.</h1>
+            <div class="text-center mt-5">
+                <button type="button" class="btn btn-outline-light btn-lg">START NOW ></button>
             </div>
         </div>
-    </footer>
-    <!-- footer end -->
-{% endblock footer %}
+    </section>
+    <!-- header end -->
+    
+</body>
+</html>
