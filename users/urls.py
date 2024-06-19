@@ -12,6 +12,8 @@ urlpatterns = [
     path("account/", views.account, name="account"),
     # Registration page
     path("register/", views.register, name="register"),
+    # Delete account page
+    path("account/delete_account/", views.delete_account, name="delete_account"),
     # Logout page
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]

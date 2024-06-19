@@ -11,6 +11,7 @@
         {% bootstrap_form form %}
         {% buttons %}
             <button name="submit" class="btn btn-primary">Save changes</button>
+            <a class="btn btn-danger" href="{% url 'users:delete_account' %}" role="button">Delete account</a>
         {% endbuttons %}
 
         <input type="hidden" name="next"value="{% url 'users:account' %}" />
