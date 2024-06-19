@@ -29,10 +29,13 @@
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                    <a class="nav-link me-2" href="#">FAQ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link me-5 border rounded" href="{% url 'users:register' %}">Register</a>
+                    <a class="nav-link me-2" href="{% url 'users:login' %}">LOGIN</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link me-5 border rounded" href="{% url 'users:register' %}">SIGN UP</a>
                 </li>
             </ul>
           </div>
@@ -44,8 +47,7 @@
     <!-- header start -->
     <section id="home" class="hero-section">
         <div class="container d-flex align-items-center text-white flex-column">
-            <h1 class="mt-5 pt-5">Securely manage your passwords of</h1>
-            <h1 class="text-center">your online accounts.</h1>
+            <h1 class="text-center mt-5 pt-5">Securely manage your passwords of<span class="d-block">your online accounts.</span></h1>
             <div class="text-center mt-5">
                 <button type="button" class="btn btn-outline-light btn-lg">START NOW ></button>
             </div>
