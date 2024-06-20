@@ -1,20 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- SEO meta tags -->
+    <meta name="description" content="Securely manage your passwords of your online accounts.">
+    <meta name="author" content="KafetzisThomas">
+
+    <!-- Webpage title -->
+    <title>PassManager - Home Page</title>
 
     <!-- Bootstrap CSS -->
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
 
+    <!-- Custom styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'main.css' %}">
 
-    <title>PassManager</title>
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
     <!--navbar start-->
@@ -23,40 +32,39 @@
             <a class="navbar-brand ms-lg-5" href="{% url 'home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
             </a>
-          <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link me-2" href="#">FAQ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link me-2" href="{% url 'users:login' %}">LOGIN</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link me-5 border rounded" href="{% url 'users:register' %}">SIGN UP</a>
-                </li>
-            </ul>
-          </div>
+            <button class="navbar-toggler navbar-dark bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link me-2" href="#">FAQ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link me-2" href="{% url 'vault' %}">LOGIN</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link me-5 border border-secondary rounded" href="{% url 'users:register' %}">SIGN UP</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
     <!-- navbar end -->
 
-
     <!-- header start -->
-    <section id="home" class="hero-section">
+    <section class="hero-section">
         <div class="container d-flex align-items-center text-white flex-column">
             <h1 class="text-center mt-5 pt-5">Securely manage your passwords of<span class="d-block">your online accounts.</span></h1>
             <div class="text-center mt-5">
-                <button type="button" class="btn btn-outline-light btn-lg">START NOW ></button>
+                <a class="btn btn-outline-light btn-lg" href="{% url 'users:register' %}">START NOW ></a>
             </div>
         </div>
     </section>
     <!-- header end -->
     
     <!-- features start -->
-    <section id="services" class="mt-5">
+    <section class="mt-5">
         <div class="container-lg px-4">
             <div class="text-left mb-4">
                 <h2>Features</h2>
@@ -170,6 +178,6 @@
         </div>
     </footer>
     <!-- footer end -->
-
 </body>
+
 </html>
