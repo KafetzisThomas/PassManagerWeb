@@ -1,12 +1,3 @@
-body {
-  background: #fafafa;
-  color: #333333;
-}
-
-.bg-steel {
-  background-color: #5f788a;
-}
-
 /* Navigation link styles */
 .nav-link {
   color: #808080;
@@ -23,7 +14,8 @@ body {
   color: #fff;
 }
 
-.content-section {
+/* Item styles */
+.item-section {
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
@@ -31,68 +23,34 @@ body {
   margin-bottom: 20px;
 }
 
-.article-title {
+/* Item name styles */
+.item-name {
   color: #666666;
   font-size: 25px;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.article-title:hover {
+/* Hover state styles for items name */
+.item-name:hover {
   color: #333333;
 }
 
-.article-metadata {
+/* Styles for each items metadata */
+.item-metadata {
   padding-bottom: 1px;
   margin-bottom: 4px;
   border-bottom: 1px solid #e3e3e3;
 }
 
-.article-metadata a {
+/* Styles for each items metadata a tag */
+.item-metadata a {
   color: inherit;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.article-metadata a:hover {
-  color: #333333;
-}
-
-.article-svg {
-  width: 25px;
-  height: 25px;
-  vertical-align: middle;
-}
-
-.account-heading {
-  font-size: 2.5rem;
-}
-
-.delete-acc-btn-background {
-  background-color: #f8f9fa;
-  border-color: #dc3545;
-  color: #dc3545;
-}
-
-.delete-acc-btn-background:hover {
-  background-color: #dc3545;
-  border-color: #dc3545;
-  color: white;
-}
-
-.save-btn-color {
-  background-color: #17a2b8;
-  border-color: #17a2b8;
-  color: white;
-}
-
-.save-btn-color:hover,
-.save-btn-color:active {
-  background-color: #138496;
-  border-color: #138496;
-  color: white;
-}
-
+/* Styles for each feature card */
 .card {
   text-align: center;
   display: flex;
@@ -102,10 +60,10 @@ body {
   height: 100%;
 }
 
+/* Styles for length of generated password field */
 .lengthfield-size {
   max-width: 100px;
 }
-
 
 /* Hero section styles */
 .hero-section {
@@ -134,11 +92,4 @@ body {
   height: 100vh;
   z-index: 1;
   position: relative;
-}
-
-
-/* Subheading styles within hero section */
-.hero-section h2 {
-  /* Font size for larger screens */
-  font-size: 0.7em;
 }

@@ -14,13 +14,13 @@
 
 {% block content %}
     {% for item in page_obj %}
-        <article class="media content-section">
+        <article class="media item-section">
             <div class="media-body">
-                <div class="article-metadata">
+                <div class="item-metadata">
                     <small class="text-muted">{{ item.date_added }}</small>
                 </div>
                 <!-- Edit item page-->
-                <h2><a class="article-title" href="{% url 'edit_item' item.id %}">{{ item.name }}</a></h2>
+                <h2><a class="item-name" href="{% url 'edit_item' item.id %}">{{ item.name }}</a></h2>
             </div>
         </article>
     {% empty %}
