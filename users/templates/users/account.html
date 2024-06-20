@@ -8,6 +8,11 @@
 {% endblock page_header %}
 
 {% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
     <form action="{% url 'users:account' %}" method="post" class="form">
         {% csrf_token %}
         {% bootstrap_form form %}
@@ -18,7 +23,6 @@
 
         <input type="hidden" name="next"value="{% url 'users:account' %}" />
     </form>
-
 {% endblock content %}
 
 {% block footer %}

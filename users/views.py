@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .models import CustomUser
 from .forms import CustomUserCreationForm, CustomUserChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 def register(request):
@@ -25,6 +27,12 @@ def account(request):
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
             form.save()
+            update_session_auth_hash(
+                request, request.user
+            )  # Important for keeping the user logged in
+            messages.success(
+                request, "Your account credentials was successfully updated!"
+            )
             return redirect("users:account")
     else:
         form = CustomUserChangeForm(instance=request.user)
