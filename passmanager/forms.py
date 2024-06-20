@@ -7,6 +7,13 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = ["name", "website", "username", "password", "notes"]
 
+    def __init__(self, *args, **kwargs):
+        super(ItemForm, self).__init__(*args, **kwargs)
+        self.fields["website"].required = False
+        self.fields["username"].required = False
+        self.fields["password"].required = False
+        self.fields["notes"].required = False
+
 
 class PasswordGeneratorForm(forms.Form):
     length = forms.IntegerField(
