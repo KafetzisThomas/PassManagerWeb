@@ -31,16 +31,35 @@ def new_item(request):
     if request.method == "POST":
         # Create a mutable copy of request.POST
         mutable_post_data = request.POST.copy()
-
         form = ItemForm(data=request.POST)
-        if form.is_valid():
-            obj = form.save(commit=False)
-            website_entry = obj.website
-            username_entry = obj.username
-            password_entry = obj.password
-            notes_entry = obj.notes
+        obj = form.save(commit=False)
 
-            if "gen_pass" in request.POST:
+        website_entry = obj.website
+        username_entry = obj.username
+        password_entry = obj.password
+        notes_entry = obj.notes
+
+        if form.is_valid():
+            action = request.POST.get("action", "value")
+            if action == "save":
+                obj.website = encrypt(
+                    website_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.username = encrypt(
+                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.password = encrypt(
+                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.notes = encrypt(
+                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.owner = request.user
+
+                form.save()
+                return redirect("vault")
+
+            elif action == "generate_password":
                 generated_password = generate_password(
                     length=12,
                     include_letters=True,
@@ -63,7 +82,7 @@ def new_item(request):
                 context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
 
-            if "check_pass" in request.POST:
+            elif action == "check_password":
                 is_pwned = check_password(mutable_post_data["password"])
                 if mutable_post_data["password"]:
                     if is_pwned:
@@ -79,23 +98,6 @@ def new_item(request):
 
                 context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
-
-            obj.website = encrypt(
-                website_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.username = encrypt(
-                username_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.password = encrypt(
-                password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.notes = encrypt(
-                notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.owner = request.user
-
-            form.save()
-            return redirect("vault")
     else:
         form = ItemForm()
 
@@ -112,17 +114,35 @@ def edit_item(request, item_id):
     if request.method == "POST":
         # Create a mutable copy of request.POST
         mutable_post_data = request.POST.copy()
-
         form = ItemForm(instance=item, data=request.POST)
+        obj = form.save(commit=False)
+
+        website_entry = obj.website
+        username_entry = obj.username
+        password_entry = obj.password
+        notes_entry = obj.notes
+
         if form.is_valid():
-            obj = form.save(commit=False)
+            action = request.POST.get("action", "value")
+            if action == "save":
+                obj.website = encrypt(
+                    website_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.username = encrypt(
+                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.password = encrypt(
+                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.notes = encrypt(
+                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.owner = request.user
 
-            website_entry = obj.website
-            username_entry = obj.username
-            password_entry = obj.password
-            notes_entry = obj.notes
+                form.save()
+                return redirect("vault")
 
-            if "gen_pass" in request.POST:
+            elif action == "generate_password":
                 generated_password = generate_password(
                     length=12,
                     include_letters=True,
@@ -145,7 +165,7 @@ def edit_item(request, item_id):
                 context = {"item": item, "form": form}
                 return render(request, "passmanager/edit_item.html", context)
 
-            if "check_pass" in request.POST:
+            elif action == "check_password":
                 is_pwned = check_password(mutable_post_data["password"])
                 if mutable_post_data["password"]:
                     if is_pwned:
@@ -162,22 +182,9 @@ def edit_item(request, item_id):
                 context = {"item": item, "form": form}
                 return render(request, "passmanager/edit_item.html", context)
 
-            obj.website = encrypt(
-                website_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.username = encrypt(
-                username_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.password = encrypt(
-                password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.notes = encrypt(
-                notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
-            ).decode("utf-8")
-            obj.owner = request.user
+            elif action == "delete":
+                delete_item(request, item.id)
 
-            form.save()
-            return redirect("vault")
     else:
         # Decrypt the fields for display in the form
         decrypted_website = decrypt(

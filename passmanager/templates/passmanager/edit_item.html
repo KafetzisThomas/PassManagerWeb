@@ -20,17 +20,33 @@
     <form action="{% url 'edit_item' item.id %}" method='POST' class="form">
         {% csrf_token %}
         {% bootstrap_form form %}
-        <div class="d-flex justify-content-end">
-            <button type="submit" name="submit" class="btn btn-primary me-2">
-                <i class="bi bi-floppy"></i> Save item
+        <div class="btn-group">
+            <button type="submit" name="submit" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-list"></i> Action
             </button>
-            <a class="btn btn-danger" href="{% url 'delete_item' item.id %}" role="button"><i class="bi bi-trash"></i> Delete</a>
-            <button type="submit" name="check_pass" class="btn btn-primary ms-auto">
-                <i class="bi bi-heart-pulse"></i> Check Password
-            </button>
-            <button type="submit" name="gen_pass" class="btn btn-primary ms-1">
-                <i class="bi bi-arrow-clockwise"></i> Generate Password
-            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <button class="dropdown-item" type="submit" name="action" value="save">
+                        <i class="bi bi-floppy"></i> Save Changes
+                    </button>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'delete_item' item.id %}" role="button">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <button class="dropdown-item" type="submit" name="action" value="check_password">
+                        <i class="bi bi-heart-pulse"></i> Check Password
+                    </button>
+                </li>
+                <li>
+                    <button class="dropdown-item" type="submit" name="action" value="generate_password">
+                        <i class="bi bi-arrow-clockwise"></i> Generate Password
+                    </button>
+                </li>
+            </ul>
         </div>
     </form>
 {% endblock content %}
