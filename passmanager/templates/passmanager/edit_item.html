@@ -8,6 +8,15 @@
 {% endblock page_header %}
 
 {% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if 'error' in message.tags %}alert-danger{% endif %}
+                {% if 'success' in message.tags %}alert-success{% endif %}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <form action="{% url 'edit_item' item.id %}" method='POST' class="form">
         {% csrf_token %}
         {% bootstrap_form form %}
@@ -16,7 +25,10 @@
                 <i class="bi bi-floppy"></i> Save item
             </button>
             <a class="btn btn-danger" href="{% url 'delete_item' item.id %}" role="button"><i class="bi bi-trash"></i> Delete</a>
-            <button type="submit" name="gen_pass" class="btn btn-primary ms-auto">
+            <button type="submit" name="check_pass" class="btn btn-primary ms-auto">
+                <i class="bi bi-heart-pulse"></i> Check Password
+            </button>
+            <button type="submit" name="gen_pass" class="btn btn-primary ms-1">
                 <i class="bi bi-arrow-clockwise"></i> Generate Password
             </button>
         </div>

@@ -1,4 +1,5 @@
 from cryptography.fernet import Fernet
+import pwnedpasswords
 import string
 import random
 
@@ -20,3 +21,7 @@ def generate_password(length, include_letters, include_digits, include_special_c
     if include_special_chars:
         characters += string.punctuation
     return "".join(random.choice(characters) for _ in range(length))
+
+
+def check_password(password):
+    return pwnedpasswords.check(password, plain_text=True)

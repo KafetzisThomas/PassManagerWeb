@@ -5,7 +5,8 @@ from django.core.paginator import Paginator
 from .models import Item
 from django.http import Http404
 from .forms import ItemForm, PasswordGeneratorForm
-from .utils import encrypt, decrypt, generate_password
+from django.contrib import messages
+from .utils import encrypt, decrypt, generate_password, check_password
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -58,6 +59,23 @@ def new_item(request):
                 form.initial["website"] = website_entry
                 form.initial["username"] = username_entry
                 form.initial["notes"] = notes_entry
+
+                context = {"form": form}
+                return render(request, "passmanager/new_item.html", context)
+
+            if "check_pass" in request.POST:
+                is_pwned = check_password(mutable_post_data["password"])
+                if mutable_post_data["password"]:
+                    if is_pwned:
+                        messages.error(
+                            request,
+                            f"This password has been exposed {is_pwned} time(s) in data leaks. You have to change it.",
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "This password was not found in known data breaches. It must be safe to use.",
+                        )
 
                 context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
@@ -123,6 +141,23 @@ def edit_item(request, item_id):
                 form.initial["website"] = website_entry
                 form.initial["username"] = username_entry
                 form.initial["notes"] = notes_entry
+
+                context = {"item": item, "form": form}
+                return render(request, "passmanager/edit_item.html", context)
+
+            if "check_pass" in request.POST:
+                is_pwned = check_password(mutable_post_data["password"])
+                if mutable_post_data["password"]:
+                    if is_pwned:
+                        messages.error(
+                            request,
+                            f"This password has been exposed {is_pwned} time(s) in data leaks. You have to change it.",
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "This password was not found in known data breaches. It must be safe to use.",
+                        )
 
                 context = {"item": item, "form": form}
                 return render(request, "passmanager/edit_item.html", context)
