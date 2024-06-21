@@ -12,13 +12,23 @@ def register(request):
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
             new_user = form.save()
-            login(request, new_user)
+            login(
+                request, new_user, backend="django.contrib.auth.backends.ModelBackend"
+            )
             return redirect("vault")
     else:
         form = CustomUserCreationForm()
 
     context = {"form": form}
     return render(request, "registration/register.html", context)
+
+
+from django.contrib.auth.views import LoginView
+from .forms import CustomAuthenticationForm
+
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
 
 
 @login_required
