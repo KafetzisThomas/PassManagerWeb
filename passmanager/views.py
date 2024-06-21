@@ -1,13 +1,11 @@
 import os
-import string
-import random
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .models import Item
 from django.http import Http404
 from .forms import ItemForm, PasswordGeneratorForm
-from .utils import encrypt, decrypt
+from .utils import encrypt, decrypt, generate_password
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,6 +28,9 @@ def vault(request):
 @login_required
 def new_item(request):
     if request.method == "POST":
+        # Create a mutable copy of request.POST
+        mutable_post_data = request.POST.copy()
+
         form = ItemForm(data=request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
@@ -37,6 +38,29 @@ def new_item(request):
             username_entry = obj.username
             password_entry = obj.password
             notes_entry = obj.notes
+
+            if "gen_pass" in request.POST:
+                generated_password = generate_password(
+                    length=12,
+                    include_letters=True,
+                    include_digits=True,
+                    include_special_chars=True,
+                )
+
+                # Update the mutable copy of POST data
+                mutable_post_data["password"] = generated_password
+
+                # Use the updated mutable_post_data to instantiate the form
+                form = ItemForm(data=mutable_post_data)
+
+                # Update the form's initial data for rendering
+                form.initial["password"] = generated_password
+                form.initial["website"] = website_entry
+                form.initial["username"] = username_entry
+                form.initial["notes"] = notes_entry
+
+                context = {"form": form}
+                return render(request, "passmanager/new_item.html", context)
 
             obj.website = encrypt(
                 website_entry.encode(), os.getenv("ENCRYPTION_KEY")
@@ -68,6 +92,9 @@ def edit_item(request, item_id):
         raise Http404
 
     if request.method == "POST":
+        # Create a mutable copy of request.POST
+        mutable_post_data = request.POST.copy()
+
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
@@ -76,6 +103,29 @@ def edit_item(request, item_id):
             username_entry = obj.username
             password_entry = obj.password
             notes_entry = obj.notes
+
+            if "gen_pass" in request.POST:
+                generated_password = generate_password(
+                    length=12,
+                    include_letters=True,
+                    include_digits=True,
+                    include_special_chars=True,
+                )
+
+                # Update the mutable copy of POST data
+                mutable_post_data["password"] = generated_password
+
+                # Use the updated mutable_post_data to instantiate the form
+                form = ItemForm(data=mutable_post_data)
+
+                # Update the form's initial data for rendering
+                form.initial["password"] = generated_password
+                form.initial["website"] = website_entry
+                form.initial["username"] = username_entry
+                form.initial["notes"] = notes_entry
+
+                context = {"item": item, "form": form}
+                return render(request, "passmanager/edit_item.html", context)
 
             obj.website = encrypt(
                 website_entry.encode(), os.getenv("ENCRYPTION_KEY")
@@ -128,17 +178,6 @@ def delete_item(request, item_id):
         raise Http404
     item.delete()
     return redirect("vault")
-
-
-def generate_password(length, include_letters, include_digits, include_special_chars):
-    characters = ""
-    if include_letters:
-        characters += string.ascii_letters
-    if include_digits:
-        characters += string.digits
-    if include_special_chars:
-        characters += string.punctuation
-    return "".join(random.choice(characters) for _ in range(length))
 
 
 def password_generator(request):
