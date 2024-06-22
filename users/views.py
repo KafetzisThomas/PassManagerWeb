@@ -5,6 +5,7 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from .utils import send_new_user_registration
 
 
 def register(request):
@@ -12,6 +13,7 @@ def register(request):
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
             new_user = form.save()
+            send_new_user_registration(new_user)
             login(
                 request, new_user, backend="django.contrib.auth.backends.ModelBackend"
             )
