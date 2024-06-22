@@ -6,6 +6,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .utils import send_new_user_registration
+from django.contrib.auth.views import LoginView
+from .forms import CustomAuthenticationForm
 
 
 def register(request):
@@ -23,14 +25,6 @@ def register(request):
 
     context = {"form": form}
     return render(request, "registration/register.html", context)
-
-
-from django.contrib.auth.views import LoginView
-from .forms import CustomAuthenticationForm
-
-
-class CustomLoginView(LoginView):
-    authentication_form = CustomAuthenticationForm
 
 
 @login_required
@@ -58,3 +52,7 @@ def delete_account(request):
     user = CustomUser.objects.get(id=request.user.id)
     user.delete()
     return redirect("users:login")
+
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
