@@ -192,6 +192,11 @@ def edit_item(request, item_id):
 
             elif action == "delete":
                 delete_item(request, item.id)
+                messages.success(
+                    request,
+                    "Item deleted successfully.",
+                )
+                return redirect("vault")
 
     else:
         # Decrypt the fields for display in the form
