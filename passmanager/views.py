@@ -57,6 +57,10 @@ def new_item(request):
                 obj.owner = request.user
 
                 form.save()
+                messages.success(
+                    request,
+                    "Item created successfully.",
+                )
                 return redirect("vault")
 
             elif action == "generate_password":
@@ -140,6 +144,10 @@ def edit_item(request, item_id):
                 obj.owner = request.user
 
                 form.save()
+                messages.success(
+                    request,
+                    "Item modified successfully.",
+                )
                 return redirect("vault")
 
             elif action == "generate_password":
