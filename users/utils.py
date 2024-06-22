@@ -18,3 +18,22 @@ def send_new_user_registration(user):
     )
 
     send_mail(subject, None, email_from, recipient_list, html_message=html_message)
+
+
+def send_2fa_verification(user, secret_key):
+    subject = "Security Notification: 2FA Verification"
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [
+        user.email,
+    ]
+
+    html_message = render_to_string(
+        "email_templates/2fa_verification.html",
+        {
+            "secret_key": secret_key,
+            "user_email": user.email,
+            "date_joined": user.date_joined.strftime("%d/%m/%Y %H:%M:%S"),
+        },
+    )
+
+    send_mail(subject, None, email_from, recipient_list, html_message=html_message)

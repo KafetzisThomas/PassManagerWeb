@@ -1,3 +1,5 @@
+import pyotp
+from django.contrib.auth import get_user_model
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.exceptions import ValidationError
@@ -27,6 +29,24 @@ class CustomUserCreationForm(UserCreationForm):
 
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
+    otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("username")
+        otp = cleaned_data.get("otp")
+
+        if email and otp:
+            User = get_user_model()
+            try:
+                user = User.objects.get(email=email)
+                totp = pyotp.TOTP(user.otp_secret)
+                if not totp.verify(otp):
+                    raise forms.ValidationError("Invalid OTP")
+            except User.DoesNotExist:
+                raise forms.ValidationError("Invalid email or password")
+
+        return cleaned_data
 
 
 class CustomUserChangeForm(UserChangeForm):

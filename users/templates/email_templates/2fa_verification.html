@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Notification: 2FA Verification</title>
+</head>
+<body>
+    <h2 style="color:black">Security Notification: 2FA Verification</h2>
+    <p><strong style="color:black">Email:</strong> {{ user_email }}</p>
+    <p><strong style="color:black">OTP Secret Key:</strong> {{ secret_key }}</p>
+
+    <div class="instructions">
+        <strong style="color:black">Instructions for Mobile</strong>
+        <ul>
+            <li style="color:black">
+                Download Google Authenticator for
+                <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US">Android</a>
+                or
+                <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS</a> on your mobile
+            </li>
+            <li style="color:black">Open Google Authenticator and scan <strong>QRCode</strong></li>
+            <li style="color:black">or</li>
+            <li style="color:black">Create a new account with <strong>setup key</strong> method</li>
+            <li style="color:black">Provide the required details (name, secret key)</li>
+            <li style="color:black">Select time-based authentication</li>
+            <li style="color:black">Submit the generated key in the form</li>
+        </ul>
+    </div>
+
+    <div class="instructions">
+        <strong style="color:black">Instructions for Desktops</strong>
+        <ul>
+            <li style="color:black">
+                Download Authenticator for
+                <a href="https://winauth.github.io/winauth/download.html">Windows</a>
+                or
+                <a href="https://apps.apple.com/us/app/authenticator-app/id1538761576">Mac</a>
+                or
+                <a href="https://snapcraft.io/authenticator">Linux</a>
+            </li>
+            <li style="color:black">Open Authenticator and create a new account with <b>setup key</b> method</li>
+            <li style="color:black">Provide the required details (name, secret key)</li>
+            <li style="color:black">Submit the generated key in the form</li>
+        </ul>
+    </div>
+    <p style="color:black">Date of registration: {{ date_joined }}</p>
+
+    --
+    
+    <p style="color:black">
+        Best Regards<br>
+        KafetzisThomas
+    </p>
+</body>
+</html>
