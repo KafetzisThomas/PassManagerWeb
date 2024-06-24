@@ -2,6 +2,7 @@
 This module contains test cases for the following classes:
 * CustomUserCreationForm (validation, required fields, and the save method)
 * CustomAuthenticationForm (validation and authentication logic)
+* CustomUserChangeForm (validation and saving functionality)
 """
 
 from django.test import TestCase
@@ -9,7 +10,11 @@ from django import forms
 import pyotp
 
 from ..models import CustomUser
-from ..forms import CustomUserCreationForm, CustomAuthenticationForm
+from ..forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    CustomUserChangeForm,
+)
 
 
 class CustomUserCreationFormTests(TestCase):
@@ -196,3 +201,94 @@ class CustomAuthenticationFormTests(TestCase):
         self.assertFalse(form.is_valid())
         with self.assertRaises(forms.ValidationError):
             form.clean()
+
+
+class CustomUserChangeFormTests(TestCase):
+    """
+    Test suite for the CustomUserChangeForm.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment by creating a test user.
+        """
+        self.test_email = "testuser@example.com"
+        self.test_username = "testuser"
+        self.test_password = "testpassword"
+
+        self.user = CustomUser.objects.create_user(
+            email=self.test_email,
+            username=self.test_username,
+            password=self.test_password,
+        )
+
+    def test_form_valid_data(self):
+        """
+        Test that the form is valid when correct data is provided.
+        """
+        form_data = {
+            "email": "updated@example.com",
+            "username": "updated_username",
+            "password1": "newpassword123",
+            "password2": "newpassword123",
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertTrue(form.is_valid(), form.errors.as_json())
+
+    def test_form_invalid_passwords_not_matching(self):
+        """
+        Test that the form is invalid when passwords do not match.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+            "password1": "newpassword123",
+            "password2": "differentpassword",
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("password2", form.errors)
+        self.assertEqual(form.errors["password2"][0], "Passwords do not match.")
+
+    def test_form_invalid_password_not_meeting_requirements(self):
+        """
+        Test that the form is invalid when the new password does not meet validation requirements.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+            "password1": "weak",
+            "password2": "weak",
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("password1", form.errors)
+
+    def test_form_save(self):
+        """
+        Test that the form's save method updates the user's password correctly.
+        """
+        new_password = "newpassword123"
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+            "password1": new_password,
+            "password2": new_password,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertTrue(form.is_valid())
+        updated_user = form.save()
+        self.assertTrue(updated_user.check_password(new_password))
+
+    def test_form_save_no_password_change(self):
+        """
+        Test that the form's save method does not change the password if no new password is provided.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertTrue(form.is_valid())
+        updated_user = form.save()
+        self.assertTrue(updated_user.check_password(self.test_password))
