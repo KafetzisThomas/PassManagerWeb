@@ -1,12 +1,13 @@
 """
-This module contains test cases for the ItemForm class.
-The tests cover form validation and saving functionality.
+This module contains test cases for the following classes:
+* ItemForm (validation and saving functionality)
+* PasswordGeneratorForm (validation and functionality)
 """
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from ..forms import ItemForm
+from ..forms import ItemForm, PasswordGeneratorForm
 from ..models import Item
 
 
@@ -96,3 +97,81 @@ class ItemFormTests(TestCase):
         """
         form = ItemForm(data={})
         self.assertFalse(form.is_valid())
+
+
+class PasswordGeneratorFormTests(TestCase):
+    """
+    Test suite for the PasswordGeneratorForm.
+    """
+
+    def test_form_valid(self):
+        """
+        Test that the form is valid when correct data is provided.
+        """
+        form_data = {
+            "length": 12,
+            "letters": True,
+            "digits": True,
+            "special_chars": False,
+        }
+        form = PasswordGeneratorForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_invalid_length_too_short(self):
+        """
+        Test that the form is invalid when the length is too short.
+        """
+        form_data = {
+            "length": 4,
+            "letters": True,
+            "digits": True,
+            "special_chars": False,
+        }
+        form = PasswordGeneratorForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("length", form.errors)
+        self.assertEqual(
+            form.errors["length"][0], "Ensure this value is greater than or equal to 8."
+        )
+
+    def test_form_invalid_length_too_long(self):
+        """
+        Test that the form is invalid when the length is too long.
+        """
+        form_data = {
+            "length": 35,
+            "letters": True,
+            "digits": True,
+            "special_chars": False,
+        }
+        form = PasswordGeneratorForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("length", form.errors)
+        self.assertEqual(
+            form.errors["length"][0], "Ensure this value is less than or equal to 32."
+        )
+
+    def test_form_invalid_when_letters_unchecked(self):
+        """
+        Test that the form is invalid when letters option is unchecked.
+        """
+        form_data = {
+            "length": 12,
+            "letters": False,
+            "digits": True,
+            "special_chars": True,
+        }
+        form = PasswordGeneratorForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("letters", form.errors)
+        self.assertEqual(form.errors["letters"][0], "This field is required.")
+
+    def test_form_initial_values(self):
+        """
+        Test that the form initializes with correct initial values.
+        """
+        form = PasswordGeneratorForm()
+        self.assertEqual(form.fields["length"].initial, 12)
+        self.assertTrue(form.fields["letters"].initial)
+        self.assertTrue(form.fields["digits"].initial)
+        self.assertTrue(form.fields["special_chars"].initial)
