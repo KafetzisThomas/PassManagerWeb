@@ -1,13 +1,20 @@
 """
 This module contains test cases for the following views:
-* home, vault
+* home, vault, new_item
 """
 
-from django.test import TestCase
+import os
+import base64
+from django.test import TestCase, override_settings
+from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
+from unittest.mock import patch
 from django.urls import reverse
 
 from users.models import CustomUser
-from passmanager.models import Item
+from ..models import Item
+from ..forms import ItemForm
+from ..utils import decrypt
 
 
 class HomeViewTest(TestCase):
@@ -102,3 +109,141 @@ class VaultViewTest(TestCase):
         page_obj = response.context["page_obj"]
         self.assertFalse(page_obj.has_next())
         self.assertEqual(len(page_obj), 2)
+
+
+class NewItemViewTest(TestCase):
+    """
+    Test case for the new_item view.
+    """
+
+    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
+    def setUp(self):
+        """
+        Set up test data and create a test user.
+        """
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="12345", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="12345")
+
+    def test_new_item_view_redirect_if_not_logged_in(self):
+        """
+        Test if the new_item view redirects to the login page if not logged in.
+        """
+        self.client.logout()
+        response = self.client.get(reverse("new_item"))
+        self.assertRedirects(response, "/user/login/?next=/new_item/")
+
+    def test_new_item_view_status_code_and_template(self):
+        """
+        Test if the new_item view returns a status code 200 and uses the correct template for logged-in users.
+        """
+        response = self.client.get(reverse("new_item"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/new_item.html")
+        self.assertIsInstance(response.context["form"], ItemForm)
+
+    def test_new_item_view_post_save_action(self):
+        """
+        Test if the new_item view correctly saves an item and redirects to the vault.
+        """
+        data = {
+            "name": "Test Item",
+            "website": "http://example.com",
+            "username": "testuser",
+            "password": "password123",
+            "notes": "Test notes",
+            "action": "save",
+        }
+        response = self.client.post(reverse("new_item"), data)
+        self.assertRedirects(response, reverse("vault"))
+
+        item = Item.objects.get(name="Test Item")
+        self.assertEqual(item.owner, self.user)
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(str(messages[0]), "Item created successfully.")
+
+    @patch("passmanager.views.generate_password")
+    def test_new_item_view_post_generate_password_action(self, mock_generate_password):
+        """
+        Test if the new_item view correctly generates a password and updates the form.
+        """
+        mock_generate_password.return_value = "generatedpassword123"
+        data = {
+            "name": "Test Item",
+            "website": "http://example.com",
+            "username": "testuser",
+            "password": "",
+            "notes": "Test notes",
+            "action": "generate_password",
+        }
+        response = self.client.post(reverse("new_item"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/new_item.html")
+        self.assertEqual(
+            response.context["form"].initial["password"], "generatedpassword123"
+        )
+
+    @patch("passmanager.views.check_password")
+    def test_new_item_view_post_check_password_action(self, mock_check_password):
+        """
+        Test if the new_item view correctly checks if the password has been pwned and shows a message.
+        """
+        mock_check_password.return_value = 0
+        data = {
+            "name": "Test Item",
+            "website": "http://example.com",
+            "username": "testuser",
+            "password": "safe_password",
+            "notes": "Test notes",
+            "action": "check_password",
+        }
+        response = self.client.post(reverse("new_item"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/new_item.html")
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            "This password was not found in known data breaches. It must be safe to use.",
+        )
+
+    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
+    def test_new_item_view_post_save_action_with_encryption(self):
+        """
+        Test if the new_item view correctly encrypts data before saving.
+        """
+        data = {
+            "name": "Encrypted Item",
+            "website": "http://example.com",
+            "username": "encrypteduser",
+            "password": "encryptedpassword",
+            "notes": "Encrypted notes",
+            "action": "save",
+        }
+        response = self.client.post(reverse("new_item"), data)
+        self.assertRedirects(response, reverse("vault"))
+        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
+
+        item = Item.objects.get(name="Encrypted Item")
+        self.assertNotEqual(item.website, "http://example.com")
+        self.assertNotEqual(item.username, "encrypteduser")
+        self.assertNotEqual(item.password, "encryptedpassword")
+        self.assertNotEqual(item.notes, "Encrypted notes")
+
+        decrypted_website = decrypt(item.website.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
+
+        self.assertEqual(decrypted_website, "http://example.com")
+        self.assertEqual(decrypted_username, "encrypteduser")
+        self.assertEqual(decrypted_password, "encryptedpassword")
+        self.assertEqual(decrypted_notes, "Encrypted notes")
