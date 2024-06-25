@@ -10,18 +10,34 @@ from django.contrib.auth.password_validation import validate_password
 
 class CustomUserCreationForm(UserCreationForm):
     password1 = forms.CharField(
-        label="Master Password", widget=forms.PasswordInput, required=False
+        label="Master Password", widget=forms.PasswordInput, required=True
     )
     password2 = forms.CharField(
-        label="Confirm Master Password", widget=forms.PasswordInput, required=False
+        label="Confirm Master Password", widget=forms.PasswordInput, required=True
     )
 
     class Meta:
         model = CustomUser
         fields = ("email", "username", "password1", "password2")
 
+    def clean(self):
+        """
+        Ensure that passwords are properly validated only when provided.
+        """
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 or password2:
+            if password1 != password2:
+                self.add_error("password2", "The two password fields didn’t match.")
+
+        return cleaned_data
+
     def save(self, commit=True):
         user = super().save(commit=False)
+        if self.cleaned_data.get("password1"):
+            user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()
         return user

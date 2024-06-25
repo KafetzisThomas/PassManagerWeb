@@ -19,8 +19,8 @@ class PasswordGeneratorForm(forms.Form):
     length = forms.IntegerField(
         label="Length",
         min_value=8,
-        max_value=16,
-        initial=8,
+        max_value=32,
+        initial=12,
         widget=forms.NumberInput(
             attrs={"class": "form-control form-control-lg lengthfield-size"}
         ),
