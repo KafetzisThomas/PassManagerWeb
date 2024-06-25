@@ -44,7 +44,7 @@ class RegisterViewTest(TestCase):
             "password2": "testpassword123",
         }
         response = self.client.post(self.register_url, form_data)
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("users:login"))
 
         # Check if the user is created in the database
         self.assertTrue(
@@ -89,7 +89,7 @@ class RegisterViewTest(TestCase):
             "password2": "testpassword123",
         }
         response = self.client.post(self.register_url, form_data)
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("users:login"))
 
         # Check that the OTP secret is generated and saved for the new user
         new_user = CustomUser.objects.get(email="testuser@example.com")
