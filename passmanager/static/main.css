@@ -102,3 +102,12 @@ body {
   z-index: 1;
   position: relative;
 }
+
+/* Media query for large screens */
+@media (min-width: 960px) {
+  .border-on-lg {
+    border: 1px solid #6c757d;
+    border-radius: 0.25rem;
+    border-color: #6c757d;
+  }
+}
