@@ -36,6 +36,26 @@ class HomeViewTest(TestCase):
         self.assertTemplateUsed(response, "passmanager/home.html")
 
 
+class FaqViewTest(TestCase):
+    """
+    Test case for the faq view.
+    """
+
+    def test_faq_view_status_code(self):
+        """
+        Test if the faq view returns a status code 200.
+        """
+        response = self.client.get(reverse("faq"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_faq_view_template_used(self):
+        """
+        Test if the faq view uses the correct template.
+        """
+        response = self.client.get(reverse("faq"))
+        self.assertTemplateUsed(response, "passmanager/faq.html")
+
+
 class VaultViewTest(TestCase):
     """
     Test case for the vault view.

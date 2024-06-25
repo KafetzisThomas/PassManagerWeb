@@ -6,6 +6,8 @@ from . import views
 urlpatterns = [
     # Home page
     path("", views.home, name="home"),
+    # FAQ page
+    path("faq/", views.faq, name="faq"),
     # Vault page
     path("vault/", views.vault, name="vault"),
     # Add a new item page
