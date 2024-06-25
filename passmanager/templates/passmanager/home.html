@@ -32,16 +32,18 @@
             <a class="navbar-brand ms-lg-5" href="{% url 'home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
             </a>
+
             <button class="navbar-toggler navbar-dark bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link me-2" href="{% url 'faq' %}">FAQ</a>
+                        <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'faq' %}">FAQ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-2" href="{% url 'vault' %}">LOGIN</a>
+                        <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'users:login' %}">LOGIN</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link me-5 border-on-lg" href="{% url 'users:register' %}">SIGN UP</a>

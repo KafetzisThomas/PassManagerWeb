@@ -38,13 +38,13 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link me-2" href="#">FAQ</a>
+                        <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'faq' %}">FAQ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-2" href="{% url 'vault' %}">LOGIN</a>
+                        <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'users:login' %}">LOGIN</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-5 border border-secondary rounded" href="{% url 'users:register' %}">SIGN UP</a>
+                        <a class="nav-link me-5 border-on-lg {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">SIGN UP</a>
                     </li>
                 </ul>
             </div>

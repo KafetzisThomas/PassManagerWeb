@@ -27,56 +27,55 @@
         <div class="container">
             <a class="navbar-brand ms-lg-5" href="{% url 'home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
-              </a>
-        {% if user.is_authenticated %}
+            </a>
+
             <button class="navbar-toggler navbar-dark bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-        {% endif %}
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'vault' %}">My Vault</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'password_generator' %}">Password Generator</a>
-                    </li>
-                {% endif %}
-              </li>
-            </ul>
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                {% if user.is_authenticated %}
-                    {% if request.user.is_superuser == 1 %}
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                            <a class="nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'vault' %}">My Vault</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'password_generator' %}">Password Generator</a>
                         </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'new_item' %}">New Item</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/users/account/' %}active{% endif %}" href="{% url 'users:account' %}">Account</a>
-                    </li>
-                    <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
-                        {% csrf_token %}
-                    </form>
-                    <li class="nav-item">
-                        <a class="nav-link me-5" href="#" onclick="document.getElementById('logout-form').submit();">Log out</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link me-2" href="{% url 'faq' %}">FAQ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link me-2" href="{% url 'vault' %}">LOGIN</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link me-5 border border-secondary rounded" href="{% url 'users:register' %}">SIGN UP</a>
-                    </li>
-                {% endif %}
-            </ul>
-          </div>
+                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                        {% if request.user.is_superuser == 1 %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'new_item' %}">New Item</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/user/account/' %}active{% endif %}" href="{% url 'users:account' %}">Account</a>
+                        </li>
+                        <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
+                            {% csrf_token %}
+                        </form>
+                        <li class="nav-item">
+                            <a class="nav-link me-5" href="#" onclick="document.getElementById('logout-form').submit();">Log out</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'faq' %}">FAQ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'users:login' %}">LOGIN</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-5 border-on-lg {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">SIGN UP</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
     <!-- navbar end -->
