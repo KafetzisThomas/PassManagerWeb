@@ -1,6 +1,6 @@
 """
 This module contains test cases for the following views:
-* register, account
+* register, account, delete_account
 """
 
 from django.test import TestCase, Client
@@ -195,3 +195,43 @@ class AccountViewTest(TestCase):
         self.client.logout()
         response = self.client.get(self.account_url)
         self.assertRedirects(response, f"/user/login/?next=/user/account/")
+
+
+class DeleteAccountViewTest(TestCase):
+    """
+    Test case for the delete_account view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="password")
+        self.delete_account_url = reverse("users:delete_account")
+
+    def test_delete_account_view(self):
+        """
+        Test deleting the user account with a POST request.
+        """
+        response = self.client.post(self.delete_account_url)
+        self.assertRedirects(response, reverse("home"))
+
+        # Check that the user is deleted
+        self.assertFalse(CustomUser.objects.filter(id=self.user.id).exists())
+
+    def test_delete_account_view_not_logged_in(self):
+        """
+        Test accessing the view when not logged in.
+        """
+        self.client.logout()
+        response = self.client.post(self.delete_account_url)
+        self.assertRedirects(
+            response, f"/user/login/?next=/user/account/delete_account/"
+        )
+
+        # Ensure the user is not deleted
+        self.assertTrue(CustomUser.objects.filter(id=self.user.id).exists())
