@@ -56,7 +56,7 @@ def account(request):
 def delete_account(request):
     user = CustomUser.objects.get(id=request.user.id)
     user.delete()
-    return redirect("users:login")
+    return redirect("home")
 
 
 class CustomLoginView(LoginView):
