@@ -332,7 +332,7 @@ class EditItemViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/edit_item.html")
-        self.assertNotEqual(
+        self.assertEqual(
             response.context["form"].initial["password"], "generatedpassword123"
         )
 
