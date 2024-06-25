@@ -6,7 +6,6 @@ This module contains test cases for the following views:
 import os
 import base64
 from django.test import TestCase, override_settings
-from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from unittest.mock import patch
 from django.urls import reverse
@@ -242,6 +241,172 @@ class NewItemViewTest(TestCase):
             "utf-8"
         )
         decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
+
+        self.assertEqual(decrypted_website, "http://example.com")
+        self.assertEqual(decrypted_username, "encrypteduser")
+        self.assertEqual(decrypted_password, "encryptedpassword")
+        self.assertEqual(decrypted_notes, "Encrypted notes")
+
+
+class EditItemViewTest(TestCase):
+    """
+    Test case for the edit_item view.
+    """
+
+    def setUp(self):
+        """
+        Set up test data and create a test user.
+        """
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.other_user = CustomUser.objects.create_user(
+            email="otheruser@example.com", password="password", username="otheruser"
+        )
+        self.client.login(email="testuser@example.com", password="password")
+        self.item = Item.objects.create(
+            name="Test Item",
+            website="http://example.com",
+            username="testuser",
+            password="testpassword",
+            notes="Test notes",
+            owner=self.user,
+        )
+
+    def test_edit_item_view_redirect_if_not_logged_in(self):
+        """
+        Test to verify that non-logged-in users are redirected to the login page when trying to access the edit_item view.
+        """
+        self.client.logout()
+        response = self.client.get(
+            reverse("edit_item", kwargs={"item_id": self.item.id})
+        )
+        self.assertRedirects(
+            response, "/user/login/?next=/edit_item/{}/".format(self.item.id)
+        )
+
+    def test_edit_item_view_permission_denied_for_other_user(self):
+        """
+        Test to verify that other users cannot access the edit_item view of items they don't own.
+        """
+        self.client.login(email="otheruser@example.com", password="password")
+        response = self.client.get(
+            reverse("edit_item", kwargs={"item_id": self.item.id})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_item_view_post_save_action(self):
+        """
+        Verifies that an item's attributes are correctly updated after a save action.
+        """
+        data = {
+            "name": "Modified Item",
+            "website": "http://modified-example.com",
+            "username": "modifieduser",
+            "password": "modifiedpassword",
+            "notes": "Modified notes",
+            "action": "save",
+        }
+        response = self.client.post(
+            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+        )
+        self.assertRedirects(response, reverse("vault"))
+        self.item.refresh_from_db()
+        self.assertEqual(self.item.name, "Modified Item")
+
+    @patch("passmanager.views.generate_password")
+    def test_edit_item_view_post_generate_password_action(self, mock_generate_password):
+        """
+        Verifies that the generate_password action generates a new password.
+        """
+        mock_generate_password.return_value = "generatedpassword123"
+        data = {
+            "name": "Modified Item",
+            "website": "http://modified-example.com",
+            "username": "modifieduser",
+            "password": "",
+            "notes": "Modified notes",
+            "action": "generate_password",
+        }
+        response = self.client.post(
+            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/edit_item.html")
+        self.assertNotEqual(
+            response.context["form"].initial["password"], "generatedpassword123"
+        )
+
+    def test_edit_item_view_post_check_password_action(self):
+        """
+        Verifies that the check_password action correctly processes the form data (password).
+        """
+        data = {
+            "name": "Modified Item",
+            "website": "http://modified-example.com",
+            "username": "modifieduser",
+            "password": "safe_password",
+            "notes": "Modified notes",
+            "action": "check_password",
+        }
+        response = self.client.post(
+            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/edit_item.html")
+
+    def test_edit_item_view_post_delete_action(self):
+        """
+        Verifies that an item is correctly deleted when the delete action is triggered.
+        """
+        data = {
+            "name": "Modified Item",
+            "website": "http://modified-example.com",
+            "username": "modifieduser",
+            "password": "modifiedpassword",
+            "notes": "Modified notes",
+            "action": "delete",
+        }
+        response = self.client.post(
+            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+        )
+        self.assertRedirects(response, reverse("vault"))
+        with self.assertRaises(Item.DoesNotExist):
+            Item.objects.get(id=self.item.id)  # Ensure item is deleted
+
+    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
+    def test_edit_item_view_post_save_action_with_encryption(self):
+        """
+        Verifies that item attributes are correctly encrypted and decrypted after a save action.
+        """
+        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
+
+        data = {
+            "name": "Encrypted Item",
+            "website": "http://example.com",
+            "username": "encrypteduser",
+            "password": "encryptedpassword",
+            "notes": "Encrypted notes",
+            "action": "save",
+        }
+        response = self.client.post(
+            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+        )
+        self.assertRedirects(response, reverse("vault"))
+
+        self.item.refresh_from_db()
+        decrypted_website = decrypt(self.item.website.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_username = decrypt(
+            self.item.username.encode(), encryption_key
+        ).decode("utf-8")
+        decrypted_password = decrypt(
+            self.item.password.encode(), encryption_key
+        ).decode("utf-8")
+        decrypted_notes = decrypt(self.item.notes.encode(), encryption_key).decode(
+            "utf-8"
+        )
 
         self.assertEqual(decrypted_website, "http://example.com")
         self.assertEqual(decrypted_username, "encrypteduser")
