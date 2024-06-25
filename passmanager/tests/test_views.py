@@ -1,6 +1,6 @@
 """
 This module contains test cases for the following views:
-* home, vault, new_item
+* home, vault, new_item, edit_item, delete_item, password_generator
 """
 
 import os
