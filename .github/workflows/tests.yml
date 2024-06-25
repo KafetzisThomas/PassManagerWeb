@@ -9,6 +9,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      DEBUG: 'True'
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -16,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'  # Use latest Python version available
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
@@ -26,4 +31,7 @@ jobs:
       - name: Run tests with unittest module
         run: |
           python3 manage.py test passmanager.tests
+
+      - name: Run tests for users app
+        run: |
           python3 manage.py test users.tests
