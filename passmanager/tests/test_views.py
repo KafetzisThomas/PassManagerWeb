@@ -12,7 +12,7 @@ from django.urls import reverse
 
 from users.models import CustomUser
 from ..models import Item
-from ..forms import ItemForm
+from ..forms import ItemForm, PasswordGeneratorForm
 from ..utils import decrypt
 
 
@@ -460,3 +460,76 @@ class DeleteItemViewTest(TestCase):
         self.assertRedirects(
             response, "/user/login/?next=/edit_item/{}/delete".format(self.item.id)
         )
+
+
+class PasswordGeneratorViewTest(TestCase):
+    """
+    Test case for the password_generator view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.client = Client()
+
+    def test_password_generator_view_get(self):
+        """
+        Test GET request to password_generator view returns form.
+        """
+        response = self.client.get(reverse("password_generator"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/password_generator.html")
+        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
+        self.assertEqual(
+            response.context["password"], ""
+        )  # Ensure password is empty initially
+
+    @patch("passmanager.views.generate_password")
+    def test_password_generator_view_post(self, mock_generate_password):
+        """
+        Test POST request to password_generator view generates password.
+        """
+        mock_generate_password.return_value = "GeneratedPassword123"
+        data = {
+            "length": 12,
+            "letters": True,
+            "digits": True,
+            "special_chars": False,
+        }
+
+        response = self.client.post(reverse("password_generator"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/password_generator.html")
+        self.assertEqual(response.context["password"], "GeneratedPassword123")
+
+        mock_generate_password.assert_called_once_with(12, True, True, False)
+
+    def test_password_generator_view_post_invalid_form(self):
+        """
+        Test POST request with invalid data returns form with errors.
+        """
+        data = {
+            "length": 4,  # Invalid length (< min_value)
+            "letters": True,
+            "digits": True,
+            "special_chars": False,
+        }
+
+        response = self.client.post(reverse("password_generator"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/password_generator.html")
+        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
+        self.assertIn("length", response.context["form"].errors)
+
+    def test_password_generator_view_post_empty_data(self):
+        """
+        Test POST request with empty data returns form with initial values.
+        """
+        response = self.client.post(reverse("password_generator"), {})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/password_generator.html")
+        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
+        self.assertEqual(
+            response.context["password"], ""
+        )  # Ensure password remains empty
