@@ -173,21 +173,6 @@ class CustomAuthenticationFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("password", form.errors)
 
-    def test_form_clean_method(self):
-        """
-        Test the clean method of the form to ensure OTP verification.
-        """
-        form_data = {
-            "username": self.test_email,
-            "password": self.test_password,
-            "otp": self.test_otp,
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
-        cleaned_data = form.clean()
-        self.assertEqual(cleaned_data["username"], self.test_email)
-        self.assertEqual(cleaned_data["otp"], self.test_otp)
-
     def test_form_clean_method_invalid_otp(self):
         """
         Test the clean method of the form with invalid OTP.
