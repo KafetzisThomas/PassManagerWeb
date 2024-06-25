@@ -5,7 +5,7 @@ This module contains test cases for the following views:
 
 import os
 import base64
-from django.test import TestCase, override_settings
+from django.test import TestCase, Client, override_settings
 from django.contrib.messages import get_messages
 from unittest.mock import patch
 from django.urls import reverse
@@ -43,7 +43,7 @@ class VaultViewTest(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test data and create test users.
         """
         self.user = CustomUser.objects.create_user(
             email="testuser@example.com", password="12345", username="testuser"
@@ -115,7 +115,6 @@ class NewItemViewTest(TestCase):
     Test case for the new_item view.
     """
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def setUp(self):
         """
         Set up test data and create a test user.
@@ -255,7 +254,7 @@ class EditItemViewTest(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test data and create test users.
         """
         self.user = CustomUser.objects.create_user(
             email="testuser@example.com", password="password", username="testuser"
@@ -412,3 +411,52 @@ class EditItemViewTest(TestCase):
         self.assertEqual(decrypted_username, "encrypteduser")
         self.assertEqual(decrypted_password, "encryptedpassword")
         self.assertEqual(decrypted_notes, "Encrypted notes")
+
+
+class DeleteItemViewTest(TestCase):
+    """
+    Test case for the delete_item view.
+    """
+
+    def setUp(self):
+        """
+        Set up test data and create test users.
+        """
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.other_user = CustomUser.objects.create_user(
+            email="otheruser@example.com", password="password", username="otheruser"
+        )
+        self.client = Client()
+        self.item = Item.objects.create(
+            name="Test Item",
+            website="http://example.com",
+            username="testuser",
+            password="testpassword",
+            notes="Test notes",
+            owner=self.user,
+        )
+
+    def test_delete_item_view_logged_in_owner(self):
+        """
+        Test that an owner can successfully delete their own item.
+        """
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("delete_item", kwargs={"item_id": self.item.id})
+        )
+        self.assertRedirects(response, reverse("vault"))
+        with self.assertRaises(Item.DoesNotExist):
+            Item.objects.get(id=self.item.id)  # Ensure item is deleted
+
+    def test_delete_item_view_not_logged_in(self):
+        """
+        Test that a not logged-in user is redirected to the login page.
+        """
+        response = self.client.post(
+            reverse("delete_item", kwargs={"item_id": self.item.id})
+        )
+        self.assertRedirects(
+            response, "/user/login/?next=/edit_item/{}/delete".format(self.item.id)
+        )
