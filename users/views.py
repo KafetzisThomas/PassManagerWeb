@@ -24,7 +24,7 @@ def register(request):
             login(
                 request, new_user, backend="django.contrib.auth.backends.ModelBackend"
             )
-            return redirect("vault")
+            return redirect("users:login")
     else:
         form = CustomUserCreationForm()
 
