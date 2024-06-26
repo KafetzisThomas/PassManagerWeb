@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "users",
     # Third-Party apps
     "bootstrap5",
+    "turnstile",
     # default django apps
     "django.contrib.admin",
     "django.contrib.auth",
@@ -176,3 +177,7 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+if not DEBUG:
+    TURNSTILE_SITEKEY = os.getenv("TURNSTILE_SITEKEY")
+    TURNSTILE_SECRET = os.getenv("TURNSTILE_SECRET")
