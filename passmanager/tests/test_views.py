@@ -66,13 +66,13 @@ class VaultViewTest(TestCase):
         Set up test data and create test users.
         """
         self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="12345", username="testuser"
+            email="testuser@gmail.com", password="12345", username="testuser"
         )
         self.user2 = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="54321", username="otheruser"
+            email="otheruser@gmail.com", password="54321", username="otheruser"
         )
 
-        self.client.login(email="testuser@example.com", password="12345")
+        self.client.login(email="testuser@gmail.com", password="12345")
 
         # Create test items for both users
         for i in range(5):
@@ -140,9 +140,9 @@ class NewItemViewTest(TestCase):
         Set up test data and create a test user.
         """
         self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="12345", username="testuser"
+            email="testuser@gmail.com", password="12345", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="12345")
+        self.client.login(email="testuser@gmail.com", password="12345")
 
     def test_new_item_view_redirect_if_not_logged_in(self):
         """
@@ -277,12 +277,12 @@ class EditItemViewTest(TestCase):
         Set up test data and create test users.
         """
         self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+            email="testuser@gmail.com", password="password", username="testuser"
         )
         self.other_user = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="password", username="otheruser"
+            email="otheruser@gmail.com", password="password", username="otheruser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@gmail.com", password="password")
         self.item = Item.objects.create(
             name="Test Item",
             website="http://example.com",
@@ -308,7 +308,7 @@ class EditItemViewTest(TestCase):
         """
         Test to verify that other users cannot access the edit_item view of items they don't own.
         """
-        self.client.login(email="otheruser@example.com", password="password")
+        self.client.login(email="otheruser@gmail.com", password="password")
         response = self.client.get(
             reverse("edit_item", kwargs={"item_id": self.item.id})
         )
@@ -443,10 +443,10 @@ class DeleteItemViewTest(TestCase):
         Set up test data and create test users.
         """
         self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+            email="testuser@gmail.com", password="password", username="testuser"
         )
         self.other_user = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="password", username="otheruser"
+            email="otheruser@gmail.com", password="password", username="otheruser"
         )
         self.client = Client()
         self.item = Item.objects.create(

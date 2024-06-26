@@ -103,7 +103,7 @@ class CustomAuthenticationFormTests(TestCase):
         """
         Set up the test environment by creating a test user.
         """
-        self.test_email = "testuser@example.com"
+        self.test_email = "testuser@gmail.com"
         self.test_password = "testpassword"
         self.test_otp_secret = "testotpsecret"
         self.test_otp = pyotp.TOTP(self.test_otp_secret).now()
@@ -203,7 +203,7 @@ class CustomUserChangeFormTests(TestCase):
         """
         Set up the test environment by creating a test user.
         """
-        self.test_email = "testuser@example.com"
+        self.test_email = "testuser@gmail.com"
         self.test_username = "testuser"
         self.test_password = "testpassword"
 
@@ -218,7 +218,7 @@ class CustomUserChangeFormTests(TestCase):
         Test that the form is valid when correct data is provided.
         """
         form_data = {
-            "email": "updated@example.com",
+            "email": "updated@gmail.com",
             "username": "updated_username",
             "password1": "newpassword123",
             "password2": "newpassword123",

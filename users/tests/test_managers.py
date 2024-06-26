@@ -24,7 +24,7 @@ class CustomUserManagerTests(TestCase):
         self.manager = CustomUserManager()
         self.manager.model = self.user_model
         self.user_data = {
-            "email": "testuser@example.com",
+            "email": "testuser@gmail.com",
             "username": "testuser",
             "password": "password123",
         }
@@ -52,7 +52,7 @@ class CustomUserManagerTests(TestCase):
         Test that a superuser can be created with the appropriate flags.
         """
         superuser_data = self.user_data.copy()
-        superuser_data["email"] = "admin@example.com"
+        superuser_data["email"] = "admin@gmail.com"
         superuser = self.manager.create_superuser(**superuser_data)
         self.assertEqual(superuser.email, superuser_data["email"])
         self.assertTrue(superuser.check_password(superuser_data["password"]))
@@ -64,7 +64,7 @@ class CustomUserManagerTests(TestCase):
         Test that creating a superuser without is_staff=True raises a ValueError.
         """
         superuser_data = self.user_data.copy()
-        superuser_data["email"] = "admin@example.com"
+        superuser_data["email"] = "admin@gmail.com"
         superuser_data["is_staff"] = False
         with self.assertRaises(ValueError) as e:
             self.manager.create_superuser(**superuser_data)
@@ -75,7 +75,7 @@ class CustomUserManagerTests(TestCase):
         Test that creating a superuser without is_superuser=True raises a ValueError.
         """
         superuser_data = self.user_data.copy()
-        superuser_data["email"] = "admin@example.com"
+        superuser_data["email"] = "admin@gmail.com"
         superuser_data["is_superuser"] = False
         with self.assertRaises(ValueError) as e:
             self.manager.create_superuser(**superuser_data)

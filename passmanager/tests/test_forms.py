@@ -21,7 +21,7 @@ class ItemFormTests(TestCase):
         Set up the test environment by creating a test user and a test item.
         """
         self.test_user = get_user_model().objects.create_user(
-            username="testuser", email="testuser@example.com", password="password123"
+            username="testuser", email="testuser@gmail.com", password="password123"
         )
         self.test_item = Item.objects.create(
             name="Test Item",

@@ -17,7 +17,7 @@ class CustomUserAdminTest(TestCase):
         """
         self.client = Client()
         self.admin_user = CustomUser.objects.create_superuser(
-            email="admin@example.com", username="admin", password="adminpassword"
+            email="admin@gmail.com", username="admin", password="adminpassword"
         )
         self.client.force_login(self.admin_user)
         self.site = AdminSite()

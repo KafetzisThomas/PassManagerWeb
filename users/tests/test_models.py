@@ -21,7 +21,7 @@ class CustomUserModelTests(TestCase):
         """
         self.user_model = get_user_model()
         self.user_data = {
-            "email": "testuser@example.com",
+            "email": "testuser@gmail.com",
             "username": "testuser",
             "password": "password123",
             "otp_secret": "12345678901234567890123456789012",
@@ -42,7 +42,7 @@ class CustomUserModelTests(TestCase):
         Test that a superuser can be created and has the correct flags.
         """
         superuser_data = self.user_data.copy()
-        superuser_data["email"] = "admin@example.com"
+        superuser_data["email"] = "admin@gmail.com"
         superuser = self.user_model.objects.create_superuser(**superuser_data)
         self.assertEqual(superuser.email, superuser_data["email"])
         self.assertTrue(superuser.is_staff)

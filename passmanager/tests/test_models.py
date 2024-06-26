@@ -21,7 +21,7 @@ class ItemModelTests(TestCase):
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", username="testuser", password="password123"
+            email="testuser@gmail.com", username="testuser", password="password123"
         )
         self.item_data = {
             "name": "Test Item",
