@@ -92,6 +92,7 @@ class CustomUserCreationFormTests(TestCase):
         self.assertTrue(user.check_password(self.valid_data["password1"]))
 
 
+@patch("turnstile.fields.TurnstileField.validate", return_value=True)
 class CustomAuthenticationFormTests(TestCase):
     """
     Test suite for the CustomAuthenticationForm.
@@ -112,7 +113,7 @@ class CustomAuthenticationFormTests(TestCase):
             otp_secret=self.test_otp_secret,
         )
 
-    def test_form_valid_data(self):
+    def test_form_valid_data(self, mock: MagicMock):
         """
         Test that the form is valid when correct email, OTP, and password are provided.
         """
@@ -124,7 +125,7 @@ class CustomAuthenticationFormTests(TestCase):
         form = CustomAuthenticationForm(data=form_data)
         self.assertTrue(form.is_valid(), form.errors.as_json())
 
-    def test_form_invalid_email(self):
+    def test_form_invalid_email(self, mock: MagicMock):
         """
         Test that the form is invalid when an incorrect email is provided.
         """
@@ -141,7 +142,7 @@ class CustomAuthenticationFormTests(TestCase):
             "Please enter a correct email address and password. Note that both fields may be case-sensitive.",
         )
 
-    def test_form_invalid_otp(self):
+    def test_form_invalid_otp(self, mock: MagicMock):
         """
         Test that the form is invalid when an incorrect OTP is provided.
         """
@@ -155,7 +156,7 @@ class CustomAuthenticationFormTests(TestCase):
         self.assertIn("__all__", form.errors)
         self.assertEqual(form.errors["__all__"][0], "Invalid OTP")
 
-    def test_form_missing_email(self):
+    def test_form_missing_email(self, mock: MagicMock):
         """
         Test that the form is invalid when the email is missing.
         """
@@ -168,7 +169,7 @@ class CustomAuthenticationFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("username", form.errors)
 
-    def test_form_missing_password(self):
+    def test_form_missing_password(self, mock: MagicMock):
         """
         Test that the form is invalid when the password is missing.
         """
@@ -177,7 +178,7 @@ class CustomAuthenticationFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("password", form.errors)
 
-    def test_form_clean_method_invalid_otp(self):
+    def test_form_clean_method_invalid_otp(self, mock: MagicMock):
         """
         Test the clean method of the form with invalid OTP.
         """

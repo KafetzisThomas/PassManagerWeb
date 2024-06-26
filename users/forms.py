@@ -48,6 +48,7 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
     otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
+    captcha_verification = TurnstileField(theme="light")
 
     def clean(self):
         cleaned_data = super().clean()
