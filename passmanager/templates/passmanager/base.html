@@ -68,7 +68,7 @@
                             <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'faq' %}">FAQ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'users:login' %}">LOGIN</a>
+                            <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'vault' %}">LOGIN</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link me-5 border-on-lg {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">SIGN UP</a>
