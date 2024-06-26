@@ -4,6 +4,7 @@ This module contains test cases for the following views:
 """
 
 from django.test import TestCase, Client
+from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
 from django.contrib.messages import get_messages
@@ -12,6 +13,7 @@ from ..forms import CustomUserCreationForm, CustomUserChangeForm
 from ..models import CustomUser
 
 
+@patch("turnstile.fields.TurnstileField.validate", return_value=True)
 class RegisterViewTest(TestCase):
     """
     Test case for the register view.
@@ -24,7 +26,7 @@ class RegisterViewTest(TestCase):
         self.client = Client()
         self.register_url = reverse("users:register")
 
-    def test_register_view_get(self):
+    def test_register_view_get(self, mock: MagicMock):
         """
         Test that the register view returns the registration form on GET request.
         """
@@ -33,7 +35,7 @@ class RegisterViewTest(TestCase):
         self.assertTemplateUsed(response, "registration/register.html")
         self.assertIsInstance(response.context["form"], CustomUserCreationForm)
 
-    def test_register_view_post_valid_form(self):
+    def test_register_view_post_valid_form(self, mock: MagicMock):
         """
         Test registering a new user with a valid form submission.
         """
@@ -42,6 +44,7 @@ class RegisterViewTest(TestCase):
             "username": "testuser",
             "password1": "testpassword123",
             "password2": "testpassword123",
+            "captcha_verification": "testsecret",
         }
         response = self.client.post(self.register_url, form_data)
         self.assertRedirects(response, reverse("users:login"))
@@ -68,7 +71,7 @@ class RegisterViewTest(TestCase):
         # Check if the user is still logged out
         self.assertNotIn(SESSION_KEY, self.client.session)
 
-    def test_register_view_post_invalid_form(self):
+    def test_register_view_post_invalid_form(self, mock: MagicMock):
         """
         Test registering a new user with an invalid form submission.
         """
@@ -77,6 +80,7 @@ class RegisterViewTest(TestCase):
             "username": "testuser",
             "password1": "testpassword123",
             "password2": "wrongpassword",
+            "captcha_verification": "testsecret",
         }
         response = self.client.post(self.register_url, form_data)
         self.assertEqual(response.status_code, 200)
