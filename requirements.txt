@@ -9,6 +9,7 @@ Django==4.2.13
 django-appconf==1.0.6
 django-bootstrap-v5==1.0.11
 django-session-security==2.6.7
+django-turnstile==0.1.0
 future==1.0.0
 gunicorn==22.0.0
 h11==0.14.0
