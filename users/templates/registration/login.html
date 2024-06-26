@@ -8,6 +8,12 @@
 {% endblock page_header %}
 
 {% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
     <form action="{% url 'users:login' %}" method="post" class="form">
         {% csrf_token %}
         {% bootstrap_form form %}

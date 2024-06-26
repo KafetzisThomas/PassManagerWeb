@@ -21,8 +21,9 @@ def register(request):
             form.save()
             send_new_user_registration(new_user)
             send_2fa_verification(new_user, otp_secret)
-            login(
-                request, new_user, backend="django.contrib.auth.backends.ModelBackend"
+            messages.success(
+                request,
+                "Account successfully created! An email containing your OTP key has been sent to your inbox.",
             )
             return redirect("users:login")
     else:

@@ -10,7 +10,7 @@
 {% block content %}
     {% if messages %}
         {% for message in messages %}
-            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+            <div class="alert alert-success">{{ message }}</div>
         {% endfor %}
     {% endif %}
     <form action="{% url 'users:account' %}" method="post" class="form">
