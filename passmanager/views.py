@@ -121,18 +121,24 @@ def edit_item(request, item_id):
         raise Http404
 
     if request.method == "POST":
-        # Create a mutable copy of request.POST
-        mutable_post_data = request.POST.copy()
+        action = request.POST.get("action")
+
+        if action == "delete":
+            delete_item(request, item.id)
+            messages.success(
+                request,
+                "Item deleted successfully.",
+            )
+            return redirect("vault")
+
         form = ItemForm(instance=item, data=request.POST)
-        obj = form.save(commit=False)
-
-        website_entry = obj.website
-        username_entry = obj.username
-        password_entry = obj.password
-        notes_entry = obj.notes
-
         if form.is_valid():
-            action = request.POST.get("action", "value")
+            obj = form.save(commit=False)
+            website_entry = obj.website
+            username_entry = obj.username
+            password_entry = obj.password
+            notes_entry = obj.notes
+
             if action == "save":
                 obj.website = encrypt(
                     website_entry.encode(), os.getenv("ENCRYPTION_KEY")
@@ -163,11 +169,7 @@ def edit_item(request, item_id):
                     include_special_chars=True,
                 )
 
-                # Update the mutable copy of POST data
-                mutable_post_data["password"] = generated_password
-
-                # Use the updated mutable_post_data to instantiate the form
-                form = ItemForm(data=mutable_post_data)
+                form = ItemForm(instance=item)
 
                 # Update the form's initial data for rendering
                 form.initial["password"] = generated_password
@@ -179,8 +181,8 @@ def edit_item(request, item_id):
                 return render(request, "passmanager/edit_item.html", context)
 
             elif action == "check_password":
-                is_pwned = check_password(mutable_post_data["password"])
-                if mutable_post_data["password"]:
+                is_pwned = check_password(password_entry)
+                if password_entry:
                     if is_pwned:
                         messages.error(
                             request,
@@ -195,13 +197,11 @@ def edit_item(request, item_id):
                 context = {"item": item, "form": form}
                 return render(request, "passmanager/edit_item.html", context)
 
-            elif action == "delete":
-                delete_item(request, item.id)
-                messages.success(
-                    request,
-                    "Item deleted successfully.",
-                )
-                return redirect("vault")
+        else:
+            messages.error(
+                request,
+                "The item could not be changed because the data didn't validate.",
+            )
 
     else:
         # Decrypt the fields for display in the form
