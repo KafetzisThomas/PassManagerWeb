@@ -124,7 +124,7 @@ def edit_item(request, item_id):
         action = request.POST.get("action")
 
         if action == "delete":
-            item.delete()
+            delete_item(request, item.id)
             messages.success(
                 request,
                 "Item deleted successfully.",
