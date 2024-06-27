@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    # Schedule to run on January, April, July, and October
+    - cron: '0 0 1 1,4,7,10 *'
 
 jobs:
   test:
