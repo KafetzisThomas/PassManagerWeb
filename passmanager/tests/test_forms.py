@@ -81,9 +81,9 @@ class ItemFormTests(TestCase):
         self.test_item.refresh_from_db()
         self.assertEqual(self.test_item.name, "Updated Item")
 
-    def test_item_form_required_fields(self):
+    def test_item_form_other_fields(self):
         """
-        Test that the form is valid when required fields are missing.
+        Test that the form is valid when other fields are missing.
         """
         form_data = {
             "name": "Test Item",

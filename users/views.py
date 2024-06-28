@@ -1,12 +1,15 @@
 import pyotp
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
 from .models import CustomUser
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .utils import send_new_user_registration, send_2fa_verification
+from .utils import (
+    send_new_user_registration,
+    send_2fa_verification,
+    send_delete_account_notification,
+)
 from django.contrib.auth.views import LoginView
 from .forms import CustomAuthenticationForm
 
@@ -57,6 +60,7 @@ def account(request):
 def delete_account(request):
     user = CustomUser.objects.get(id=request.user.id)
     user.delete()
+    send_delete_account_notification(user)
     return redirect("home")
 
 
