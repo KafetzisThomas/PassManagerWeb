@@ -9,6 +9,7 @@ from .utils import (
     send_new_user_registration,
     send_2fa_verification,
     send_delete_account_notification,
+    send_update_account_notification,
 )
 from django.contrib.auth.views import LoginView
 from .forms import CustomAuthenticationForm
@@ -41,6 +42,8 @@ def account(request):
     if request.method == "POST":
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
+            user = CustomUser.objects.get(id=request.user.id)
+            send_update_account_notification(user)
             form.save()
             update_session_auth_hash(
                 request, request.user
