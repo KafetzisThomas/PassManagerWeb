@@ -9,9 +9,10 @@
     <h2 style="color:black">Security Notification: 2FA Verification</h2>
     <p><strong style="color:black">Email:</strong> {{ user_email }}</p>
     <p><strong style="color:black">OTP Secret Key:</strong> {{ secret_key }}</p>
+    <img id="qr-code-image" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ secret_key }}" alt="QR Code">
 
     <div class="instructions">
-        <strong style="color:black">Instructions for Mobile</strong>
+        <br><strong style="color:black">Instructions for Mobile</strong>
         <ul>
             <li style="color:black">
                 Download Google Authenticator for
