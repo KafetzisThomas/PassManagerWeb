@@ -80,7 +80,7 @@ class CustomAuthenticationForm(AuthenticationForm):
         return cleaned_data
 
 
-class CustomUserChangeForm(UserChangeForm):
+class CustomUserChangeForm(forms.ModelForm):
     password1 = forms.CharField(
         label="New Master Password", widget=forms.PasswordInput, required=False
     )
