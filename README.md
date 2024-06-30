@@ -80,6 +80,20 @@ Now you can access the website at `http://127.0.0.1:8000/` or `http://localhost:
 $ python3 manage.py test users.tests passmanager.tests
 ```
 
+## Screenshots
+
+<div align = 'center'>
+    <h2>Vault</h2>
+    <img src = 'https://github.com/PassManagerWeb/PassManagerWeb/assets/105563667/2babd158-ec4f-496c-acdc-707022a0e252' alt = 'Vault'>
+    <br>
+    <h2>Password Generator</h2>
+    <img src = 'https://github.com/PassManagerWeb/PassManagerWeb/assets/105563667/2a4f2ed8-23aa-4d32-9516-1a22c097c00f' alt = 'Password Generator'>
+    <br>
+    <h2>Add Item</h2>
+    <img src = 'https://github.com/PassManagerWeb/PassManagerWeb/assets/105563667/d2e3d7e5-8ade-46b1-a9c3-3ae025f7aa44' alt = 'New Item'>
+    <br>
+</div>
+
 ## Contributing Guidelines for PassManager
 
 ### Pull Requests
