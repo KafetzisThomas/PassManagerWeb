@@ -19,6 +19,7 @@ psycopg2-binary==2.9.9
 pwnedpasswords==2.0.0
 pycparser==2.22
 pyotp==2.9.0
+pyperclip==1.9.0
 python-dotenv==1.0.1
 soupsieve==2.5
 sqlparse==0.5.0

@@ -3,6 +3,12 @@ from .models import Item
 
 
 class ItemForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(
+            render_value=True,
+        )
+    )
+
     class Meta:
         model = Item
         fields = ["name", "website", "username", "password", "notes"]
