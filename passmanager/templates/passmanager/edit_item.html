@@ -36,13 +36,6 @@
                     </button>
                 </li>
                 <li>
-                    <!-- Button trigger modal -->
-                    <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#delete_item_modal">
-                        <i class="bi bi-trash"></i> Delete
-                    </button>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
                     <button class="dropdown-item" type="submit" name="action" value="check_password">
                         <i class="bi bi-heart-pulse"></i> Check Password
                     </button>
@@ -51,6 +44,21 @@
                     <button class="dropdown-item" type="submit" name="action" value="generate_password">
                         <i class="bi bi-arrow-clockwise"></i> Generate Password
                     </button>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <!-- Button trigger modal -->
+                    <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#delete_item_modal">
+                        <i class="bi bi-trash"></i> Delete Item
+                    </button>
+                </li>
+                <li>
+                    <a class="dropdown-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="btncheck"/>
+                            <label class="form-check-label" for="btncheck">Show Password</label>
+                        </div>
+                    </a>
                 </li>
             </ul>
         </div>
@@ -79,21 +87,30 @@
     </div>
     <!-- Delete item modal end -->
 
-    <!-- Copy password to clipboard when button is clicked start -->
     <script>
-        document.getElementById("copy-password-btn").addEventListener("click", function() {
-            var passwordField = document.getElementById("id_password");
-            var password = passwordField.value;
-            var textarea = document.createElement("textarea");
-            textarea.value = password;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textarea);
-            alert("Password copied to clipboard.");
+        document.addEventListener("DOMContentLoaded", function() {
+            const copyPasswordBtn = document.getElementById("copy-password-btn");
+            const passwordField = document.getElementById("id_password");
+            const revealCheckbox = document.getElementById("btncheck");
+    
+            // Copy password to clipboard when button is clicked
+            copyPasswordBtn.addEventListener("click", function() {
+                const password = passwordField.value;
+                const textarea = document.createElement("textarea");
+                textarea.value = password;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                alert("Password copied to clipboard.");
+            });
+    
+            // Show password when checkbox is clicked
+            revealCheckbox.addEventListener("change", function() {
+                passwordField.type = revealCheckbox.checked ? 'text' : 'password';
+            });
         });
     </script>
-    <!-- Copy password to clipboard when button is clicked end -->
 {% endblock content %}
 
 {% block footer %}
