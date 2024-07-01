@@ -1,5 +1,4 @@
 import os
-import pyperclip
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -161,9 +160,6 @@ def edit_item(request, item_id):
                     "Item modified successfully.",
                 )
                 return redirect("vault")
-
-            elif action == "copy_password":
-                pyperclip.copy(form.cleaned_data.get("password"))
 
             elif action == "generate_password":
                 generated_password = generate_password(

@@ -31,7 +31,7 @@
                     </button>
                 </li>
                 <li>
-                    <button class="dropdown-item copy-password-btn" type="submit" name="action" value="copy_password">
+                    <button id="copy-password-btn" class="dropdown-item" type="button" onclick="CopyText()">
                         <i class="bi bi-clipboard"></i> Copy Password
                     </button>
                 </li>
@@ -78,6 +78,22 @@
         </div>
     </div>
     <!-- Delete item modal end -->
+
+    <!-- Copy password to clipboard when button is clicked start -->
+    <script>
+        document.getElementById("copy-password-btn").addEventListener("click", function() {
+            var passwordField = document.getElementById("id_password");
+            var password = passwordField.value;
+            var textarea = document.createElement("textarea");
+            textarea.value = password;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("Password copied to clipboard.");
+        });
+    </script>
+    <!-- Copy password to clipboard when button is clicked end -->
 {% endblock content %}
 
 {% block footer %}
