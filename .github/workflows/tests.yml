@@ -5,8 +5,8 @@ on:
     branches:
       - main
   schedule:
-    # Schedule to run on January, April, July, and October
-    - cron: '0 0 1 1,4,7,10 *'
+    # Schedule to run every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
 
 jobs:
   test:
