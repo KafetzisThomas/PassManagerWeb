@@ -16,7 +16,7 @@
 
     <form action="{% url 'users:login' %}" method="post" class="form">
         {% csrf_token %}
-        {% bootstrap_form form %}
+        {% bootstrap_form form bound_css_class='' %}
         {% buttons %}
             <button name="submit" class="btn btn-primary">Log in</button>
         {% endbuttons %}
