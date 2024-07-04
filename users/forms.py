@@ -26,21 +26,9 @@ class CustomUserCreationForm(UserCreationForm):
         """
         Ensure that passwords are properly validated only when provided.
         """
-        valid_domains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"]
-
         cleaned_data = super().clean()
-        email = cleaned_data.get("email")
         password1 = cleaned_data.get("password1")
         password2 = cleaned_data.get("password2")
-
-        # Validate email domain
-        if email:
-            _, _, domain = email.partition("@")
-            if domain not in valid_domains:
-                self.add_error(
-                    "email",
-                    f"Ensure the email domain is valid: {', '.join(valid_domains)}.",
-                )
 
         # Validate password match
         if (password1 and password2) and (password1 != password2):

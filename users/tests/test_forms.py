@@ -53,11 +53,10 @@ class CustomUserCreationFormTests(TestCase):
 
     def test_form_invalid_data(self, mock: MagicMock):
         """
-        Test that the form is invalid when email domain is not in the allowed list or passwords don't match.
+        Test that the form is invalid when passwords do not match.
         """
         form = CustomUserCreationForm(data=self.invalid_data)
         self.assertFalse(form.is_valid())
-        self.assertIn("email", form.errors)
         self.assertIn("password2", form.errors)
 
     def test_form_missing_email(self, mock: MagicMock):
