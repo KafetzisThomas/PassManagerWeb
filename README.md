@@ -23,7 +23,6 @@
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
 - [X] **Automatic Logout**: Enhanced security with automatic logout after **15 minutes** of inactivity or on **browser close**.
 - [X] **Cloudflare CAPTCHA Verification**: Protects against automated attacks by using CAPTCHA to verify human users.
-- [X] **Valid Email Domain Verification**: Ensures that only valid email domains are accepted during registration, **reducing the risk of spam and fraudulent accounts**.
 
 ## Setup for Local Development
 
