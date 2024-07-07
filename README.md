@@ -4,12 +4,12 @@
     </h1>
     <p>Securely manage your passwords of your online accounts.<br><a href="https://passmanagerweb.onrender.com/">https://passmanagerweb.onrender.com/</a><br>Written in Python/Django</p>
     <h3>
-        <a href="https://github.com/PassManagerWeb/PassManagerWeb">Homepage</a> |
+        <a href="https://github.com/KafetzisThomas/PassManagerWeb">Homepage</a> |
         <a href="https://passmanagerweb.onrender.com/faq">FAQ</a> | 
-        <a href="https://github.com/PassManagerWeb/PassManagerWeb/graphs/contributors">Contributors</a>
+        <a href="https://github.com/KafetzisThomas/PassManagerWeb/graphs/contributors">Contributors</a>
     </h3>
-    <a href="https://github.com/PassManagerWeb/PassManagerWeb/actions/workflows/tests.yml">
-        <img src = "https://github.com/PassManagerWeb/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt = 'Run Tests'/>
+    <a href="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml">
+        <img src = "https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt = 'Run Tests'/>
     </a>
 </div>
 
@@ -23,6 +23,12 @@
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
 - [X] **Automatic Logout**: Enhanced security with automatic logout after **15 minutes** of inactivity or on **browser close**.
 - [X] **Cloudflare CAPTCHA Verification**: Protects against automated attacks by using CAPTCHA to verify human users.
+
+## Purpose
+
+The primary goal of this project is to **provide an open-source application that anyone can use and learn from**. While the deployed app is available for use, my main intention is not to attract active users or compete with major applications like [Bitwarden](https://bitwarden.com/). Instead, I aim to share the code, primarily written in Django, with those who might find it useful for similar projects or personal use.
+
+If you find this project interesting, helpful, or inspiring, please consider giving a `star`, `following`, or even `donating` to support further development.
 
 ## Setup for Local Development
 
@@ -83,13 +89,13 @@ $ python3 manage.py test users.tests passmanager.tests
 
 <div align = 'center'>
     <h2>Vault</h2>
-    <img src = 'https://github.com/PassManagerWeb/PassManagerWeb/assets/105563667/2babd158-ec4f-496c-acdc-707022a0e252' alt = 'Vault'>
+    <img src = 'https://github.com/KafetzisThomas/PassManagerWeb/assets/105563667/2babd158-ec4f-496c-acdc-707022a0e252' alt = 'Vault'>
     <br>
     <h2>Password Generator</h2>
-    <img src = 'https://github.com/PassManagerWeb/PassManagerWeb/assets/105563667/2a4f2ed8-23aa-4d32-9516-1a22c097c00f' alt = 'Password Generator'>
+    <img src = 'https://github.com/KafetzisThomas/PassManagerWeb/assets/105563667/2a4f2ed8-23aa-4d32-9516-1a22c097c00f' alt = 'Password Generator'>
     <br>
     <h2>Add Item</h2>
-    <img src = 'https://github.com/PassManagerWeb/PassManagerWeb/assets/105563667/d2e3d7e5-8ade-46b1-a9c3-3ae025f7aa44' alt = 'New Item'>
+    <img src = 'https://github.com/KafetzisThomas/PassManagerWeb/assets/105563667/d2e3d7e5-8ade-46b1-a9c3-3ae025f7aa44' alt = 'New Item'>
     <br>
 </div>
 
@@ -109,9 +115,9 @@ When submitting a pull request, please keep these points in mind:
 ### Filing Bug Reports and Submitting Pull Requests
 If you encounter a bug, please follow these steps to report it:
 
-* **Bug Reports**: File bug reports on the [GitHub Issues](https://github.com/PassManagerWeb/PassManagerWeb/issues) page.
-* **Pull Requests**: Open pull requests on the [GitHub Pull Requests](https://github.com/PassManagerWeb/PassManagerWeb/pulls) page.
+* **Bug Reports**: File bug reports on the [GitHub Issues](https://github.com/KafetzisThomas/PassManagerWeb/issues) page.
+* **Pull Requests**: Open pull requests on the [GitHub Pull Requests](https://github.com/KafetzisThomas/PassManagerWeb/pulls) page.
 
-Before contributing, please review the [License](https://github.com/PassManagerWeb/PassManagerWeb/blob/main/LICENSE) to understand the terms and conditions governing the use and distribution of PassManager.
+Before contributing, please review the [License](https://github.com/KafetzisThomas/PassManagerWeb/blob/main/LICENSE) to understand the terms and conditions governing the use and distribution of PassManager.
 
 Thank you for your interest in improving PassManager!
