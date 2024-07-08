@@ -19,7 +19,7 @@
 
     <form action="{% url 'edit_item' item.id %}" method='POST' class="form">
         {% csrf_token %}
-        {% bootstrap_form form %}
+        {% bootstrap_form form bound_css_class='' %}
         <div class="btn-group">
             <button type="submit" name="submit" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-list"></i> Action
