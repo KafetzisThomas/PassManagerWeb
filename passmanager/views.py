@@ -34,29 +34,38 @@ def vault(request):
 @login_required
 def new_item(request):
     if request.method == "POST":
-        form = ItemForm(request.POST)
+        # Create a mutable copy of request.POST
+        mutable_post_data = request.POST.copy()
+        form = ItemForm(data=request.POST)
+        obj = form.save(commit=False)
+
+        website_entry = obj.website
+        username_entry = obj.username
+        password_entry = obj.password
+        notes_entry = obj.notes
 
         if form.is_valid():
-            action = request.POST.get("action")
-
+            action = request.POST.get("action", "value")
             if action == "save":
-                obj = form.save(commit=False)
                 obj.website = encrypt(
-                    obj.website.encode(), os.getenv("ENCRYPTION_KEY")
+                    website_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.username = encrypt(
-                    obj.username.encode(), os.getenv("ENCRYPTION_KEY")
+                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.password = encrypt(
-                    obj.password.encode(), os.getenv("ENCRYPTION_KEY")
+                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.notes = encrypt(
-                    obj.notes.encode(), os.getenv("ENCRYPTION_KEY")
+                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.owner = request.user
-                obj.save()
 
-                messages.success(request, "Item created successfully.")
+                form.save()
+                messages.success(
+                    request,
+                    "Item created successfully.",
+                )
                 return redirect("vault")
 
             elif action == "generate_password":
@@ -67,24 +76,24 @@ def new_item(request):
                     include_special_chars=True,
                 )
 
-                form = ItemForm(
-                    initial={
-                        "name": form.cleaned_data["name"],
-                        "website": form.cleaned_data["website"],
-                        "username": form.cleaned_data["username"],
-                        "notes": form.cleaned_data["notes"],
-                        "password": generated_password,
-                    }
-                )
+                # Update the mutable copy of POST data
+                mutable_post_data["password"] = generated_password
 
-                messages.success(request, "Generated a new password.")
+                # Use the updated mutable_post_data to instantiate the form
+                form = ItemForm(data=mutable_post_data)
+
+                # Update the form's initial data for rendering
+                form.initial["password"] = generated_password
+                form.initial["website"] = website_entry
+                form.initial["username"] = username_entry
+                form.initial["notes"] = notes_entry
+
                 context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
 
             elif action == "check_password":
-                password = form.cleaned_data["password"]
-                if password:
-                    is_pwned = check_password(password)
+                is_pwned = check_password(mutable_post_data["password"])
+                if mutable_post_data["password"]:
                     if is_pwned:
                         messages.error(
                             request,
@@ -95,12 +104,9 @@ def new_item(request):
                             request,
                             "This password was not found in known data breaches. It must be safe to use.",
                         )
-                else:
-                    messages.error(request, "No password provided for checking.")
 
                 context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
-
     else:
         form = ItemForm()
 
@@ -172,7 +178,6 @@ def edit_item(request, item_id):
                 form.initial["notes"] = notes_entry
 
                 context = {"item": item, "form": form}
-                messages.success(request, "Generated a new password.")
                 return render(request, "passmanager/edit_item.html", context)
 
             elif action == "check_password":
@@ -188,8 +193,6 @@ def edit_item(request, item_id):
                             request,
                             "This password was not found in known data breaches. It must be safe to use.",
                         )
-                else:
-                    messages.error(request, "No password provided for checking.")
 
                 context = {"item": item, "form": form}
                 return render(request, "passmanager/edit_item.html", context)
