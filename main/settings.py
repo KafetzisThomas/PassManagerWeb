@@ -158,26 +158,33 @@ if not DEBUG:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # My settings
+
+# Session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 900
 SESSION_SAVE_EVERY_REQUEST = True
 
+# Custom user model
 AUTH_USER_MODEL = "users.CustomUser"
 
+# Custom email authentication backend
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "users.backends.EmailBackend",
 ]
 
+# Login and logout settings
 LOGIN_URL = "users:login"
 LOGOUT_REDIRECT_URL = "/"
 
+# Email settings
 EMAIL_USE_TLS = True
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
+# Turnstile settings (DEBUG=False)
 if not DEBUG:
     TURNSTILE_SITEKEY = os.getenv("TURNSTILE_SITEKEY")
     TURNSTILE_SECRET = os.getenv("TURNSTILE_SECRET")
