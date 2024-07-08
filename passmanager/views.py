@@ -104,6 +104,8 @@ def new_item(request):
                             request,
                             "This password was not found in known data breaches. It must be safe to use.",
                         )
+                else:
+                    messages.error(request, "No password to check.")
 
                 context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
@@ -193,6 +195,8 @@ def edit_item(request, item_id):
                             request,
                             "This password was not found in known data breaches. It must be safe to use.",
                         )
+                else:
+                    messages.error(request, "No password to check.")
 
                 context = {"item": item, "form": form}
                 return render(request, "passmanager/edit_item.html", context)
