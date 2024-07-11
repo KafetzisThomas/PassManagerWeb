@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "passmanager",
     "users",
     # Third-Party apps
-    "bootstrap5",
+    "django_bootstrap5",
     "turnstile",
     # default django apps
     "django.contrib.admin",

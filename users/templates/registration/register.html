@@ -1,5 +1,5 @@
 {% extends "passmanager/base.html" %}
-{% load bootstrap5 %}
+{% load django_bootstrap5 %}
 
 {% block title %}Register{% endblock title %}
 
@@ -11,9 +11,7 @@
     <form method="post" action="{% url 'users:register' %}" class="form">
         {% csrf_token %}
         {% bootstrap_form form %}
-        {% buttons %}
-            <button name="submit" class="btn btn-primary">Sign up</button>
-        {% endbuttons %}
+        {% bootstrap_button button_type="submit" content="Sign Up" %}
 
         <input type="hidden" name="next" value="{% url 'vault' %}" />
     </form>

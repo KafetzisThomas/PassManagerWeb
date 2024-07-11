@@ -1,5 +1,5 @@
 {% extends "passmanager/base.html" %}
-{% load bootstrap5 %}
+{% load django_bootstrap5 %}
 
 {% block title %}Account{% endblock title %}
 
@@ -8,20 +8,13 @@
 {% endblock page_header %}
 
 {% block content %}
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
     <form action="{% url 'users:account' %}" method="post" class="form">
         {% csrf_token %}
         {% bootstrap_form form %}
-        {% buttons %}
-            <button name="submit" class="btn btn-primary"><i class="bi bi-floppy"></i> Save changes</button>
-            <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button"><i class="bi bi-trash"></i> Delete account</a>
-        {% endbuttons %}
 
-        <input type="hidden" name="next"value="{% url 'users:account' %}" />
+        <button name="submit" class="btn btn-primary"><i class="bi bi-floppy"></i> Save changes</button>
+        <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button"><i class="bi bi-trash"></i> Delete account</a>
+        <input type="hidden" name="next" value="{% url 'vault' %}" />
     </form>
 
     <!-- Delete account modal start -->

@@ -51,7 +51,7 @@ def account(request):
             messages.success(
                 request, "Your account credentials was successfully updated!"
             )
-            return redirect("users:account")
+            return redirect("vault")
     else:
         form = CustomUserChangeForm(instance=request.user)
 
