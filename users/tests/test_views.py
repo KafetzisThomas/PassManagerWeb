@@ -130,7 +130,7 @@ class AccountViewTest(TestCase):
             "password2": "newpassword123",
         }
         response = self.client.post(self.account_url, form_data)
-        self.assertRedirects(response, reverse("users:account"))
+        self.assertRedirects(response, reverse("vault"))
 
         # Check if user details are updated
         updated_user = CustomUser.objects.get(email="updateduser@gmail.com")
@@ -177,7 +177,7 @@ class AccountViewTest(TestCase):
             "password2": "",
         }
         response = self.client.post(self.account_url, form_data)
-        self.assertRedirects(response, reverse("users:account"))
+        self.assertRedirects(response, reverse("vault"))
 
         # Ensure user details remain unchanged
         self.user.refresh_from_db()

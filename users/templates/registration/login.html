@@ -1,5 +1,5 @@
 {% extends "passmanager/base.html" %}
-{% load bootstrap5 %}
+{% load crispy_forms_tags %}
 
 {% block title %}Login{% endblock title %}
 
@@ -8,20 +8,11 @@
 {% endblock page_header %}
 
 {% block content %}
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
     <form action="{% url 'users:login' %}" method="post" class="form">
         {% csrf_token %}
-        {% bootstrap_form form bound_css_class='' %}
-        {% buttons %}
-            <button name="submit" class="btn btn-primary">Log in</button>
-        {% endbuttons %}
-
-        <input type="hidden" name="next"value="{% url 'vault' %}" />
+        {{ form|crispy }}
+        <button name="submit" class="btn btn-primary">Log In</button>
+        <input type="hidden" name="next" value="{% url 'vault' %}" />
     </form>
 {% endblock content %}
 
