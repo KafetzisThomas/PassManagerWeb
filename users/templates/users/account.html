@@ -1,5 +1,5 @@
 {% extends "passmanager/base.html" %}
-{% load django_bootstrap5 %}
+{% load crispy_forms_tags %}
 
 {% block title %}Account{% endblock title %}
 
@@ -10,8 +10,7 @@
 {% block content %}
     <form action="{% url 'users:account' %}" method="post" class="form">
         {% csrf_token %}
-        {% bootstrap_form form %}
-
+        {{ form|crispy }}
         <button name="submit" class="btn btn-primary"><i class="bi bi-floppy"></i> Save changes</button>
         <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button"><i class="bi bi-trash"></i> Delete account</a>
         <input type="hidden" name="next" value="{% url 'vault' %}" />

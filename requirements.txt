@@ -3,11 +3,13 @@ beautifulsoup4==4.12.3
 Brotli==1.1.0
 cffi==1.16.0
 click==8.1.7
+crispy-bootstrap5==2024.2
 cryptography==42.0.8
 dj-database-url==2.2.0
 Django==4.2.14
 django-appconf==1.0.6
 django-bootstrap5==24.2
+django-crispy-forms==2.2
 django-turnstile==0.1.0
 future==1.0.0
 gunicorn==22.0.0

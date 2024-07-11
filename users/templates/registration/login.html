@@ -1,5 +1,5 @@
 {% extends "passmanager/base.html" %}
-{% load django_bootstrap5 %}
+{% load crispy_forms_tags %}
 
 {% block title %}Login{% endblock title %}
 
@@ -10,9 +10,8 @@
 {% block content %}
     <form action="{% url 'users:login' %}" method="post" class="form">
         {% csrf_token %}
-        {% bootstrap_form form bound_css_class='' %}
-        {% bootstrap_button button_type="submit" content="Log In" %}
-
+        {{ form|crispy }}
+        <button name="submit" class="btn btn-primary">Log In</button>
         <input type="hidden" name="next" value="{% url 'vault' %}" />
     </form>
 {% endblock content %}

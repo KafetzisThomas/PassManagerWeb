@@ -1,5 +1,5 @@
 {% extends "passmanager/base.html" %}
-{% load django_bootstrap5 %}
+{% load crispy_forms_tags %}
 
 {% block title %}New Item{% endblock title %}
 
@@ -19,7 +19,7 @@
 
     <form action="{% url 'new_item' %}" method='POST' class="form">
         {% csrf_token %}
-        {% bootstrap_form form bound_css_class='' %}
+        {{ form|crispy }}
         <div class="btn-group">
             <button type="submit" name="submit" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-list"></i> Action
