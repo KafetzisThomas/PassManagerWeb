@@ -47,15 +47,17 @@ class CustomUserCreationForm(UserCreationForm):
 
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
+    password = forms.CharField(label="Master Password", widget=forms.PasswordInput)
     otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
     captcha_verification = TurnstileField(theme="light")
 
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("username")
+        password = cleaned_data.get("password")
         otp = cleaned_data.get("otp")
 
-        if email and otp:
+        if email and password and otp:
             User = get_user_model()
             try:
                 user = User.objects.get(email=email)
