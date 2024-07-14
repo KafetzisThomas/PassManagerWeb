@@ -58,7 +58,6 @@ Add the following environment variables (modify as needed):
 ➜ SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
 ➜ ENCRYPTION_KEY="example_encryption_key"  # https://cryptography.io/en/latest/fernet/#cryptography.fernet.Fernet
 ➜ DEBUG=True  # For development
-# Optional, required if email features are used
 ➜ EMAIL_HOST_USER="example_email_host"
 ➜ EMAIL_HOST_PASSWORD="example_email_password"
 ```
