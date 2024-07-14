@@ -40,7 +40,7 @@ class RegisterViewTest(TestCase):
         Test registering a new user with a valid form submission.
         """
         form_data = {
-            "email": "testuser@gmail.com",
+            "email": "testuser@example.com",
             "username": "testuser",
             "password1": "testpassword123",
             "password2": "testpassword123",
@@ -50,10 +50,12 @@ class RegisterViewTest(TestCase):
         self.assertRedirects(response, reverse("users:login"))
 
         # Check if the user is created in the database
-        self.assertTrue(CustomUser.objects.filter(email="testuser@gmail.com").exists())
+        self.assertTrue(
+            CustomUser.objects.filter(email="testuser@example.com").exists()
+        )
 
         # Check that the OTP secret is generated and saved for the new user
-        new_user = CustomUser.objects.get(email="testuser@gmail.com")
+        new_user = CustomUser.objects.get(email="testuser@example.com")
         self.assertIsNotNone(new_user.otp_secret)
         self.assertIsInstance(new_user.otp_secret, str)
 
@@ -104,9 +106,9 @@ class AccountViewTest(TestCase):
         """
         self.client = Client()
         self.user = CustomUser.objects.create_user(
-            email="testuser@gmail.com", password="password", username="testuser"
+            email="testuser@example.com", password="password", username="testuser"
         )
-        self.client.login(email="testuser@gmail.com", password="password")
+        self.client.login(email="testuser@example.com", password="password")
         self.account_url = reverse("users:account")
 
     def test_account_view_get(self):
@@ -124,7 +126,7 @@ class AccountViewTest(TestCase):
         Test updating account credentials with valid form data.
         """
         form_data = {
-            "email": "updateduser@gmail.com",
+            "email": "updateduser@example.com",
             "username": "updateduser",
             "password1": "newpassword123",
             "password2": "newpassword123",
@@ -133,7 +135,7 @@ class AccountViewTest(TestCase):
         self.assertRedirects(response, reverse("vault"))
 
         # Check if user details are updated
-        updated_user = CustomUser.objects.get(email="updateduser@gmail.com")
+        updated_user = CustomUser.objects.get(email="updateduser@example.com")
         self.assertEqual(updated_user.username, "updateduser")
         self.assertTrue(check_password("newpassword123", updated_user.password))
 
@@ -150,7 +152,7 @@ class AccountViewTest(TestCase):
         Test handling of invalid form submission.
         """
         form_data = {
-            "email": "updateduser@gmail.com",
+            "email": "updateduser@example.com",
             "username": "updateduser",
             "password1": "newpassword123",
             "password2": "wrongpassword",
@@ -163,7 +165,7 @@ class AccountViewTest(TestCase):
 
         # Ensure user details remain unchanged
         self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "testuser@gmail.com")
+        self.assertEqual(self.user.email, "testuser@example.com")
         self.assertEqual(self.user.username, "testuser")
 
     def test_account_view_post_no_changes(self):
@@ -171,7 +173,7 @@ class AccountViewTest(TestCase):
         Test submitting the form with no changes.
         """
         form_data = {
-            "email": "testuser@gmail.com",
+            "email": "testuser@example.com",
             "username": "testuser",
             "password1": "",
             "password2": "",
@@ -181,7 +183,7 @@ class AccountViewTest(TestCase):
 
         # Ensure user details remain unchanged
         self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "testuser@gmail.com")
+        self.assertEqual(self.user.email, "testuser@example.com")
         self.assertEqual(self.user.username, "testuser")
 
     def test_account_view_not_logged_in(self):
@@ -204,9 +206,9 @@ class DeleteAccountViewTest(TestCase):
         """
         self.client = Client()
         self.user = CustomUser.objects.create_user(
-            email="testuser@gmail.com", password="password", username="testuser"
+            email="testuser@example.com", password="password", username="testuser"
         )
-        self.client.login(email="testuser@gmail.com", password="password")
+        self.client.login(email="testuser@example.com", password="password")
         self.delete_account_url = reverse("users:delete_account")
 
     def test_delete_account_view(self):
