@@ -15,7 +15,7 @@ class EmailBackendTest(TestCase):
         """
         self.backend = ModelBackend()
         self.user = CustomUser.objects.create_user(
-            email="testuser@gmail.com", password="password", username="testuser"
+            email="testuser@example.com", password="password", username="testuser"
         )
 
     def test_authenticate_with_valid_credentials(self):
@@ -23,17 +23,17 @@ class EmailBackendTest(TestCase):
         Test authenticating with valid email and password.
         """
         user = self.backend.authenticate(
-            None, username="testuser@gmail.com", password="password"
+            None, username="testuser@example.com", password="password"
         )
         self.assertIsNotNone(user)
-        self.assertEqual(user.email, "testuser@gmail.com")
+        self.assertEqual(user.email, "testuser@example.com")
 
     def test_authenticate_with_invalid_password(self):
         """
         Test authenticating with invalid password.
         """
         user = self.backend.authenticate(
-            None, username="testuser@gmail.com", password="wrongpassword"
+            None, username="testuser@example.com", password="wrongpassword"
         )
         self.assertIsNone(user)
 
@@ -42,7 +42,7 @@ class EmailBackendTest(TestCase):
         Test authenticating with invalid email (username).
         """
         user = self.backend.authenticate(
-            None, username="wronguser@gmail.com", password="password"
+            None, username="wronguser@example.com", password="password"
         )
         self.assertIsNone(user)
 
@@ -51,7 +51,7 @@ class EmailBackendTest(TestCase):
         Test authenticating when the user does not exist.
         """
         user = self.backend.authenticate(
-            None, username="nonexistent@gmail.com", password="password"
+            None, username="nonexistent@example.com", password="password"
         )
         self.assertIsNone(user)
 
@@ -67,7 +67,7 @@ class EmailBackendTest(TestCase):
         Test authenticating with valid email and empty password.
         """
         user = self.backend.authenticate(
-            None, username="testuser@gmail.com", password=""
+            None, username="testuser@example.com", password=""
         )
         self.assertIsNone(user)
 

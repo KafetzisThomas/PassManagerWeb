@@ -1,0 +1,41 @@
+name: DB Cleaner
+
+on:
+  schedule:
+    - cron: '0 0 1 1,4,7,10 *'  # Runs once every three months
+  workflow_dispatch:  # Allows for manual triggering of the workflow
+
+jobs:
+  run-cleaner:
+    runs-on: ubuntu-latest
+
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      DEBUG: 'False'
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Django management command
+        env:
+          DJANGO_SETTINGS_MODULE: main.settings
+        run: |
+          python manage.py migrate
+          python manage.py clean_db
