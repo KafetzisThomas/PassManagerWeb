@@ -93,8 +93,11 @@ $ python3 manage.py test users.tests passmanager.tests
     <h2>Password Generator</h2>
     <img src = 'https://github.com/KafetzisThomas/PassManagerWeb/assets/105563667/2a4f2ed8-23aa-4d32-9516-1a22c097c00f' alt = 'Password Generator'>
     <br>
-    <h2>Add Item</h2>
-    <img src = 'https://github.com/KafetzisThomas/PassManagerWeb/assets/105563667/d2e3d7e5-8ade-46b1-a9c3-3ae025f7aa44' alt = 'New Item'>
+    <h2>New Item</h2>
+    <img src = 'https://github.com/user-attachments/assets/9d5b7b79-7862-4f88-8e3f-f1f476d02e36' alt = 'New Item'>
+    <br>
+    <h2>Edit Item</h2>
+    <img src = 'https://github.com/user-attachments/assets/4122f1c3-d942-4a54-8444-da8e8f7067c7' alt = 'Edit Item'>
     <br>
 </div>
 
