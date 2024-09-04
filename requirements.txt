@@ -4,7 +4,7 @@ Brotli==1.1.0
 cffi==1.16.0
 click==8.1.7
 crispy-bootstrap5==2024.2
-cryptography==42.0.8
+cryptography==43.0.1
 dj-database-url==2.2.0
 Django==4.2.15
 django-appconf==1.0.6
