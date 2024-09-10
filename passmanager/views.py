@@ -6,8 +6,7 @@ from .models import Item
 from django.http import Http404
 from .forms import ItemForm, PasswordGeneratorForm
 from django.contrib import messages
-from .utils import encrypt, decrypt, check_password
-from pass_generator.pass_generator import generate_password
+from .utils import encrypt, decrypt, check_password, generate_password
 from dotenv import load_dotenv
 
 load_dotenv()
