@@ -28,7 +28,7 @@
                     <small class="text-muted">{{ item.date_added }}</small>
                 </div>
                 <!-- Edit item page-->
-                <h2><a class="item-name" href="{% url 'edit_item' item.id %}">{{ item.name }}</a></h2>
+                <h2><a class="item-name" href="{% url 'passmanager:edit_item' item.id %}">{{ item.name }}</a></h2>
             </div>
         </article>
     {% empty %}

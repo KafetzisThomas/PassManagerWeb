@@ -29,7 +29,7 @@
     <!-- navbar start -->
     <nav class="navbar navbar-expand-lg bg-dark border-body" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand ms-lg-5" href="{% url 'home' %}">
+            <a class="navbar-brand ms-lg-5" href="{% url 'passmanager:home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
             </a>
 
@@ -40,10 +40,10 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'faq' %}">FAQ</a>
+                        <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'passmanager:faq' %}">FAQ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'vault' %}">LOGIN</a>
+                        <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">LOGIN</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link me-5 border-on-lg" href="{% url 'users:register' %}">SIGN UP</a>

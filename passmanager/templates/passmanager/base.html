@@ -17,15 +17,16 @@
     <!-- Custom styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.png' %}">
 </head>
 
 <body>
-    <!--navbar start-->
+    <!-- navbar start -->
     <nav class="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand ms-lg-5 mb-lg-2" href="{% url 'home' %}">
+            <a class="navbar-brand ms-lg-5 mb-lg-2" href="{% url 'passmanager:home' %}">
                 <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
             </a>
 
@@ -37,10 +38,10 @@
                 <ul class="navbar-nav mr-auto mb-lg-0">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'vault' %}">My Vault</a>
+                            <a class="nav-link {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">My Vault</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'password_generator' %}">Password Generator</a>
+                            <a class="nav-link {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'passmanager:password_generator' %}">Password Generator</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -52,23 +53,23 @@
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'new_item' %}">New Item</a>
+                            <a class="nav-link {% if request.path == '/new_item/' %}active{% endif %}" href="{% url 'passmanager:new_item' %}">New Item</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/user/account/' %}active{% endif %}" href="{% url 'users:account' %}">Account</a>
                         </li>
-                        <form id="logout-form" action="{% url 'users:logout' %}" method="post" style="display: none;">
-                            {% csrf_token %}
-                        </form>
                         <li class="nav-item">
-                            <a class="nav-link me-5" href="#" onclick="document.getElementById('logout-form').submit();">Log out</a>
+                            <form action="{% url 'users:logout' %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link me-5">Log out</button>
+                            </form>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'faq' %}">FAQ</a>
+                            <a class="nav-link me-2 {% if request.path == '/faq/' %}active{% endif %}" href="{% url 'passmanager:faq' %}">FAQ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'vault' %}">LOGIN</a>
+                            <a class="nav-link me-2 {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">LOGIN</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link me-5 border-on-lg {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">SIGN UP</a>

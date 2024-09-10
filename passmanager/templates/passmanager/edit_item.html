@@ -17,7 +17,7 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'edit_item' item.id %}" method='POST' class="form">
+    <form action="{% url 'passmanager:edit_item' item.id %}" method='POST' class="form">
         {% csrf_token %}
         {{ form|crispy }}
         <div class="btn-group">
@@ -76,7 +76,7 @@
                     Are you sure you want to delete this item?
                 </div>
                 <div class="modal-footer">
-                    <form method="post" action="{% url 'edit_item' item.id %}">
+                    <form method="post" action="{% url 'passmanager:edit_item' item.id %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger" name="action" value="delete">Yes</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>

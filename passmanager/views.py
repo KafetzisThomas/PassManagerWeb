@@ -65,7 +65,7 @@ def new_item(request):
                     request,
                     "Item created successfully.",
                 )
-                return redirect("vault")
+                return redirect("passmanager:vault")
 
             elif action == "generate_password":
                 generated_password = generate_password(
@@ -131,7 +131,7 @@ def edit_item(request, item_id):
                 request,
                 "Item deleted successfully.",
             )
-            return redirect("vault")
+            return redirect("passmanager:vault")
 
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
@@ -161,7 +161,7 @@ def edit_item(request, item_id):
                     request,
                     "Item modified successfully.",
                 )
-                return redirect("vault")
+                return redirect("passmanager:vault")
 
             elif action == "generate_password":
                 generated_password = generate_password(
@@ -242,7 +242,7 @@ def delete_item(request, item_id):
     if item.owner != request.user:
         raise Http404
     item.delete()
-    return redirect("vault")
+    return redirect("passmanager:vault")
 
 
 def password_generator(request):

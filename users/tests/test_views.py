@@ -132,7 +132,7 @@ class AccountViewTest(TestCase):
             "password2": "newpassword123",
         }
         response = self.client.post(self.account_url, form_data)
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("passmanager:vault"))
 
         # Check if user details are updated
         updated_user = CustomUser.objects.get(email="updateduser@example.com")
@@ -179,7 +179,7 @@ class AccountViewTest(TestCase):
             "password2": "",
         }
         response = self.client.post(self.account_url, form_data)
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("passmanager:vault"))
 
         # Ensure user details remain unchanged
         self.user.refresh_from_db()
@@ -216,7 +216,7 @@ class DeleteAccountViewTest(TestCase):
         Test deleting the user account with a POST request.
         """
         response = self.client.post(self.delete_account_url)
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("passmanager:home"))
 
         # Check that the user is deleted
         self.assertFalse(CustomUser.objects.filter(id=self.user.id).exists())

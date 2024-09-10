@@ -12,7 +12,7 @@
         {% csrf_token %}
         {{ form|crispy }}
         <button name="submit" class="btn btn-primary">Sign Up</button>
-        <input type="hidden" name="next" value="{% url 'vault' %}" />
+        <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 {% endblock content %}
 
