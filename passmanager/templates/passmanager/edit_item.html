@@ -1,5 +1,6 @@
 {% extends "passmanager/base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}Edit Item{% endblock title %}
 
@@ -87,30 +88,9 @@
     </div>
     <!-- Delete item modal end -->
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const copyPasswordBtn = document.getElementById("copy-password-btn");
-            const passwordField = document.getElementById("id_password");
-            const revealCheckbox = document.getElementById("btncheck");
-    
-            // Copy password to clipboard when button is clicked
-            copyPasswordBtn.addEventListener("click", function() {
-                const password = passwordField.value;
-                const textarea = document.createElement("textarea");
-                textarea.value = password;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand("copy");
-                document.body.removeChild(textarea);
-                alert("Password copied to clipboard.");
-            });
-    
-            // Show password when checkbox is clicked
-            revealCheckbox.addEventListener("change", function() {
-                passwordField.type = revealCheckbox.checked ? 'text' : 'password';
-            });
-        });
-    </script>
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+
 {% endblock content %}
 
 {% block footer %}

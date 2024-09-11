@@ -1,5 +1,6 @@
 {% extends "passmanager/base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}New Item{% endblock title %}
 
@@ -53,17 +54,9 @@
         </div>
     </form>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const passwordField = document.getElementById("id_password");
-            const revealCheckbox = document.getElementById("btncheck");
+    <!-- Custom JavaScript -->
+    <script src="{% static 'main.js' %}"></script>
 
-            // Show password when checkbox is clicked
-            revealCheckbox.addEventListener("change", function() {
-                passwordField.type = revealCheckbox.checked ? 'text' : 'password';
-            });
-        });
-    </script>
 {% endblock content %}
 
 {% block footer %}
