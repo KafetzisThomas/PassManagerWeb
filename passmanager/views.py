@@ -88,7 +88,9 @@ def new_item(request):
                 form.initial["notes"] = notes_entry
 
                 context = {"form": form}
-                messages.success(request, "Password has been generated.")
+                messages.success(
+                    request, "New password has been generated successfully."
+                )
                 return render(request, "passmanager/new_item.html", context)
 
             elif action == "check_password":
@@ -180,7 +182,9 @@ def edit_item(request, item_id):
                 form.initial["notes"] = notes_entry
 
                 context = {"item": item, "form": form}
-                messages.success(request, "Password has been generated.")
+                messages.success(
+                    request, "New password has been generated successfully."
+                )
                 return render(request, "passmanager/edit_item.html", context)
 
             elif action == "check_password":
@@ -261,7 +265,6 @@ def password_generator(request):
             )
 
     context = {"form": form, "password": password}
-
     return render(
         request,
         "passmanager/password_generator.html",
