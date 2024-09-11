@@ -6,8 +6,7 @@ from .models import Item
 from django.http import Http404
 from .forms import ItemForm, PasswordGeneratorForm
 from django.contrib import messages
-from .utils import encrypt, decrypt, check_password
-from pass_generator.pass_generator import generate_password
+from .utils import encrypt, decrypt, check_password, generate_password
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -66,7 +65,7 @@ def new_item(request):
                     request,
                     "Item created successfully.",
                 )
-                return redirect("vault")
+                return redirect("passmanager:vault")
 
             elif action == "generate_password":
                 generated_password = generate_password(
@@ -89,7 +88,9 @@ def new_item(request):
                 form.initial["notes"] = notes_entry
 
                 context = {"form": form}
-                messages.success(request, "Password has been generated.")
+                messages.success(
+                    request, "New password has been generated successfully."
+                )
                 return render(request, "passmanager/new_item.html", context)
 
             elif action == "check_password":
@@ -132,7 +133,7 @@ def edit_item(request, item_id):
                 request,
                 "Item deleted successfully.",
             )
-            return redirect("vault")
+            return redirect("passmanager:vault")
 
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
@@ -162,7 +163,7 @@ def edit_item(request, item_id):
                     request,
                     "Item modified successfully.",
                 )
-                return redirect("vault")
+                return redirect("passmanager:vault")
 
             elif action == "generate_password":
                 generated_password = generate_password(
@@ -181,7 +182,9 @@ def edit_item(request, item_id):
                 form.initial["notes"] = notes_entry
 
                 context = {"item": item, "form": form}
-                messages.success(request, "Password has been generated.")
+                messages.success(
+                    request, "New password has been generated successfully."
+                )
                 return render(request, "passmanager/edit_item.html", context)
 
             elif action == "check_password":
@@ -243,7 +246,7 @@ def delete_item(request, item_id):
     if item.owner != request.user:
         raise Http404
     item.delete()
-    return redirect("vault")
+    return redirect("passmanager:vault")
 
 
 def password_generator(request):
@@ -262,7 +265,6 @@ def password_generator(request):
             )
 
     context = {"form": form, "password": password}
-
     return render(
         request,
         "passmanager/password_generator.html",

@@ -51,7 +51,7 @@ def account(request):
             messages.success(
                 request, "Your account credentials was successfully updated!"
             )
-            return redirect("vault")
+            return redirect("passmanager:vault")
     else:
         form = CustomUserChangeForm(instance=request.user)
 
@@ -64,7 +64,7 @@ def delete_account(request):
     user = CustomUser.objects.get(id=request.user.id)
     user.delete()
     send_delete_account_notification(user)
-    return redirect("home")
+    return redirect("passmanager:home")
 
 
 class CustomLoginView(LoginView):

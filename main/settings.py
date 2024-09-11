@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -29,10 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "").lower() == "true"
 
-if DEBUG:
-    ALLOWED_HOSTS = []
-else:
-    ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "passmanagerweb.onrender.com"]
 
 # Application definition
 
@@ -41,11 +39,12 @@ INSTALLED_APPS = [
     "passmanager",
     "users",
     # Third-Party apps
+    "django_extensions",
     "django_bootstrap5",
     "crispy_forms",
     "crispy_bootstrap5",
     "turnstile",
-    # default django apps
+    # Default django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -103,14 +102,7 @@ if DEBUG:
 else:
     # Production using PostgreSQL
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("DB_NAME"),
-            "USER": os.getenv("DB_USER"),
-            "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": os.getenv("DB_HOST"),
-            "PORT": os.getenv("DB_PORT"),
-        }
+        "default": dj_database_url.parse(os.getenv("DATABASE_URL")),
     }
 
 # Password validation
@@ -161,8 +153,6 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# My settings
 
 # Session settings
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

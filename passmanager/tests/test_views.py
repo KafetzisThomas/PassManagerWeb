@@ -25,14 +25,14 @@ class HomeViewTest(TestCase):
         """
         Test if the home view returns a status code 200.
         """
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("passmanager:home"))
         self.assertEqual(response.status_code, 200)
 
     def test_home_view_template_used(self):
         """
         Test if the home view uses the correct template.
         """
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("passmanager:home"))
         self.assertTemplateUsed(response, "passmanager/home.html")
 
 
@@ -45,14 +45,14 @@ class FaqViewTest(TestCase):
         """
         Test if the faq view returns a status code 200.
         """
-        response = self.client.get(reverse("faq"))
+        response = self.client.get(reverse("passmanager:faq"))
         self.assertEqual(response.status_code, 200)
 
     def test_faq_view_template_used(self):
         """
         Test if the faq view uses the correct template.
         """
-        response = self.client.get(reverse("faq"))
+        response = self.client.get(reverse("passmanager:faq"))
         self.assertTemplateUsed(response, "passmanager/faq.html")
 
 
@@ -88,28 +88,28 @@ class VaultViewTest(TestCase):
         Test if the vault view redirects to the login page if not logged in.
         """
         self.client.logout()
-        response = self.client.get(reverse("vault"))
+        response = self.client.get(reverse("passmanager:vault"))
         self.assertRedirects(response, "/user/login/?next=/vault/")
 
     def test_vault_view_status_code(self):
         """
         Test if the vault view returns a status code 200 for logged-in users.
         """
-        response = self.client.get(reverse("vault"))
+        response = self.client.get(reverse("passmanager:vault"))
         self.assertEqual(response.status_code, 200)
 
     def test_vault_view_template_used(self):
         """
         Test if the vault view uses the correct template.
         """
-        response = self.client.get(reverse("vault"))
+        response = self.client.get(reverse("passmanager:vault"))
         self.assertTemplateUsed(response, "passmanager/vault.html")
 
     def test_vault_view_items_for_logged_in_user(self):
         """
         Test if the vault view returns items only for the logged-in user.
         """
-        response = self.client.get(reverse("vault"))
+        response = self.client.get(reverse("passmanager:vault"))
         page_obj = response.context["page_obj"]
         items = page_obj.object_list
         for item in items:
@@ -119,12 +119,12 @@ class VaultViewTest(TestCase):
         """
         Test if the vault view paginates items correctly.
         """
-        response = self.client.get(reverse("vault"))
+        response = self.client.get(reverse("passmanager:vault"))
         page_obj = response.context["page_obj"]
         self.assertTrue(page_obj.has_next())
         self.assertEqual(len(page_obj), 3)
 
-        response = self.client.get(reverse("vault") + "?page=2")
+        response = self.client.get(reverse("passmanager:vault") + "?page=2")
         page_obj = response.context["page_obj"]
         self.assertFalse(page_obj.has_next())
         self.assertEqual(len(page_obj), 2)
@@ -149,14 +149,14 @@ class NewItemViewTest(TestCase):
         Test if the new_item view redirects to the login page if not logged in.
         """
         self.client.logout()
-        response = self.client.get(reverse("new_item"))
+        response = self.client.get(reverse("passmanager:new_item"))
         self.assertRedirects(response, "/user/login/?next=/new_item/")
 
     def test_new_item_view_status_code_and_template(self):
         """
         Test if the new_item view returns a status code 200 and uses the correct template for logged-in users.
         """
-        response = self.client.get(reverse("new_item"))
+        response = self.client.get(reverse("passmanager:new_item"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/new_item.html")
         self.assertIsInstance(response.context["form"], ItemForm)
@@ -173,8 +173,8 @@ class NewItemViewTest(TestCase):
             "notes": "Test notes",
             "action": "save",
         }
-        response = self.client.post(reverse("new_item"), data)
-        self.assertRedirects(response, reverse("vault"))
+        response = self.client.post(reverse("passmanager:new_item"), data)
+        self.assertRedirects(response, reverse("passmanager:vault"))
 
         item = Item.objects.get(name="Test Item")
         self.assertEqual(item.owner, self.user)
@@ -196,7 +196,7 @@ class NewItemViewTest(TestCase):
             "notes": "Test notes",
             "action": "generate_password",
         }
-        response = self.client.post(reverse("new_item"), data)
+        response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/new_item.html")
         self.assertEqual(
@@ -217,7 +217,7 @@ class NewItemViewTest(TestCase):
             "notes": "Test notes",
             "action": "check_password",
         }
-        response = self.client.post(reverse("new_item"), data)
+        response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/new_item.html")
 
@@ -240,8 +240,8 @@ class NewItemViewTest(TestCase):
             "notes": "Encrypted notes",
             "action": "save",
         }
-        response = self.client.post(reverse("new_item"), data)
-        self.assertRedirects(response, reverse("vault"))
+        response = self.client.post(reverse("passmanager:new_item"), data)
+        self.assertRedirects(response, reverse("passmanager:vault"))
         encryption_key = os.getenv("ENCRYPTION_KEY").encode()
 
         item = Item.objects.get(name="Encrypted Item")
@@ -298,7 +298,7 @@ class EditItemViewTest(TestCase):
         """
         self.client.logout()
         response = self.client.get(
-            reverse("edit_item", kwargs={"item_id": self.item.id})
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
         )
         self.assertRedirects(
             response, "/user/login/?next=/edit_item/{}/".format(self.item.id)
@@ -310,7 +310,7 @@ class EditItemViewTest(TestCase):
         """
         self.client.login(email="otheruser@example.com", password="password")
         response = self.client.get(
-            reverse("edit_item", kwargs={"item_id": self.item.id})
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
         )
         self.assertEqual(response.status_code, 404)
 
@@ -327,9 +327,9 @@ class EditItemViewTest(TestCase):
             "action": "save",
         }
         response = self.client.post(
-            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("passmanager:vault"))
         self.item.refresh_from_db()
         self.assertEqual(self.item.name, "Modified Item")
 
@@ -348,7 +348,7 @@ class EditItemViewTest(TestCase):
             "action": "generate_password",
         }
         response = self.client.post(
-            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/edit_item.html")
@@ -369,7 +369,7 @@ class EditItemViewTest(TestCase):
             "action": "check_password",
         }
         response = self.client.post(
-            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/edit_item.html")
@@ -387,9 +387,9 @@ class EditItemViewTest(TestCase):
             "action": "delete",
         }
         response = self.client.post(
-            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("passmanager:vault"))
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
@@ -409,9 +409,9 @@ class EditItemViewTest(TestCase):
             "action": "save",
         }
         response = self.client.post(
-            reverse("edit_item", kwargs={"item_id": self.item.id}), data
+            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("passmanager:vault"))
 
         self.item.refresh_from_db()
         decrypted_website = decrypt(self.item.website.encode(), encryption_key).decode(
@@ -464,9 +464,9 @@ class DeleteItemViewTest(TestCase):
         """
         self.client.force_login(self.user)
         response = self.client.post(
-            reverse("delete_item", kwargs={"item_id": self.item.id})
+            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
         )
-        self.assertRedirects(response, reverse("vault"))
+        self.assertRedirects(response, reverse("passmanager:vault"))
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
@@ -475,7 +475,7 @@ class DeleteItemViewTest(TestCase):
         Test that a not logged-in user is redirected to the login page.
         """
         response = self.client.post(
-            reverse("delete_item", kwargs={"item_id": self.item.id})
+            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
         )
         self.assertRedirects(
             response, "/user/login/?next=/edit_item/{}/delete".format(self.item.id)
@@ -497,7 +497,7 @@ class PasswordGeneratorViewTest(TestCase):
         """
         Test GET request to password_generator view returns form.
         """
-        response = self.client.get(reverse("password_generator"))
+        response = self.client.get(reverse("passmanager:password_generator"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
@@ -518,7 +518,7 @@ class PasswordGeneratorViewTest(TestCase):
             "special_chars": False,
         }
 
-        response = self.client.post(reverse("password_generator"), data)
+        response = self.client.post(reverse("passmanager:password_generator"), data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertEqual(response.context["password"], "GeneratedPassword123")
@@ -536,7 +536,7 @@ class PasswordGeneratorViewTest(TestCase):
             "special_chars": False,
         }
 
-        response = self.client.post(reverse("password_generator"), data)
+        response = self.client.post(reverse("passmanager:password_generator"), data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
@@ -546,7 +546,7 @@ class PasswordGeneratorViewTest(TestCase):
         """
         Test POST request with empty data returns form with initial values.
         """
-        response = self.client.post(reverse("password_generator"), {})
+        response = self.client.post(reverse("passmanager:password_generator"), {})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
