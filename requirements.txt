@@ -6,7 +6,7 @@ click==8.1.7
 crispy-bootstrap5==2024.2
 cryptography==43.0.1
 dj-database-url==2.2.0
-Django==4.2.16
+Django==4.2.17
 django-appconf==1.0.6
 django-bootstrap5==24.2
 django-crispy-forms==2.2
