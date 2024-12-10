@@ -11,8 +11,21 @@
     <form action="{% url 'users:account' %}" method="post" class="form">
         {% csrf_token %}
         {{ form|crispy }}
-        <button name="submit" class="btn btn-primary"><i class="bi bi-floppy"></i> Save changes</button>
-        <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button"><i class="bi bi-trash"></i> Delete account</a>
+        <div class="d-flex justify-content-between">
+            <div>
+                <button name="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy"></i> Save changes
+                </button>
+                <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button">
+                    <i class="bi bi-trash"></i> Delete account
+                </a>
+            </div>
+            <div>
+                <a class="btn btn-success" href="{% url 'passmanager:download_csv' %}" role="button">
+                    <i class="bi-filetype-csv"></i> Export passwords
+                </a>
+            </div>
+        </div>
         <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 
