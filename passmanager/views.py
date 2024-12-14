@@ -1,9 +1,10 @@
 import os
+import csv
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .models import Item
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from .forms import ItemForm, PasswordGeneratorForm
 from django.contrib import messages
 from .utils import encrypt, decrypt, check_password, generate_password
@@ -270,3 +271,42 @@ def password_generator(request):
         "passmanager/password_generator.html",
         context,
     )
+
+
+def download_csv(request):
+    # Create response with csv content type & set filename for download
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
+    writer = csv.writer(response)
+
+    # Write csv header (column names)
+    writer.writerow(["name", "website", "username", "password", "notes"])
+
+    # Fetch user-specific data
+    data = Item.objects.filter(owner=request.user)
+
+    for item in data:
+        decrypted_website = decrypt(item.website, os.getenv("ENCRYPTION_KEY")).decode(
+            "utf-8"
+        )
+        decrypted_username = decrypt(item.username, os.getenv("ENCRYPTION_KEY")).decode(
+            "utf-8"
+        )
+        decrypted_password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode(
+            "utf-8"
+        )
+        decrypted_notes = decrypt(item.notes, os.getenv("ENCRYPTION_KEY")).decode(
+            "utf-8"
+        )
+
+        writer.writerow(
+            [
+                item.name,
+                decrypted_website,
+                decrypted_username,
+                decrypted_password,
+                decrypted_notes,
+            ]
+        )
+
+    return response

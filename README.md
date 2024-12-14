@@ -21,6 +21,7 @@
 - [X] **Multi-Factor Authentication**: Protect your account with your favorite authenticator app.
 - [X] **Password Generator Tool**: Built-in tool to generate `strong`, `random` passwords, with `customizable` options (length, character types).
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
+- [X] **Export Passwords**: Download all your stored passwords in a `CSV` format for easy backup or migration.
 - [X] **Automatic Logout**: Enhanced security with automatic logout after **15 minutes** of inactivity or on **browser close**.
 - [X] **Cloudflare CAPTCHA Verification**: Protects against automated attacks by using CAPTCHA to verify human users.
 

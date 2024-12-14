@@ -19,4 +19,6 @@ urlpatterns = [
     path("edit_item/<int:item_id>/delete", views.delete_item, name="delete_item"),
     # Password generator page
     path("password_generator/", views.password_generator, name="password_generator"),
+    # Download csv page
+    path("download-csv/", views.download_csv, name="download_csv"),
 ]
