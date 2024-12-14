@@ -137,7 +137,7 @@ class NewItemViewTest(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up the test environment.
         """
         self.user = CustomUser.objects.create_user(
             email="testuser@example.com", password="12345", username="testuser"
