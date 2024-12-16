@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .models import Item
 from django.http import Http404, HttpResponse
-from .forms import ItemForm, PasswordGeneratorForm
+from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from django.contrib import messages
 from .utils import encrypt, decrypt, check_password, generate_password
 from dotenv import load_dotenv
@@ -310,3 +310,57 @@ def download_csv(request):
         )
 
     return response
+
+
+def upload_csv(request):
+    if request.method == "POST":
+        form = ImportPasswordsForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Read the uploaded file
+            csv_file = form.cleaned_data["csv_file"]
+            file_data = csv_file.read().decode("utf-8").splitlines()
+            csv_reader = csv.reader(file_data)
+
+            # Skip the header row
+            header = next(csv_reader)
+            expected_header = ["name", "website", "username", "password", "notes"]
+
+            if header != expected_header:
+                messages.error(
+                    request, "Invalid CSV format. Please check the column names."
+                )
+                return redirect("passmanager:upload_csv")
+
+            for row in csv_reader:
+                name, website, username, password, notes = row
+
+                # Encrypt fields before saving
+                encrypted_website = encrypt(
+                    website.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                encrypted_username = encrypt(
+                    username.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                encrypted_password = encrypt(
+                    password.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                encrypted_notes = encrypt(
+                    notes.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+
+                Item.objects.create(
+                    name=name,
+                    website=encrypted_website,
+                    username=encrypted_username,
+                    password=encrypted_password,
+                    notes=encrypted_notes,
+                    owner=request.user,
+                )
+
+            messages.success(request, "Passwords imported successfully!")
+            return redirect("passmanager:vault")
+    else:
+        form = ImportPasswordsForm()
+
+    context = {"form": form}
+    return render(request, "passmanager/upload_csv.html", context)
