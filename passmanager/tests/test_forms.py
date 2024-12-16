@@ -5,9 +5,10 @@ This module contains test cases for the following classes:
 """
 
 from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
 
-from ..forms import ItemForm, PasswordGeneratorForm
+from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from ..models import Item
 
 
@@ -175,3 +176,27 @@ class PasswordGeneratorFormTests(TestCase):
         self.assertTrue(form.fields["letters"].initial)
         self.assertTrue(form.fields["digits"].initial)
         self.assertTrue(form.fields["special_chars"].initial)
+
+
+class ImportPasswordsFormTests(TestCase):
+    """
+    Test suite for the ImportPasswordsForm.
+    """
+
+    def test_valid_csv_file_upload(self):
+        """
+        Test that a valid csv file is accepted.
+        """
+        csv_content = b"name,website,username,password,notes\Test User,example.com,test_user,test_pass,example notes"
+        file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
+        form = ImportPasswordsForm(data={}, files={"csv_file": file})
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_invalid_file_extension(self):
+        """
+        Test that a file with an invalid extension is rejected.
+        """
+        csv_content = b"Dummy content"
+        file = SimpleUploadedFile("test.txt", csv_content, content_type="text/plain")
+        form = ImportPasswordsForm(data={}, files={"csv_file": file})
+        self.assertFalse(form.is_valid(), form.errors)
