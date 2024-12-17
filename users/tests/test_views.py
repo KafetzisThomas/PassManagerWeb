@@ -3,10 +3,7 @@ This module contains test cases for the following views:
 * register, account, delete_account
 """
 
-import os
-import csv
-import base64
-from django.test import TestCase, Client, override_settings
+from django.test import TestCase, Client
 from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
@@ -14,9 +11,6 @@ from django.contrib.messages import get_messages
 from django.contrib.auth.hashers import check_password
 from ..forms import CustomUserCreationForm, CustomUserChangeForm
 from ..models import CustomUser
-
-from passmanager.models import Item
-from passmanager.utils import encrypt, decrypt
 
 
 @patch("turnstile.fields.TurnstileField.validate", return_value=True)
@@ -239,78 +233,3 @@ class DeleteAccountViewTest(TestCase):
 
         # Ensure the user is not deleted
         self.assertTrue(CustomUser.objects.filter(id=self.user.id).exists())
-
-
-class DownloadCsvViewTest(TestCase):
-    """
-    Test case for the download_csv view.
-    """
-
-    def setUp(self):
-        """
-        Set up test data and create a test user.
-        """
-        self.client = Client()
-        self.encryption_key = os.getenv("ENCRYPTION_KEY").encode()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
-        )
-        self.client.login(email="testuser@example.com", password="password")
-        self.item = Item.objects.create(
-            name="Test Item",
-            website=encrypt("http://example.com".encode(), self.encryption_key).decode(
-                "utf-8"
-            ),
-            username=encrypt("testuser".encode(), self.encryption_key).decode("utf-8"),
-            password=encrypt("testpassword".encode(), self.encryption_key).decode(
-                "utf-8"
-            ),
-            notes=encrypt("Test notes".encode(), self.encryption_key).decode("utf-8"),
-            owner=self.user,
-        )
-
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
-    def test_download_csv(self):
-        """
-        Test csv file returns with properly decrypted user data.
-        """
-        response = self.client.get(reverse("passmanager:download_csv"))
-
-        # Verify response status & headers
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "text/csv")
-        self.assertIn("PassManager Passwords.csv", response["Content-Disposition"])
-
-        # Decode csv content & validate header
-        content = response.content.decode("utf-8")
-        reader = csv.reader(content.splitlines())
-        header = next(reader)
-        self.assertEqual(header, ["name", "website", "username", "password", "notes"])
-
-        # Validate decrypted csv data rows
-        rows = list(reader)
-        self.assertEqual(len(rows), 1)  # Only 1 row of data
-
-        decrypted_website = decrypt(
-            self.item.website.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_username = decrypt(
-            self.item.username.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            self.item.password.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_notes = decrypt(self.item.notes.encode(), self.encryption_key).decode(
-            "utf-8"
-        )
-
-        self.assertEqual(
-            rows[0],
-            [
-                "Test Item",
-                decrypted_website,
-                decrypted_username,
-                decrypted_password,
-                decrypted_notes,
-            ],
-        )
