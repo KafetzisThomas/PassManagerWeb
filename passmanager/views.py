@@ -250,6 +250,7 @@ def delete_item(request, item_id):
     return redirect("passmanager:vault")
 
 
+@login_required
 def password_generator(request):
     form = PasswordGeneratorForm()
     password = ""  # Initialize password variable
@@ -273,6 +274,7 @@ def password_generator(request):
     )
 
 
+@login_required
 def download_csv(request):
     # Create response with csv content type & set filename for download
     response = HttpResponse(content_type="text/csv")
@@ -312,6 +314,7 @@ def download_csv(request):
     return response
 
 
+@login_required
 def upload_csv(request):
     if request.method == "POST":
         form = ImportPasswordsForm(request.POST, request.FILES)
