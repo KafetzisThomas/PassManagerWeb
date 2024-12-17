@@ -20,5 +20,7 @@ urlpatterns = [
     # Password generator page
     path("password_generator/", views.password_generator, name="password_generator"),
     # Download csv page
-    path("download-csv/", views.download_csv, name="download_csv"),
+    path("download_csv/", views.download_csv, name="download_csv"),
+    # Upload csv page
+    path("upload_csv/", views.upload_csv, name="upload_csv"),
 ]

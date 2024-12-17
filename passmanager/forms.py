@@ -51,3 +51,21 @@ class PasswordGeneratorForm(forms.Form):
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
+
+
+class ImportPasswordsForm(forms.Form):
+    csv_file = forms.FileField(
+        label="Select CSV File",
+        help_text="Upload your CSV file with the following columns: name, website, username, password, notes.",
+        widget=forms.ClearableFileInput(attrs={"accept": ".csv"}),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        csv_file = cleaned_data.get("csv_file")
+
+        # Check file extension
+        if not csv_file.name.endswith(".csv"):
+            raise forms.ValidationError("Invalid file type. Please upload a CSV file.")
+
+        return cleaned_data

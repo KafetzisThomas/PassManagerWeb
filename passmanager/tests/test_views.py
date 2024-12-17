@@ -1,22 +1,23 @@
 """
 This module contains test cases for the following views:
-* home, vault, new_item, edit_item, delete_item, password_generator
+* home, vault, new_item, edit_item, delete_item, password_generator, upload_csv
 """
 
 import os
 import base64
 from django.test import TestCase, Client, override_settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.messages import get_messages
 from unittest.mock import patch
 from django.urls import reverse
 
 from users.models import CustomUser
 from ..models import Item
-from ..forms import ItemForm, PasswordGeneratorForm
+from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from ..utils import decrypt
 
 
-class HomeViewTest(TestCase):
+class HomeViewTests(TestCase):
     """
     Test case for the home view.
     """
@@ -36,7 +37,7 @@ class HomeViewTest(TestCase):
         self.assertTemplateUsed(response, "passmanager/home.html")
 
 
-class FaqViewTest(TestCase):
+class FaqViewTests(TestCase):
     """
     Test case for the faq view.
     """
@@ -56,7 +57,7 @@ class FaqViewTest(TestCase):
         self.assertTemplateUsed(response, "passmanager/faq.html")
 
 
-class VaultViewTest(TestCase):
+class VaultViewTests(TestCase):
     """
     Test case for the vault view.
     """
@@ -130,7 +131,7 @@ class VaultViewTest(TestCase):
         self.assertEqual(len(page_obj), 2)
 
 
-class NewItemViewTest(TestCase):
+class NewItemViewTests(TestCase):
     """
     Test case for the new_item view.
     """
@@ -267,7 +268,7 @@ class NewItemViewTest(TestCase):
         self.assertEqual(decrypted_notes, "Encrypted notes")
 
 
-class EditItemViewTest(TestCase):
+class EditItemViewTests(TestCase):
     """
     Test case for the edit_item view.
     """
@@ -433,7 +434,7 @@ class EditItemViewTest(TestCase):
         self.assertEqual(decrypted_notes, "Encrypted notes")
 
 
-class DeleteItemViewTest(TestCase):
+class DeleteItemViewTests(TestCase):
     """
     Test case for the delete_item view.
     """
@@ -482,7 +483,7 @@ class DeleteItemViewTest(TestCase):
         )
 
 
-class PasswordGeneratorViewTest(TestCase):
+class PasswordGeneratorViewTests(TestCase):
     """
     Test case for the password_generator view.
     """
@@ -553,3 +554,78 @@ class PasswordGeneratorViewTest(TestCase):
         self.assertEqual(
             response.context["password"], ""
         )  # Ensure password remains empty
+
+
+class UploadCsvViewTests(TestCase):
+    """
+    Test case for the upload_csv view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="password")
+        self.upload_url = reverse("passmanager:upload_csv")
+
+    def test_upload_csv_view_status_code_and_template(self):
+        """
+        Test GET request renders the upload form.
+        """
+        response = self.client.get(self.upload_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "passmanager/upload_csv.html")
+        self.assertIsInstance(response.context["form"], ImportPasswordsForm)
+
+    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
+    def test_valid_csv_upload(self):
+        """
+        Test valid csv upload saves encrypted data to the database.
+        """
+        csv_content = b"name,website,username,password,notes\nTest user,example.com,test_user,test_pass,example notes"
+        file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
+        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
+
+        # Post csv file to the view
+        response = self.client.post(
+            self.upload_url, data={"csv_file": file}, follow=True
+        )
+        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertEqual(Item.objects.count(), 1)
+
+        item = Item.objects.first()
+        decrypted_website = decrypt(item.website.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
+            "utf-8"
+        )
+        decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
+
+        self.assertEqual(item.name, "Test user")
+        self.assertEqual(decrypted_website, "example.com")
+        self.assertEqual(decrypted_username, "test_user")
+        self.assertEqual(decrypted_password, "test_pass")
+        self.assertEqual(decrypted_notes, "example notes")
+        self.assertEqual(item.owner, self.user)
+
+    def test_invalid_csv_header(self):
+        """
+        Test csv upload with invalid headers.
+        """
+        csv_content = b"wrong_header1,wrong_header2,wrong_header3\ndata1,data2,data3"
+        file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
+
+        # Post csv file to the view
+        response = self.client.post(
+            self.upload_url, data={"csv_file": file}, follow=True
+        )
+
+        self.assertRedirects(response, self.upload_url)
+        self.assertEqual(Item.objects.count(), 0)
