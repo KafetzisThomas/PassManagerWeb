@@ -124,12 +124,12 @@ class VaultViewTests(TestCase):
         response = self.client.get(reverse("passmanager:vault"))
         page_obj = response.context["page_obj"]
         self.assertTrue(page_obj.has_next())
-        self.assertEqual(len(page_obj), 3)
+        self.assertEqual(len(page_obj), 4)
 
         response = self.client.get(reverse("passmanager:vault") + "?page=2")
         page_obj = response.context["page_obj"]
         self.assertFalse(page_obj.has_next())
-        self.assertEqual(len(page_obj), 2)
+        self.assertEqual(len(page_obj), 1)
 
 
 class NewItemViewTests(TestCase):
@@ -493,7 +493,10 @@ class PasswordGeneratorViewTests(TestCase):
         """
         Set up the test environment.
         """
-        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="password")
 
     def test_password_generator_view_get(self):
         """
