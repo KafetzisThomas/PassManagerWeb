@@ -3,10 +3,6 @@
 
 {% block title %}Import Passwords{% endblock title %}
 
-{% block page_header %}
-    <h2 class="text-center">Import Passwords</h2>
-{% endblock page_header %}
-
 {% block content %}
     <form action="{% url 'passmanager:upload_csv' %}" method="post" class="form" enctype="multipart/form-data">
         {% csrf_token %}
