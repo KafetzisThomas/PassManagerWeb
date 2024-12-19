@@ -15,6 +15,9 @@
     {% for item in page_obj %}
         <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
             <article class="media border-dark rounded shadow item-section">
+                <div class="favicon-wrapper me-3">
+                    <i class="bi bi-{{ item.name|lower }} text-dark fs-1"></i>
+                </div>
                 <div class="media-body">
                     <div class="item-metadata mb-0">
                         <small class="text-muted">{{ item.date_added }}</small>

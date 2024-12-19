@@ -25,6 +25,8 @@ body {
 
 /* Item styles */
 .item-section {
+  display: flex;
+  align-items: center;
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
@@ -37,6 +39,15 @@ body {
 .item-section:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Favicon styles */
+.favicon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
 }
 
 /* Item name styles */
