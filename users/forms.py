@@ -16,7 +16,7 @@ class CustomUserCreationForm(UserCreationForm):
     password2 = forms.CharField(
         label="Confirm Master Password", widget=forms.PasswordInput, required=True
     )
-    captcha_verification = TurnstileField(theme="light")
+    captcha_verification = TurnstileField(theme="light", size="flexible")
 
     class Meta:
         model = CustomUser
