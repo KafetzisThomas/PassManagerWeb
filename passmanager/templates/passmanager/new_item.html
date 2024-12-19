@@ -17,11 +17,11 @@
     <form action="{% url 'passmanager:new_item' %}" method='POST' class="form">
         {% csrf_token %}
         {{ form|crispy }}
-        <div class="btn-group">
-            <button type="submit" name="submit" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="btn-group w-100">
+            <button type="submit" name="submit" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-list"></i> Action
             </button>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu w-100">
                 <li>
                     <button class="dropdown-item" type="submit" name="action" value="save">
                         <i class="bi bi-floppy"></i> Save Item

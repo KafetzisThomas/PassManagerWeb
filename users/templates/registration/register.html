@@ -11,7 +11,7 @@
     <form method="post" action="{% url 'users:register' %}" class="form">
         {% csrf_token %}
         {{ form|crispy }}
-        <button name="submit" class="btn btn-primary">Sign Up</button>
+        <button name="submit" class="btn btn-dark w-100">Sign Up</button>
         <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 {% endblock content %}
