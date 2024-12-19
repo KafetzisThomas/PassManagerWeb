@@ -17,6 +17,7 @@
     <form action="{% url 'passmanager:edit_item' item.id %}" method='POST' class="form">
         {% csrf_token %}
         {{ form|crispy }}
+        <p class="text-muted mb-4">Created: {{ item.date_added }}<br>Last Modified: {{ item.last_modified }}</p>
         <div class="btn-group w-100">
             <button type="submit" name="submit" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-list"></i> Action
