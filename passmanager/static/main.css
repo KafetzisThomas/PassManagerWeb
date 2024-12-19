@@ -30,29 +30,31 @@ body {
   border: 1px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover state styles for item box */
+.item-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Item name styles */
 .item-name {
-  color: #666666;
-  font-size: 25px;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-/* Hover state styles for items name */
-.item-name:hover {
   color: #333333;
+  font-size: 25px;
+  font-weight: bold;
+  text-decoration: none;
 }
 
-/* Styles for each items metadata */
+/* Styles for each item's metadata */
 .item-metadata {
   padding-bottom: 1px;
   margin-bottom: 4px;
   border-bottom: 1px solid #e3e3e3;
 }
 
-/* Styles for each items metadata a tag */
+/* Styles for each item's metadata a tag */
 .item-metadata a {
   color: inherit;
   text-decoration: none;
