@@ -25,34 +25,47 @@ body {
 
 /* Item styles */
 .item-section {
+  display: flex;
+  align-items: center;
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover state styles for item box */
+.item-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Favicon styles */
+.favicon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
 }
 
 /* Item name styles */
 .item-name {
-  color: #666666;
-  font-size: 25px;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-/* Hover state styles for items name */
-.item-name:hover {
   color: #333333;
+  font-size: 25px;
+  font-weight: bold;
+  text-decoration: none;
 }
 
-/* Styles for each items metadata */
+/* Styles for each item's metadata */
 .item-metadata {
-  padding-bottom: 1px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #e3e3e3;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  border-bottom: 2px dashed #cccccc;
 }
 
-/* Styles for each items metadata a tag */
+/* Styles for each item's metadata a tag */
 .item-metadata a {
   color: inherit;
   text-decoration: none;

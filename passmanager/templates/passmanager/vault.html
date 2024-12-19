@@ -13,15 +13,19 @@
     {% endif %}
 
     {% for item in page_obj %}
-        <article class="media item-section">
-            <div class="media-body">
-                <div class="item-metadata">
-                    <small class="text-muted">{{ item.date_added }}</small>
+        <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
+            <article class="media border-dark rounded shadow item-section">
+                <div class="favicon-wrapper me-3">
+                    <i class="bi bi-{{ item.name|lower }} text-dark fs-1"></i>
                 </div>
-                <!-- Edit item page-->
-                <h2><a class="item-name" href="{% url 'passmanager:edit_item' item.id %}">{{ item.name }}</a></h2>
-            </div>
-        </article>
+                <div class="media-body">
+                    <div class="item-metadata mb-0">
+                        <small class="text-muted">{{ item.date_added }}</small>
+                    </div>
+                    <h2 class="mb-0 item-name">{{ item.name }}</h2>
+                </div>
+            </article>
+        </a>
     {% empty %}
         <div class="container text-center mt-3">
             <h5>There are no items in the list.</h5>
@@ -78,7 +82,7 @@
 
 {% block footer %}
     <!-- footer start -->
-    <footer class="footer bg-light text-dark py-3 fixed-bottom">
+    <footer class="footer bg-light text-dark py-2 fixed-bottom">
         <div class="container">
             <hr class="border-dark mb-1" width="100%">
             <div class="row justify-content-between align-items-center">
