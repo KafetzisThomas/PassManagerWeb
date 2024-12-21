@@ -67,7 +67,7 @@ class ItemModelTests(TestCase):
         self.assertEqual(item._meta.get_field("name").max_length, 50)
         self.assertEqual(item._meta.get_field("username").max_length, 500)
         self.assertEqual(item._meta.get_field("password").max_length, 500)
-        self.assertEqual(item._meta.get_field("url").max_length, 500)
+        self.assertEqual(item._meta.get_field("url").max_length, 50)
         self.assertEqual(item._meta.get_field("notes").max_length, 1500)
 
     def test_item_deletion(self):
