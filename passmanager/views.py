@@ -53,9 +53,6 @@ def new_item(request):
                 obj.password = encrypt(
                     password_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
-                obj.url = encrypt(
-                    url_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
                 obj.notes = encrypt(
                     notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
@@ -85,7 +82,6 @@ def new_item(request):
                 # Update the form's initial data for rendering
                 form.initial["username"] = username_entry
                 form.initial["password"] = generated_password
-                form.initial["url"] = url_entry
                 form.initial["notes"] = notes_entry
 
                 context = {"form": form}
@@ -141,7 +137,6 @@ def edit_item(request, item_id):
             obj = form.save(commit=False)
             username_entry = obj.username
             password_entry = obj.password
-            url_entry = obj.url
             notes_entry = obj.notes
 
             if action == "save":
@@ -150,9 +145,6 @@ def edit_item(request, item_id):
                 ).decode("utf-8")
                 obj.password = encrypt(
                     password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.url = encrypt(
-                    url_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.notes = encrypt(
                     notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
@@ -179,7 +171,6 @@ def edit_item(request, item_id):
                 # Update the form's initial data for rendering
                 form.initial["username"] = username_entry
                 form.initial["password"] = generated_password
-                form.initial["url"] = url_entry
                 form.initial["notes"] = notes_entry
 
                 context = {"item": item, "form": form}
@@ -221,9 +212,6 @@ def edit_item(request, item_id):
         decrypted_password = decrypt(
             item.password.encode(), os.getenv("ENCRYPTION_KEY")
         ).decode("utf-8")
-        decrypted_url = decrypt(item.url.encode(), os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
         decrypted_notes = decrypt(
             item.notes.encode(), os.getenv("ENCRYPTION_KEY")
         ).decode("utf-8")
@@ -232,7 +220,7 @@ def edit_item(request, item_id):
             "name": item.name,
             "username": decrypted_username,
             "password": decrypted_password,
-            "url": decrypted_url,
+            "url": item.url,
             "notes": decrypted_notes,
         }
         form = ItemForm(instance=item, initial=initial_data)
@@ -294,7 +282,6 @@ def download_csv(request):
         decrypted_password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode(
             "utf-8"
         )
-        decrypted_url = decrypt(item.url, os.getenv("ENCRYPTION_KEY")).decode("utf-8")
         decrypted_notes = decrypt(item.notes, os.getenv("ENCRYPTION_KEY")).decode(
             "utf-8"
         )
@@ -304,7 +291,7 @@ def download_csv(request):
                 item.name,
                 decrypted_username,
                 decrypted_password,
-                decrypted_url,
+                item.url,
                 decrypted_notes,
             ]
         )
@@ -342,9 +329,6 @@ def upload_csv(request):
                 encrypted_password = encrypt(
                     password.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
-                encrypted_url = encrypt(
-                    url.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
                 encrypted_notes = encrypt(
                     notes.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
@@ -353,7 +337,7 @@ def upload_csv(request):
                     name=name,
                     username=encrypted_username,
                     password=encrypted_password,
-                    url=encrypted_url,
+                    url=url,
                     notes=encrypted_notes,
                     owner=request.user,
                 )
