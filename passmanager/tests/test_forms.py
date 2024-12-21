@@ -26,9 +26,9 @@ class ItemFormTests(TestCase):
         )
         self.test_item = Item.objects.create(
             name="Test Item",
-            website="example.com",
             username="test_username",
             password="test_password",
+            url="example.com",
             notes="Test notes",
             owner=self.test_user,
         )
@@ -39,9 +39,9 @@ class ItemFormTests(TestCase):
         """
         form_data = {
             "name": "Updated Item Name",
-            "website": "updated-example.com",
             "username": "updated_username",
             "password": "updated_password",
+            "url": "updated-example.com",
             "notes": "Updated notes",
         }
         form = ItemForm(data=form_data)
@@ -53,9 +53,9 @@ class ItemFormTests(TestCase):
         """
         form_data = {
             "name": "New Item",
-            "website": "new-example.com",
             "username": "new_username",
             "password": "new_password",
+            "url": "new-example.com",
             "notes": "New notes",
         }
         form = ItemForm(data=form_data)
@@ -71,9 +71,9 @@ class ItemFormTests(TestCase):
         """
         form_data = {
             "name": "Updated Item",
-            "website": "updated-example.com",
             "username": "updated_username",
             "password": "updated_password",
+            "url": "updated-example.com",
             "notes": "Updated notes",
         }
         form = ItemForm(instance=self.test_item, data=form_data)
@@ -187,7 +187,7 @@ class ImportPasswordsFormTests(TestCase):
         """
         Test that a valid csv file is accepted.
         """
-        csv_content = b"name,website,username,password,notes\Test User,example.com,test_user,test_pass,example notes"
+        csv_content = b"name,username,password,url,notes\Test User,test_user,test_pass,example.com,example notes"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
         form = ImportPasswordsForm(data={}, files={"csv_file": file})
         self.assertTrue(form.is_valid(), form.errors)

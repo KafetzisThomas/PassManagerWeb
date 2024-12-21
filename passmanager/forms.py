@@ -11,13 +11,13 @@ class ItemForm(forms.ModelForm):
 
     class Meta:
         model = Item
-        fields = ["name", "website", "username", "password", "notes"]
+        fields = ["name", "username", "password", "url", "notes"]
 
     def __init__(self, *args, **kwargs):
         super(ItemForm, self).__init__(*args, **kwargs)
-        self.fields["website"].required = False
         self.fields["username"].required = False
         self.fields["password"].required = False
+        self.fields["url"].required = False
         self.fields["notes"].required = False
 
 
@@ -56,7 +56,7 @@ class PasswordGeneratorForm(forms.Form):
 class ImportPasswordsForm(forms.Form):
     csv_file = forms.FileField(
         label="Select CSV File",
-        help_text="Upload your CSV file with the following columns: name, website, username, password, notes.",
+        help_text="Upload your CSV file with the following columns: name, username, password, url, notes.",
         widget=forms.ClearableFileInput(attrs={"accept": ".csv"}),
     )
 

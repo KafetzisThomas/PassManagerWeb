@@ -39,7 +39,7 @@ def new_item(request):
         form = ItemForm(data=request.POST)
         obj = form.save(commit=False)
 
-        website_entry = obj.website
+        url_entry = obj.url
         username_entry = obj.username
         password_entry = obj.password
         notes_entry = obj.notes
@@ -47,14 +47,14 @@ def new_item(request):
         if form.is_valid():
             action = request.POST.get("action", "value")
             if action == "save":
-                obj.website = encrypt(
-                    website_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
                 obj.username = encrypt(
                     username_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.password = encrypt(
                     password_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.url = encrypt(
+                    url_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.notes = encrypt(
                     notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
@@ -83,9 +83,9 @@ def new_item(request):
                 form = ItemForm(data=mutable_post_data)
 
                 # Update the form's initial data for rendering
-                form.initial["password"] = generated_password
-                form.initial["website"] = website_entry
                 form.initial["username"] = username_entry
+                form.initial["password"] = generated_password
+                form.initial["url"] = url_entry
                 form.initial["notes"] = notes_entry
 
                 context = {"form": form}
@@ -139,20 +139,20 @@ def edit_item(request, item_id):
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
-            website_entry = obj.website
             username_entry = obj.username
             password_entry = obj.password
+            url_entry = obj.url
             notes_entry = obj.notes
 
             if action == "save":
-                obj.website = encrypt(
-                    website_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
                 obj.username = encrypt(
                     username_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.password = encrypt(
                     password_entry.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                obj.url = encrypt(
+                    url_entry.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 obj.notes = encrypt(
                     notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
@@ -177,9 +177,9 @@ def edit_item(request, item_id):
                 form = ItemForm(instance=item)
 
                 # Update the form's initial data for rendering
-                form.initial["password"] = generated_password
-                form.initial["website"] = website_entry
                 form.initial["username"] = username_entry
+                form.initial["password"] = generated_password
+                form.initial["url"] = url_entry
                 form.initial["notes"] = notes_entry
 
                 context = {"item": item, "form": form}
@@ -215,24 +215,24 @@ def edit_item(request, item_id):
 
     else:
         # Decrypt the fields for display in the form
-        decrypted_website = decrypt(
-            item.website.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
         decrypted_username = decrypt(
             item.username.encode(), os.getenv("ENCRYPTION_KEY")
         ).decode("utf-8")
         decrypted_password = decrypt(
             item.password.encode(), os.getenv("ENCRYPTION_KEY")
         ).decode("utf-8")
+        decrypted_url = decrypt(item.url.encode(), os.getenv("ENCRYPTION_KEY")).decode(
+            "utf-8"
+        )
         decrypted_notes = decrypt(
             item.notes.encode(), os.getenv("ENCRYPTION_KEY")
         ).decode("utf-8")
 
         initial_data = {
             "name": item.name,
-            "website": decrypted_website,
             "username": decrypted_username,
             "password": decrypted_password,
+            "url": decrypted_url,
             "notes": decrypted_notes,
         }
         form = ItemForm(instance=item, initial=initial_data)
@@ -282,21 +282,19 @@ def download_csv(request):
     writer = csv.writer(response)
 
     # Write csv header (column names)
-    writer.writerow(["name", "website", "username", "password", "notes"])
+    writer.writerow(["name", "username", "password", "url", "notes"])
 
     # Fetch user-specific data
     data = Item.objects.filter(owner=request.user)
 
     for item in data:
-        decrypted_website = decrypt(item.website, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
         decrypted_username = decrypt(item.username, os.getenv("ENCRYPTION_KEY")).decode(
             "utf-8"
         )
         decrypted_password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode(
             "utf-8"
         )
+        decrypted_url = decrypt(item.url, os.getenv("ENCRYPTION_KEY")).decode("utf-8")
         decrypted_notes = decrypt(item.notes, os.getenv("ENCRYPTION_KEY")).decode(
             "utf-8"
         )
@@ -304,9 +302,9 @@ def download_csv(request):
         writer.writerow(
             [
                 item.name,
-                decrypted_website,
                 decrypted_username,
                 decrypted_password,
+                decrypted_url,
                 decrypted_notes,
             ]
         )
@@ -326,7 +324,7 @@ def upload_csv(request):
 
             # Skip the header row
             header = next(csv_reader)
-            expected_header = ["name", "website", "username", "password", "notes"]
+            expected_header = ["name", "username", "password", "url", "notes"]
 
             if header != expected_header:
                 messages.error(
@@ -335,17 +333,17 @@ def upload_csv(request):
                 return redirect("passmanager:upload_csv")
 
             for row in csv_reader:
-                name, website, username, password, notes = row
+                name, username, password, url, notes = row
 
                 # Encrypt fields before saving
-                encrypted_website = encrypt(
-                    website.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
                 encrypted_username = encrypt(
                     username.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 encrypted_password = encrypt(
                     password.encode(), os.getenv("ENCRYPTION_KEY")
+                ).decode("utf-8")
+                encrypted_url = encrypt(
+                    url.encode(), os.getenv("ENCRYPTION_KEY")
                 ).decode("utf-8")
                 encrypted_notes = encrypt(
                     notes.encode(), os.getenv("ENCRYPTION_KEY")
@@ -353,9 +351,9 @@ def upload_csv(request):
 
                 Item.objects.create(
                     name=name,
-                    website=encrypted_website,
                     username=encrypted_username,
                     password=encrypted_password,
+                    url=encrypted_url,
                     notes=encrypted_notes,
                     owner=request.user,
                 )

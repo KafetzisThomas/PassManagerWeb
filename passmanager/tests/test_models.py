@@ -25,9 +25,9 @@ class ItemModelTests(TestCase):
         )
         self.item_data = {
             "name": "Test Item",
-            "website": "https://example.com",
             "username": "itemuser",
             "password": "password123",
+            "url": "https://example.com",
             "notes": "Some notes about the item",
             "owner": self.user,
         }
@@ -38,9 +38,9 @@ class ItemModelTests(TestCase):
         """
         item = Item.objects.create(**self.item_data)
         self.assertEqual(item.name, self.item_data["name"])
-        self.assertEqual(item.website, self.item_data["website"])
         self.assertEqual(item.username, self.item_data["username"])
         self.assertEqual(item.password, self.item_data["password"])
+        self.assertEqual(item.url, self.item_data["url"])
         self.assertEqual(item.notes, self.item_data["notes"])
         self.assertEqual(item.owner, self.item_data["owner"])
         self.assertTrue((timezone.now() - item.date_added).seconds < 10)
@@ -65,9 +65,9 @@ class ItemModelTests(TestCase):
         """
         item = Item.objects.create(**self.item_data)
         self.assertEqual(item._meta.get_field("name").max_length, 100)
-        self.assertEqual(item._meta.get_field("website").max_length, 100)
         self.assertEqual(item._meta.get_field("username").max_length, 100)
         self.assertEqual(item._meta.get_field("password").max_length, 100)
+        self.assertEqual(item._meta.get_field("url").max_length, 100)
         self.assertEqual(item._meta.get_field("notes").max_length, 100)
 
     def test_item_deletion(self):
