@@ -249,7 +249,6 @@ class NewItemViewTests(TestCase):
         item = Item.objects.get(name="Encrypted Item")
         self.assertNotEqual(item.username, "encrypteduser")
         self.assertNotEqual(item.password, "encryptedpassword")
-        self.assertNotEqual(item.url, "http://example.com")
         self.assertNotEqual(item.notes, "Encrypted notes")
 
         decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
@@ -258,12 +257,12 @@ class NewItemViewTests(TestCase):
         decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
             "utf-8"
         )
-        decrypted_url = decrypt(item.url.encode(), encryption_key).decode("utf-8")
         decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
 
+        self.assertEqual(item.name, "Encrypted Item")
         self.assertEqual(decrypted_username, "encrypteduser")
         self.assertEqual(decrypted_password, "encryptedpassword")
-        self.assertEqual(decrypted_url, "http://example.com")
+        self.assertEqual(item.url, "http://example.com")
         self.assertEqual(decrypted_notes, "Encrypted notes")
 
 
@@ -420,14 +419,14 @@ class EditItemViewTests(TestCase):
         decrypted_password = decrypt(
             self.item.password.encode(), encryption_key
         ).decode("utf-8")
-        decrypted_url = decrypt(self.item.url.encode(), encryption_key).decode("utf-8")
         decrypted_notes = decrypt(self.item.notes.encode(), encryption_key).decode(
             "utf-8"
         )
 
+        self.assertEqual(self.item.name, "Encrypted Item")
         self.assertEqual(decrypted_username, "encrypteduser")
         self.assertEqual(decrypted_password, "encryptedpassword")
-        self.assertEqual(decrypted_url, "http://example.com")
+        self.assertEqual(self.item.url, "http://example.com")
         self.assertEqual(decrypted_notes, "Encrypted notes")
 
 
@@ -578,9 +577,7 @@ class DownloadCsvViewTest(TestCase):
             password=encrypt("testpassword".encode(), self.encryption_key).decode(
                 "utf-8"
             ),
-            url=encrypt("http://example.com".encode(), self.encryption_key).decode(
-                "utf-8"
-            ),
+            url="https://example.com",
             notes=encrypt("Test notes".encode(), self.encryption_key).decode("utf-8"),
             owner=self.user,
         )
@@ -613,9 +610,6 @@ class DownloadCsvViewTest(TestCase):
         decrypted_password = decrypt(
             self.item.password.encode(), self.encryption_key
         ).decode("utf-8")
-        decrypted_url = decrypt(self.item.url.encode(), self.encryption_key).decode(
-            "utf-8"
-        )
         decrypted_notes = decrypt(self.item.notes.encode(), self.encryption_key).decode(
             "utf-8"
         )
@@ -626,7 +620,7 @@ class DownloadCsvViewTest(TestCase):
                 "Test Item",
                 decrypted_username,
                 decrypted_password,
-                decrypted_url,
+                "https://example.com",
                 decrypted_notes,
             ],
         )
@@ -679,13 +673,12 @@ class UploadCsvViewTests(TestCase):
         decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
             "utf-8"
         )
-        decrypted_url = decrypt(item.url.encode(), encryption_key).decode("utf-8")
         decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
 
         self.assertEqual(item.name, "Test user")
         self.assertEqual(decrypted_username, "test_user")
         self.assertEqual(decrypted_password, "test_pass")
-        self.assertEqual(decrypted_url, "example.com")
+        self.assertEqual(item.url, "example.com")
         self.assertEqual(decrypted_notes, "example notes")
         self.assertEqual(item.owner, self.user)
 
