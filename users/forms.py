@@ -79,7 +79,7 @@ class CustomUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "username", "password1", "password2")
+        fields = ("email", "username", "password1", "password2", "session_timeout")
 
     def clean(self):
         cleaned_data = super().clean()
