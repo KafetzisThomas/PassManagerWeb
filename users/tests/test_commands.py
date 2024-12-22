@@ -6,13 +6,16 @@ for deleting rows in the CustomUser model where the 'last_login' field is NULL.
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils.timezone import make_aware
 from datetime import datetime
 from io import StringIO
 from ..models import CustomUser
 
 
 class CleanDBCommandTestCase(TestCase):
-    """Test suite for the clean_db management command."""
+    """
+    Test suite for the clean_db management command.
+    """
 
     def setUp(self):
         """
@@ -27,7 +30,7 @@ class CleanDBCommandTestCase(TestCase):
         CustomUser.objects.create(
             email="user3@example.com",
             username="user3",
-            last_login=datetime(2024, 1, 1, 12, 0, 0),
+            last_login=make_aware(datetime(2024, 1, 1, 12, 0, 0)),
         )
 
     def test_clean_db_command(self):
