@@ -13,6 +13,8 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "email",
+        "otp_secret",
+        "session_timeout",
         "is_active",
         "is_staff",
         "is_superuser",
@@ -33,6 +35,10 @@ class CustomUserAdmin(UserAdmin):
                 )
             },
         ),
+        (
+            "Session Settings",
+            {"fields": ("session_timeout",)},
+        ),
         ("Dates", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
@@ -47,6 +53,7 @@ class CustomUserAdmin(UserAdmin):
                     "password2",
                     "is_staff",
                     "is_active",
+                    "session_timeout",
                 ),
             },
         ),
