@@ -32,6 +32,8 @@ class CustomUserAdminTest(TestCase):
             (
                 "username",
                 "email",
+                "otp_secret",
+                "session_timeout",
                 "is_active",
                 "is_staff",
                 "is_superuser",
@@ -67,6 +69,10 @@ class CustomUserAdminTest(TestCase):
                     )
                 },
             ),
+            (
+                "Session Settings",
+                {"fields": ("session_timeout",)},
+            ),
             ("Dates", {"fields": ("last_login", "date_joined")}),
         )
         self.assertEqual(custom_user_admin.fieldsets, expected_fieldsets)
@@ -88,6 +94,7 @@ class CustomUserAdminTest(TestCase):
                         "password2",
                         "is_staff",
                         "is_active",
+                        "session_timeout",
                     ),
                 },
             ),
