@@ -155,8 +155,7 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Session settings
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# Update session on every request
 SESSION_SAVE_EVERY_REQUEST = True
 
 # Custom user model
