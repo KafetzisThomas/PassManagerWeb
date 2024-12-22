@@ -62,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "users.middleware.SessionTimeoutMiddleware",
 ]
 
 ROOT_URLCONF = "main.urls"
@@ -154,9 +155,7 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Session settings
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 900
+# Update session on every request
 SESSION_SAVE_EVERY_REQUEST = True
 
 # Custom user model

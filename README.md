@@ -22,7 +22,7 @@
 - [X] **Password Generator Tool**: Built-in tool to generate `strong`, `random` passwords, with `customizable` options (length, character types).
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
 - [X] **Import/Export Passwords**: `Upload` passwords from a CSV file or `download` your stored passwords in `CSV` format for easy backup or migration.
-- [X] **Automatic Logout**: Enhanced security with automatic logout after **15 minutes** of inactivity or on **browser close**.
+- [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
 - [X] **Cloudflare CAPTCHA Verification**: Protects against automated attacks by using CAPTCHA to verify human users.
 
 ## Purpose

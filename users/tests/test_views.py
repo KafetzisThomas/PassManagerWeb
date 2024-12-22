@@ -130,6 +130,7 @@ class AccountViewTest(TestCase):
             "username": "updateduser",
             "password1": "newpassword123",
             "password2": "newpassword123",
+            "session_timeout": 300,
         }
         response = self.client.post(self.account_url, form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
@@ -177,6 +178,7 @@ class AccountViewTest(TestCase):
             "username": "testuser",
             "password1": "",
             "password2": "",
+            "session_timeout": 300,
         }
         response = self.client.post(self.account_url, form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
