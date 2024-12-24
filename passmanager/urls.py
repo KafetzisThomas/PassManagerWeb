@@ -23,4 +23,6 @@ urlpatterns = [
     path("download_csv/", views.download_csv, name="download_csv"),
     # Upload csv page
     path("upload_csv/", views.upload_csv, name="upload_csv"),
+    # Password checkup page
+    path("password_checkup/", views.password_checkup, name="password_checkup"),
 ]

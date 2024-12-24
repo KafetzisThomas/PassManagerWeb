@@ -46,6 +46,9 @@
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/upload_csv/' %}active{% endif %}" href="{% url 'passmanager:upload_csv' %}">Import Passwords</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/password_checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}">Checkup</a>
+                        </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">

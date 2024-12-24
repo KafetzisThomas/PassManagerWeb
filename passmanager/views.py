@@ -349,3 +349,34 @@ def upload_csv(request):
 
     context = {"form": form}
     return render(request, "passmanager/upload_csv.html", context)
+
+
+@login_required
+def password_checkup(request):
+    items = Item.objects.filter(owner=request.user)
+    results = []
+    for item in items:
+        password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode("utf-8")
+        is_pwned = check_password(password)
+        if password:
+            if is_pwned:
+                results.append(
+                    {
+                        "name": item.name,
+                        "status": f"Exposed {is_pwned} time(s)",
+                        "recommendation": "Changing this password is recommended.",
+                        "severity": "High",
+                    }
+                )
+            else:
+                results.append(
+                    {
+                        "name": item.name,
+                        "status": "No breaches found.",
+                        "recommendation": "This password appears to be safe.",
+                        "severity": "Low",
+                    }
+                )
+
+    context = {"results": results}
+    return render(request, "passmanager/password_checkup.html", context)
