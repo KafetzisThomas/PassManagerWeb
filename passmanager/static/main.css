@@ -162,6 +162,17 @@ body {
   border-radius: 10px;
 }
 
+/* List results styles */
+.list-results {
+  transition: transform 0.3s ease;
+}
+
+/* Hover state styles for list results */
+.list-results:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
 /* Media query for large screens */
 @media (min-width: 960px) {
   .border-on-lg {
