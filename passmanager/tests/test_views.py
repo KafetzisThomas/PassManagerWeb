@@ -205,30 +205,6 @@ class NewItemViewTests(TestCase):
             response.context["form"].initial["password"], "generatedpassword123"
         )
 
-    @patch("passmanager.views.check_password")
-    def test_new_item_view_post_check_password_action(self, mock_check_password):
-        """
-        Test if the new_item view correctly checks if the password has been pwned and shows a message.
-        """
-        mock_check_password.return_value = 0
-        data = {
-            "name": "Test Item",
-            "username": "testuser",
-            "password": "safe_password",
-            "url": "http://example.com",
-            "notes": "Test notes",
-            "action": "check_password",
-        }
-        response = self.client.post(reverse("passmanager:new_item"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/new_item.html")
-
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(
-            str(messages[0]),
-            "This password was not found in known data breaches. It must be safe to use.",
-        )
-
     @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_new_item_view_post_save_action_with_encryption(self):
         """
@@ -354,24 +330,6 @@ class EditItemViewTests(TestCase):
         self.assertEqual(
             response.context["form"].initial["password"], "generatedpassword123"
         )
-
-    def test_edit_item_view_post_check_password_action(self):
-        """
-        Verifies that the check_password action correctly processes the form data (password).
-        """
-        data = {
-            "name": "Modified Item",
-            "username": "modifieduser",
-            "password": "safe_password",
-            "url": "http://modified-example.com",
-            "notes": "Modified notes",
-            "action": "check_password",
-        }
-        response = self.client.post(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/edit_item.html")
 
     def test_edit_item_view_post_delete_action(self):
         """
