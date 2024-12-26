@@ -88,25 +88,7 @@ def new_item(request):
                 messages.success(
                     request, "New password has been generated successfully."
                 )
-                return render(request, "passmanager/new_item.html", context)
 
-            elif action == "check_password":
-                is_pwned = check_password(mutable_post_data["password"])
-                if mutable_post_data["password"]:
-                    if is_pwned:
-                        messages.error(
-                            request,
-                            f"This password has been exposed {is_pwned} time(s) in data leaks. You have to change it.",
-                        )
-                    else:
-                        messages.success(
-                            request,
-                            "This password was not found in known data breaches. It must be safe to use.",
-                        )
-                else:
-                    messages.error(request, "No password to check.")
-
-                context = {"form": form}
                 return render(request, "passmanager/new_item.html", context)
     else:
         form = ItemForm()
@@ -177,27 +159,8 @@ def edit_item(request, item_id):
                 messages.success(
                     request, "New password has been generated successfully."
                 )
+
                 return render(request, "passmanager/edit_item.html", context)
-
-            elif action == "check_password":
-                is_pwned = check_password(password_entry)
-                if password_entry:
-                    if is_pwned:
-                        messages.error(
-                            request,
-                            f"This password has been exposed {is_pwned} time(s) in data leaks. You have to change it.",
-                        )
-                    else:
-                        messages.success(
-                            request,
-                            "This password was not found in known data breaches. It must be safe to use.",
-                        )
-                else:
-                    messages.error(request, "No password to check.")
-
-                context = {"item": item, "form": form}
-                return render(request, "passmanager/edit_item.html", context)
-
         else:
             messages.error(
                 request,
@@ -349,3 +312,34 @@ def upload_csv(request):
 
     context = {"form": form}
     return render(request, "passmanager/upload_csv.html", context)
+
+
+@login_required
+def password_checkup(request):
+    items = Item.objects.filter(owner=request.user)
+    results = []
+    for item in items:
+        password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode("utf-8")
+        is_pwned = check_password(password)
+        if password:
+            if is_pwned:
+                results.append(
+                    {
+                        "name": item.name,
+                        "status": f"Exposed {is_pwned} time(s)",
+                        "recommendation": "Changing this password is recommended.",
+                        "severity": "High",
+                    }
+                )
+            else:
+                results.append(
+                    {
+                        "name": item.name,
+                        "status": "No breaches found.",
+                        "recommendation": "This password appears to be safe.",
+                        "severity": "Low",
+                    }
+                )
+
+    context = {"results": results}
+    return render(request, "passmanager/password_checkup.html", context)
