@@ -654,3 +654,69 @@ class UploadCsvViewTests(TestCase):
 
         self.assertRedirects(response, self.upload_url)
         self.assertEqual(Item.objects.count(), 0)
+
+
+class PasswordCheckupViewTests(TestCase):
+    """
+    Test case for the password_checkup view.
+    """
+
+    def setUp(self):
+        """
+        Set up test data and create a test user.
+        """
+        self.encryption_key = base64.urlsafe_b64encode(os.urandom(32)).decode()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="password")
+
+        self.item1 = Item.objects.create(
+            name="Test Item 1",
+            username="testuser1",
+            password=encrypt(
+                "testpassword12".encode(), self.encryption_key.encode()
+            ).decode(),
+            url="http://example.com",
+            notes="Test notes",
+            owner=self.user,
+        )
+        self.item2 = Item.objects.create(
+            name="Test Item 2",
+            username="testuser2",
+            password=encrypt(
+                "tEst__pA$$word".encode(), self.encryption_key.encode()
+            ).decode(),
+            url="http://example.com",
+            notes="Test notes",
+            owner=self.user,
+        )
+
+    @override_settings(ENCRYPTION_KEY="mocked_encryption_key")
+    @patch("passmanager.views.check_password")
+    @patch("os.getenv")
+    def test_password_checkup(self, mock_getenv, mock_check_password):
+        """
+        Test for check if the password has been pwned.
+        """
+        # Mock encryption_key env variable & check_password function
+        mock_getenv.return_value = self.encryption_key
+        mock_check_password.side_effect = lambda password: {
+            # Fake values for testing
+            "testpassword12": 4,
+            "tEst__pA$$word": 0,
+        }.get(password, 0)
+
+        response = self.client.get(reverse("passmanager:password_checkup"))
+        results = response.context["results"]
+
+        # Ensure the view uses the correct template
+        self.assertTemplateUsed(response, "passmanager/password_checkup.html")
+
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]["name"], "Test Item 1")
+        self.assertEqual(results[0]["status"], "Exposed 4 time(s)")
+        self.assertEqual(results[0]["severity"], "High")
+        self.assertEqual(results[1]["name"], "Test Item 2")
+        self.assertEqual(results[1]["status"], "No breaches found.")
+        self.assertEqual(results[1]["severity"], "Low")
