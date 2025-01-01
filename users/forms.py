@@ -48,23 +48,26 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
     password = forms.CharField(label="Master Password", widget=forms.PasswordInput)
-    otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
+    otp = forms.CharField(label="Generated OTP", widget=forms.TextInput, required=False)
 
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("username")
         password = cleaned_data.get("password")
         otp = cleaned_data.get("otp")
+        User = get_user_model()
 
-        if email and password and otp:
-            User = get_user_model()
-            try:
-                user = User.objects.get(email=email)
-                totp = pyotp.TOTP(user.otp_secret)
-                if not totp.verify(otp):
-                    raise forms.ValidationError("Invalid OTP")
-            except User.DoesNotExist:
-                raise forms.ValidationError("Invalid email or password")
+        user = User.objects.get(email=email)
+        if not user or not user.check_password(password):
+            raise forms.ValidationError("Invalid email or password.")
+
+        if user.otp_secret:
+            if not otp:
+                raise forms.ValidationError("OTP is required.")
+
+            totp = pyotp.TOTP(user.otp_secret)
+            if not totp.verify(otp):
+                raise forms.ValidationError("Invalid OTP.")
 
         return cleaned_data
 
@@ -79,7 +82,14 @@ class CustomUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "username", "password1", "password2", "session_timeout")
+        fields = (
+            "email",
+            "username",
+            "password1",
+            "password2",
+            "session_timeout",
+            "enable_2fa",
+        )
 
     def clean(self):
         cleaned_data = super().clean()

@@ -15,6 +15,7 @@ SESSION_TIMEOUT_CHOICES = (
 
 class CustomUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
+    enable_2fa = models.BooleanField(default=False, verbose_name="Enable 2FA")
     otp_secret = models.CharField(max_length=32)
     session_timeout = models.IntegerField(
         choices=[(key, value) for value, key in SESSION_TIMEOUT_CHOICES],

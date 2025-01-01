@@ -42,9 +42,18 @@ def account(request):
     if request.method == "POST":
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
-            user = CustomUser.objects.get(id=request.user.id)
+            user = form.save(commit=False)
+
+            # Handle 2FA enable/disable & OTP secret generation
+            user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+            if user.enable_2fa:
+                user.otp_secret = pyotp.random_base32()
+                send_2fa_verification(user, user.otp_secret)
+            else:
+                user.otp_secret = ""
+
+            user.save()
             send_update_account_notification(user)
-            form.save()
             update_session_auth_hash(
                 request, request.user
             )  # Important for keeping the user logged in
