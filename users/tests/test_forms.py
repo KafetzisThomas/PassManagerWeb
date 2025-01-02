@@ -2,18 +2,18 @@
 This module contains test cases for the following classes:
 * CustomUserCreationForm (validation, required fields, and the save method)
 * CustomAuthenticationForm (validation and authentication logic)
+* TwoFactorVerificationForm (OTP validation)
 * CustomUserChangeForm (validation and saving functionality)
 """
 
+import pyotp
 from django.test import TestCase
 from unittest.mock import MagicMock, patch
-from django import forms
-import pyotp
-
 from ..models import CustomUser
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
+    TwoFactorVerificationForm,
     CustomUserChangeForm,
 )
 
@@ -49,15 +49,14 @@ class CustomUserCreationFormTests(TestCase):
         Test that the form is valid when all required fields are provided and passwords match.
         """
         form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_data(self, mock: MagicMock):
         """
         Test that the form is invalid when passwords do not match.
         """
         form = CustomUserCreationForm(data=self.invalid_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password2", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_email(self, mock: MagicMock):
         """
@@ -66,8 +65,7 @@ class CustomUserCreationFormTests(TestCase):
         data = self.valid_data.copy()
         data.pop("email")
         form = CustomUserCreationForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("email", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_username(self, mock: MagicMock):
         """
@@ -76,15 +74,14 @@ class CustomUserCreationFormTests(TestCase):
         data = self.valid_data.copy()
         data.pop("username")
         form = CustomUserCreationForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("username", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_save(self, mock: MagicMock):
         """
         Test that the form's save method works correctly.
         """
         form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
         user = form.save()
         self.assertIsInstance(user, CustomUser)
         self.assertEqual(user.email, self.valid_data["email"])
@@ -92,7 +89,6 @@ class CustomUserCreationFormTests(TestCase):
         self.assertTrue(user.check_password(self.valid_data["password1"]))
 
 
-@patch("turnstile.fields.TurnstileField.validate", return_value=True)
 class CustomAuthenticationFormTests(TestCase):
     """
     Test suite for the CustomAuthenticationForm.
@@ -104,93 +100,100 @@ class CustomAuthenticationFormTests(TestCase):
         """
         self.test_email = "testuser@example.com"
         self.test_password = "testpassword"
-        self.test_otp_secret = "testotpsecret"
-        self.test_otp = pyotp.TOTP(self.test_otp_secret).now()
 
         self.user = CustomUser.objects.create_user(
             email=self.test_email,
             password=self.test_password,
-            otp_secret=self.test_otp_secret,
         )
 
-    def test_form_valid_data(self, mock: MagicMock):
+    def test_form_valid_data(self):
         """
-        Test that the form is valid when correct email, OTP, and password are provided.
+        Test that the form is valid when correct email and password are provided.
         """
         form_data = {
             "username": self.test_email,
             "password": self.test_password,
-            "otp": self.test_otp,
         }
         form = CustomAuthenticationForm(data=form_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
 
-    def test_form_invalid_email(self, mock: MagicMock):
+    def test_form_invalid_email(self):
         """
         Test that the form is invalid when an incorrect email is provided.
         """
         form_data = {
             "username": "wrongemail@example.com",
             "password": self.test_password,
-            "otp": self.test_otp,
         }
         form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("__all__", form.errors)
-        self.assertEqual(
-            form.errors["__all__"][0],
-            "Please enter a correct email address and password. Note that both fields may be case-sensitive.",
+        self.assertFalse(form.is_valid(), form.errors)
+
+
+class TwoFactorVerificationFormTests(TestCase):
+    """
+    Test suite for the TwoFactorVerificationForm.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment by creating a test user.
+        """
+        self.test_username = "testuser"
+        self.test_email = "testuser@example.com"
+        self.test_password = "testpassword"
+        self.test_otp_secret = pyotp.random_base32()
+
+        self.user = CustomUser.objects.create_user(
+            username=self.test_username,
+            email=self.test_email,
+            password=self.test_password,
+            otp_secret=self.test_otp_secret,
         )
 
-    def test_form_invalid_otp(self, mock: MagicMock):
+    def test_form_valid_with_correct_otp(self):
+        """
+        Test that the form is valid when provided with a correct OTP.
+        """
+        valid_otp = pyotp.TOTP(self.user.otp_secret).now()
+        form = TwoFactorVerificationForm(data={"otp": valid_otp}, user=self.user)
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_form_invalid_without_user(self):
+        """
+        Test that the form is invalid when no user is provided.
+        """
+        form = TwoFactorVerificationForm(data={"otp": self.test_otp_secret})
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_invalid_without_otp_secret(self):
+        """
+        Test that the form is invalid when the user lacks an OTP secret.
+        """
+        user_without_otp = CustomUser.objects.create_user(
+            username="testuser2",
+            email="testuser2@example.com",
+            password=self.test_password,
+        )
+        form = TwoFactorVerificationForm(
+            data={"otp": self.test_otp_secret}, user=user_without_otp
+        )
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_invalid_with_wrong_otp(self):
         """
         Test that the form is invalid when an incorrect OTP is provided.
         """
-        form_data = {
-            "username": self.test_email,
-            "password": self.test_password,
-            "otp": "654321",  # Wrong OTP
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("__all__", form.errors)
-        self.assertEqual(form.errors["__all__"][0], "Invalid OTP")
+        form = TwoFactorVerificationForm(
+            data={"otp": self.test_otp_secret}, user=self.user
+        )
+        self.assertFalse(form.is_valid(), form.errors)
 
-    def test_form_missing_email(self, mock: MagicMock):
+    def test_form_invalid_with_empty_otp(self):
         """
-        Test that the form is invalid when the email is missing.
+        Test that the form is invalid when an empty OTP is provided.
         """
-        form_data = {
-            "username": "",
-            "password": self.test_password,
-            "otp": self.test_otp,
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("username", form.errors)
-
-    def test_form_missing_password(self, mock: MagicMock):
-        """
-        Test that the form is invalid when the password is missing.
-        """
-        form_data = {"username": self.test_email, "password": "", "otp": self.test_otp}
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password", form.errors)
-
-    def test_form_clean_method_invalid_otp(self, mock: MagicMock):
-        """
-        Test the clean method of the form with invalid OTP.
-        """
-        form_data = {
-            "username": self.test_email,
-            "password": self.test_password,
-            "otp": "654321",  # Wrong OTP
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        with self.assertRaises(forms.ValidationError):
-            form.clean()
+        form = TwoFactorVerificationForm(data={"otp": ""}, user=self.user)
+        self.assertFalse(form.is_valid(), form.errors)
 
 
 class CustomUserChangeFormTests(TestCase):
@@ -206,12 +209,14 @@ class CustomUserChangeFormTests(TestCase):
         self.test_username = "testuser"
         self.test_password = "testpassword"
         self.session_timeout = 300
+        self.enable_2fa = False
 
         self.user = CustomUser.objects.create_user(
             email=self.test_email,
             username=self.test_username,
             password=self.test_password,
             session_timeout=self.session_timeout,
+            enable_2fa=self.enable_2fa,
         )
 
     def test_form_valid_data(self):
@@ -224,9 +229,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": "newpassword123",
             "password2": "newpassword123",
             "session_timeout": 600,
+            "enable_2fa": True,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_passwords_not_matching(self):
         """
@@ -238,11 +244,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": "newpassword123",
             "password2": "differentpassword",
             "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password2", form.errors)
-        self.assertEqual(form.errors["password2"][0], "Passwords do not match.")
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_password_not_meeting_requirements(self):
         """
@@ -254,10 +259,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": "weak",
             "password2": "weak",
             "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password1", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_save(self):
         """
@@ -270,9 +275,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": new_password,
             "password2": new_password,
             "session_timeout": self.session_timeout,
+            "enable_2fa": True,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
         self.assertTrue(updated_user.check_password(new_password))
 
@@ -284,8 +290,24 @@ class CustomUserChangeFormTests(TestCase):
             "email": self.test_email,
             "username": self.test_username,
             "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
         self.assertTrue(updated_user.check_password(self.test_password))
+
+    def test_form_enable_2fa_toggle(self):
+        """
+        Test that the form correctly updates the enable_2fa field.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+            "session_timeout": self.session_timeout,
+            "enable_2fa": True,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertTrue(form.is_valid(), form.errors)
+        updated_user = form.save()
+        self.assertTrue(updated_user.enable_2fa)

@@ -1,8 +1,14 @@
 import pyotp
 from django.shortcuts import render, redirect
 from .models import CustomUser
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from django.contrib.auth import update_session_auth_hash
+from django.views.generic.edit import FormView
+from .forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    TwoFactorVerificationForm,
+    CustomUserChangeForm,
+)
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .utils import (
@@ -12,23 +18,15 @@ from .utils import (
     send_update_account_notification,
 )
 from django.contrib.auth.views import LoginView
-from .forms import CustomAuthenticationForm
 
 
 def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
-            otp_secret = pyotp.random_base32()
-            new_user = form.save(commit=False)
-            new_user.otp_secret = otp_secret
-            form.save()
+            new_user = form.save()
             send_new_user_registration(new_user)
-            send_2fa_verification(new_user, otp_secret)
-            messages.success(
-                request,
-                "Account successfully created! An email containing your OTP key has been sent to your inbox.",
-            )
+            messages.success(request, "Account successfully created!")
             return redirect("users:login")
     else:
         form = CustomUserCreationForm()
@@ -42,9 +40,18 @@ def account(request):
     if request.method == "POST":
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
-            user = CustomUser.objects.get(id=request.user.id)
+            user = form.save(commit=False)
+
+            # Handle 2FA enable/disable & OTP secret generation
+            user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+            if user.enable_2fa:
+                user.otp_secret = pyotp.random_base32()
+                send_2fa_verification(user, user.otp_secret)
+            else:
+                user.otp_secret = ""
+
+            user.save()
             send_update_account_notification(user)
-            form.save()
             update_session_auth_hash(
                 request, request.user
             )  # Important for keeping the user logged in
@@ -69,3 +76,30 @@ def delete_account(request):
 
 class CustomLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
+
+    def form_valid(self, form):
+        user = form.cleaned_data["user"]
+        if user.otp_secret:
+            self.request.session["user_id"] = user.id  # Store user ID in session
+            return redirect("users:2fa_verification")
+        return super().form_valid(form)
+
+
+class TwoFactorVerificationView(FormView):
+    template_name = "registration/2fa_verification.html"
+    form_class = TwoFactorVerificationForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user_id = self.request.session.get("user_id")
+        kwargs["user"] = CustomUser.objects.get(id=user_id)
+        return kwargs
+
+    def form_valid(self, form):
+        user = form.user
+        backend_path = "django.contrib.auth.backends.ModelBackend"
+        login(self.request, user, backend=backend_path)
+
+        # Remove user from session data
+        self.request.session.pop("user_id", None)
+        return redirect("passmanager:vault")

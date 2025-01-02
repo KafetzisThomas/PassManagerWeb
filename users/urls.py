@@ -9,6 +9,12 @@ app_name = "users"
 urlpatterns = [
     # Login page
     path("login/", CustomLoginView.as_view(), name="login"),
+    # 2FA verification page
+    path(
+        "login/2fa_verification/",
+        views.TwoFactorVerificationView.as_view(),
+        name="2fa_verification",
+    ),
     # Account page
     path("account/", views.account, name="account"),
     # Registration page

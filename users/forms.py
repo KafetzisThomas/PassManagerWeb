@@ -48,25 +48,38 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
     password = forms.CharField(label="Master Password", widget=forms.PasswordInput)
-    otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
 
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("username")
         password = cleaned_data.get("password")
-        otp = cleaned_data.get("otp")
+        User = get_user_model()
 
-        if email and password and otp:
-            User = get_user_model()
-            try:
-                user = User.objects.get(email=email)
-                totp = pyotp.TOTP(user.otp_secret)
-                if not totp.verify(otp):
-                    raise forms.ValidationError("Invalid OTP")
-            except User.DoesNotExist:
-                raise forms.ValidationError("Invalid email or password")
+        user = User.objects.get(email=email)
+        if not user or not user.check_password(password):
+            raise forms.ValidationError("Invalid email or password.")
 
+        self.cleaned_data["user"] = user
         return cleaned_data
+
+
+class TwoFactorVerificationForm(forms.Form):
+    otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        otp = self.cleaned_data.get("otp")
+        if not self.user or not self.user.otp_secret:
+            raise forms.ValidationError("Invalid user or OTP configuration.")
+
+        totp = pyotp.TOTP(self.user.otp_secret)
+        if not totp.verify(otp):
+            raise forms.ValidationError("Invalid OTP.")
+
+        return self.cleaned_data
 
 
 class CustomUserChangeForm(forms.ModelForm):
@@ -79,7 +92,14 @@ class CustomUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "username", "password1", "password2", "session_timeout")
+        fields = (
+            "email",
+            "username",
+            "password1",
+            "password2",
+            "session_timeout",
+            "enable_2fa",
+        )
 
     def clean(self):
         cleaned_data = super().clean()

@@ -13,6 +13,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "email",
+        "enable_2fa",
         "otp_secret",
         "session_timeout",
         "is_active",
