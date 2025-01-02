@@ -280,7 +280,7 @@ class CustomUserChangeFormTests(TestCase):
         form = CustomUserChangeForm(instance=self.user, data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
-        self.assertTrue(updated_user.check_password(new_password), form.errors)
+        self.assertTrue(updated_user.check_password(new_password))
 
     def test_form_save_no_password_change(self):
         """
@@ -295,7 +295,7 @@ class CustomUserChangeFormTests(TestCase):
         form = CustomUserChangeForm(instance=self.user, data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
-        self.assertTrue(updated_user.check_password(self.test_password), form.errors)
+        self.assertTrue(updated_user.check_password(self.test_password))
 
     def test_form_enable_2fa_toggle(self):
         """
@@ -310,4 +310,4 @@ class CustomUserChangeFormTests(TestCase):
         form = CustomUserChangeForm(instance=self.user, data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
-        self.assertTrue(updated_user.enable_2fa, form.errors)
+        self.assertTrue(updated_user.enable_2fa)
