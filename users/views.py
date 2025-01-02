@@ -1,8 +1,14 @@
 import pyotp
 from django.shortcuts import render, redirect
 from .models import CustomUser
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from django.contrib.auth import update_session_auth_hash
+from django.views.generic.edit import FormView
+from .forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    TwoFactorVerificationForm,
+    CustomUserChangeForm,
+)
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .utils import (
@@ -12,7 +18,6 @@ from .utils import (
     send_update_account_notification,
 )
 from django.contrib.auth.views import LoginView
-from .forms import CustomAuthenticationForm
 
 
 def register(request):
@@ -78,3 +83,30 @@ def delete_account(request):
 
 class CustomLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
+
+    def form_valid(self, form):
+        user = form.cleaned_data["user"]
+        if user.otp_secret:
+            self.request.session["user_id"] = user.id  # Store user ID in session
+            return redirect("users:2fa_verification")
+        return super().form_valid(form)
+
+
+class TwoFactorVerificationView(FormView):
+    template_name = "registration/2fa_verification.html"
+    form_class = TwoFactorVerificationForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user_id = self.request.session.get("user_id")
+        kwargs["user"] = CustomUser.objects.get(id=user_id)
+        return kwargs
+
+    def form_valid(self, form):
+        user = form.user
+        backend_path = "django.contrib.auth.backends.ModelBackend"
+        login(self.request, user, backend=backend_path)
+
+        # Remove user from session data
+        self.request.session.pop("user_id", None)
+        return redirect("passmanager:vault")
