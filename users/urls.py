@@ -11,7 +11,7 @@ urlpatterns = [
     path("login/", CustomLoginView.as_view(), name="login"),
     # 2FA verification page
     path(
-        "2fa_verification/",
+        "login/2fa_verification/",
         views.TwoFactorVerificationView.as_view(),
         name="2fa_verification",
     ),
