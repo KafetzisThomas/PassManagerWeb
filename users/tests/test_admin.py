@@ -32,6 +32,7 @@ class CustomUserAdminTest(TestCase):
             (
                 "username",
                 "email",
+                "enable_2fa",
                 "otp_secret",
                 "session_timeout",
                 "is_active",
