@@ -1,7 +1,7 @@
 {% extends "passmanager/base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Import Passwords{% endblock title %}
+{% block title %}Import Data{% endblock title %}
 
 {% block content %}
     <form action="{% url 'passmanager:upload_csv' %}" method="post" class="form" enctype="multipart/form-data">
