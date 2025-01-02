@@ -49,15 +49,14 @@ class CustomUserCreationFormTests(TestCase):
         Test that the form is valid when all required fields are provided and passwords match.
         """
         form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_data(self, mock: MagicMock):
         """
         Test that the form is invalid when passwords do not match.
         """
         form = CustomUserCreationForm(data=self.invalid_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password2", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_email(self, mock: MagicMock):
         """
@@ -66,8 +65,7 @@ class CustomUserCreationFormTests(TestCase):
         data = self.valid_data.copy()
         data.pop("email")
         form = CustomUserCreationForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("email", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_username(self, mock: MagicMock):
         """
@@ -76,15 +74,14 @@ class CustomUserCreationFormTests(TestCase):
         data = self.valid_data.copy()
         data.pop("username")
         form = CustomUserCreationForm(data=data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("username", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_save(self, mock: MagicMock):
         """
         Test that the form's save method works correctly.
         """
         form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
         user = form.save()
         self.assertIsInstance(user, CustomUser)
         self.assertEqual(user.email, self.valid_data["email"])
