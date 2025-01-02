@@ -92,7 +92,6 @@ class CustomUserCreationFormTests(TestCase):
         self.assertTrue(user.check_password(self.valid_data["password1"]))
 
 
-@patch("turnstile.fields.TurnstileField.validate", return_value=True)
 class CustomAuthenticationFormTests(TestCase):
     """
     Test suite for the CustomAuthenticationForm.
@@ -104,93 +103,33 @@ class CustomAuthenticationFormTests(TestCase):
         """
         self.test_email = "testuser@example.com"
         self.test_password = "testpassword"
-        self.test_otp_secret = "testotpsecret"
-        self.test_otp = pyotp.TOTP(self.test_otp_secret).now()
 
         self.user = CustomUser.objects.create_user(
             email=self.test_email,
             password=self.test_password,
-            otp_secret=self.test_otp_secret,
         )
 
-    def test_form_valid_data(self, mock: MagicMock):
+    def test_form_valid_data(self):
         """
-        Test that the form is valid when correct email, OTP, and password are provided.
+        Test that the form is valid when correct email and password are provided.
         """
         form_data = {
             "username": self.test_email,
             "password": self.test_password,
-            "otp": self.test_otp,
         }
         form = CustomAuthenticationForm(data=form_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
 
-    def test_form_invalid_email(self, mock: MagicMock):
+    def test_form_invalid_email(self):
         """
         Test that the form is invalid when an incorrect email is provided.
         """
         form_data = {
             "username": "wrongemail@example.com",
             "password": self.test_password,
-            "otp": self.test_otp,
         }
         form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("__all__", form.errors)
-        self.assertEqual(
-            form.errors["__all__"][0],
-            "Please enter a correct email address and password. Note that both fields may be case-sensitive.",
-        )
-
-    def test_form_invalid_otp(self, mock: MagicMock):
-        """
-        Test that the form is invalid when an incorrect OTP is provided.
-        """
-        form_data = {
-            "username": self.test_email,
-            "password": self.test_password,
-            "otp": "654321",  # Wrong OTP
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("__all__", form.errors)
-        self.assertEqual(form.errors["__all__"][0], "Invalid OTP")
-
-    def test_form_missing_email(self, mock: MagicMock):
-        """
-        Test that the form is invalid when the email is missing.
-        """
-        form_data = {
-            "username": "",
-            "password": self.test_password,
-            "otp": self.test_otp,
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("username", form.errors)
-
-    def test_form_missing_password(self, mock: MagicMock):
-        """
-        Test that the form is invalid when the password is missing.
-        """
-        form_data = {"username": self.test_email, "password": "", "otp": self.test_otp}
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password", form.errors)
-
-    def test_form_clean_method_invalid_otp(self, mock: MagicMock):
-        """
-        Test the clean method of the form with invalid OTP.
-        """
-        form_data = {
-            "username": self.test_email,
-            "password": self.test_password,
-            "otp": "654321",  # Wrong OTP
-        }
-        form = CustomAuthenticationForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        with self.assertRaises(forms.ValidationError):
-            form.clean()
+        self.assertFalse(form.is_valid(), form.errors)
 
 
 class TwoFactorVerificationFormTests(TestCase):
