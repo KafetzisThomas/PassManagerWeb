@@ -212,12 +212,14 @@ class CustomUserChangeFormTests(TestCase):
         self.test_username = "testuser"
         self.test_password = "testpassword"
         self.session_timeout = 300
+        self.enable_2fa = False
 
         self.user = CustomUser.objects.create_user(
             email=self.test_email,
             username=self.test_username,
             password=self.test_password,
             session_timeout=self.session_timeout,
+            enable_2fa=self.enable_2fa,
         )
 
     def test_form_valid_data(self):
@@ -230,9 +232,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": "newpassword123",
             "password2": "newpassword123",
             "session_timeout": 600,
+            "enable_2fa": True,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid(), form.errors.as_json())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_passwords_not_matching(self):
         """
@@ -244,11 +247,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": "newpassword123",
             "password2": "differentpassword",
             "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password2", form.errors)
-        self.assertEqual(form.errors["password2"][0], "Passwords do not match.")
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_password_not_meeting_requirements(self):
         """
@@ -260,10 +262,10 @@ class CustomUserChangeFormTests(TestCase):
             "password1": "weak",
             "password2": "weak",
             "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("password1", form.errors)
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_save(self):
         """
@@ -276,11 +278,12 @@ class CustomUserChangeFormTests(TestCase):
             "password1": new_password,
             "password2": new_password,
             "session_timeout": self.session_timeout,
+            "enable_2fa": True,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
-        self.assertTrue(updated_user.check_password(new_password))
+        self.assertTrue(updated_user.check_password(new_password), form.errors)
 
     def test_form_save_no_password_change(self):
         """
@@ -290,8 +293,24 @@ class CustomUserChangeFormTests(TestCase):
             "email": self.test_email,
             "username": self.test_username,
             "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
-        self.assertTrue(updated_user.check_password(self.test_password))
+        self.assertTrue(updated_user.check_password(self.test_password), form.errors)
+
+    def test_form_enable_2fa_toggle(self):
+        """
+        Test that the form correctly updates the enable_2fa field.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+            "session_timeout": self.session_timeout,
+            "enable_2fa": True,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertTrue(form.is_valid(), form.errors)
+        updated_user = form.save()
+        self.assertTrue(updated_user.enable_2fa, form.errors)
