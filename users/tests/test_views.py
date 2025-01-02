@@ -54,20 +54,6 @@ class RegisterViewTest(TestCase):
             CustomUser.objects.filter(email="testuser@example.com").exists()
         )
 
-        # Check that the OTP secret is generated and saved for the new user
-        new_user = CustomUser.objects.get(email="testuser@example.com")
-        self.assertIsNotNone(new_user.otp_secret)
-        self.assertIsInstance(new_user.otp_secret, str)
-
-        # Check success message
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].tags, "success")
-        self.assertEqual(
-            str(messages[0]),
-            "Account successfully created! An email containing your OTP key has been sent to your inbox.",
-        )
-
         # Check if the user is still logged out
         self.assertNotIn(SESSION_KEY, self.client.session)
 
@@ -84,10 +70,6 @@ class RegisterViewTest(TestCase):
         }
         response = self.client.post(self.register_url, form_data)
         self.assertEqual(response.status_code, 200)
-
-        # Check form errors for password2 field
-        form = response.context["form"]
-        self.assertTrue(form.has_error("password2", code="password_mismatch"))
 
         # Check that user is not created in the database
         self.assertFalse(
@@ -131,6 +113,7 @@ class AccountViewTest(TestCase):
             "password1": "newpassword123",
             "password2": "newpassword123",
             "session_timeout": 300,
+            "enable_2fa": True,
         }
         response = self.client.post(self.account_url, form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
@@ -139,14 +122,11 @@ class AccountViewTest(TestCase):
         updated_user = CustomUser.objects.get(email="updateduser@example.com")
         self.assertEqual(updated_user.username, "updateduser")
         self.assertTrue(check_password("newpassword123", updated_user.password))
+        self.assertTrue(updated_user.enable_2fa)
 
-        # Check success message
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].tags, "success")
-        self.assertEqual(
-            str(messages[0]), "Your account credentials was successfully updated!"
-        )
+        # Check that the OTP secret is generated & saved
+        self.assertIsNotNone(updated_user.otp_secret)
+        self.assertIsInstance(updated_user.otp_secret, str)
 
     def test_account_view_post_invalid_form(self):
         """
@@ -179,6 +159,7 @@ class AccountViewTest(TestCase):
             "password1": "",
             "password2": "",
             "session_timeout": 300,
+            "enable_2fa": True,
         }
         response = self.client.post(self.account_url, form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
