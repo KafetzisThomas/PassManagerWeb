@@ -3,6 +3,7 @@ This module contains test cases for the following views:
 * register, account, delete_account
 """
 
+import pyotp
 from django.test import TestCase, Client
 from unittest.mock import MagicMock, patch
 from django.urls import reverse
@@ -291,3 +292,63 @@ class CustomLoginViewTests(TestCase):
         # Check if the user is not fully logged in yet
         self.assertNotIn(SESSION_KEY, self.client.session)
         self.assertEqual(self.client.session["user_id"], self.user.id)
+
+
+class TwoFactorVerificationViewTests(TestCase):
+    """
+    Test case for the TwoFactorVerification view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+            username="testuser",
+            otp_secret=pyotp.random_base32(),
+        )
+        self.verification_url = reverse("users:2fa_verification")
+
+        # Store user_id in session
+        session = self.client.session
+        session["user_id"] = self.user.id
+        session.save()
+
+    def test_get_verification_page(self):
+        """
+        Test that the verification page loads correctly.
+        """
+        response = self.client.get(self.verification_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/2fa_verification.html")
+
+    def test_valid_otp_submission(self):
+        """
+        Test successful 2FA verification with valid OTP.
+        """
+        valid_otp = pyotp.TOTP(self.user.otp_secret).now()
+        response = self.client.post(self.verification_url, {"otp": valid_otp})
+        self.assertRedirects(response, reverse("passmanager:vault"))
+
+        # User should be logged in
+        self.assertIn(SESSION_KEY, self.client.session)
+
+        # user_id should be removed from session
+        self.assertNotIn("user_id", self.client.session)
+
+    def test_invalid_otp_submission(self):
+        """
+        Test failed 2FA verification with invalid OTP.
+        """
+        response = self.client.post(self.verification_url, {"otp": "123456"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/2fa_verification.html")
+
+        # User should not be logged in
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+        # user_id should still be in session
+        self.assertIn("user_id", self.client.session)
