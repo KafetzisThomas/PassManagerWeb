@@ -169,6 +169,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Login and logout settings
 LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "passmanager:vault"
 LOGOUT_REDIRECT_URL = "/"
 
 # Email settings
