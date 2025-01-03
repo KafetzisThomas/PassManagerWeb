@@ -7,9 +7,12 @@ from django.test import TestCase, Client
 from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
-from django.contrib.messages import get_messages
 from django.contrib.auth.hashers import check_password
-from ..forms import CustomUserCreationForm, CustomUserChangeForm
+from ..forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    CustomUserChangeForm,
+)
 from ..models import CustomUser
 
 
@@ -216,3 +219,75 @@ class DeleteAccountViewTest(TestCase):
 
         # Ensure the user is not deleted
         self.assertTrue(CustomUser.objects.filter(id=self.user.id).exists())
+
+
+class CustomLoginViewTests(TestCase):
+    """
+    Test case for the CustomLogin view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="password", username="testuser"
+        )
+        self.login_url = reverse("users:login")
+
+    def test_login_view_get(self):
+        """
+        Test that the login view returns the login form on GET request.
+        """
+        response = self.client.get(self.login_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/login.html")
+        self.assertIsInstance(response.context["form"], CustomAuthenticationForm)
+
+    def test_login_view_post_valid_credentials(self):
+        """
+        Test logging in with valid credentials.
+        """
+        form_data = {
+            "username": "testuser@example.com",
+            "password": "password",
+        }
+        response = self.client.post(self.login_url, form_data)
+        self.assertRedirects(response, reverse("passmanager:vault"))
+
+        # Check if the user is logged in
+        self.assertIn(SESSION_KEY, self.client.session)
+
+    def test_login_view_post_invalid_credentials(self):
+        """
+        Test logging in with invalid credentials.
+        """
+        form_data = {
+            "username": "testuser@example.com",
+            "password": "wrongpassword",
+        }
+        response = self.client.post(self.login_url, form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/login.html")
+
+        # Check if the user is not logged in
+        self.assertNotIn(SESSION_KEY, self.client.session)
+
+    def test_login_view_post_with_2fa_enabled(self):
+        """
+        Test logging in with 2FA enabled.
+        """
+        self.user.otp_secret = "test_otp_secret"
+        self.user.save()
+
+        form_data = {
+            "username": "testuser@example.com",
+            "password": "password",
+        }
+        response = self.client.post(self.login_url, form_data)
+        self.assertRedirects(response, reverse("users:2fa_verification"))
+
+        # Check if the user is not fully logged in yet
+        self.assertNotIn(SESSION_KEY, self.client.session)
+        self.assertEqual(self.client.session["user_id"], self.user.id)
