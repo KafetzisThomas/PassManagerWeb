@@ -111,22 +111,12 @@ $ python3 manage.py test users.tests passmanager.tests
 ## Contributing Guidelines for PassManager
 
 ### Pull Requests
-When submitting a pull request, please keep these points in mind:
+* **Simplicity**: Keep changes focused and easy to review.
+* **Libraries**: Avoid adding non-standard libraries unless discussed via an issue.
+* **Testing**: Ensure code runs error-free, passes all tests, and meets coding standards.
 
-* **Simplicity**: Keep your changes straightforward and focused. Complex changes are harder to review and integrate.
+### Bug Reports
+* Report bugs via GitHub Issues.
+* Submit pull requests via GitHub Pull Requests.
 
-* **Avoid Non-Standard Libraries**: Whenever possible, refrain from adding new non-standard libraries. If your idea necessitates one, kindly discuss it first by opening an issue. This helps in evaluating the necessity and compatibility of the library.
-
-* **Ensure It Runs**: Before submitting a pull request, ensure that your code runs without errors and adheres to the project's coding standards.
-
-* **Pass All Tests**: Make sure all existing [tests](#run-tests) pass and add new tests as necessary. Pull requests will not be merged unless all tests pass successfully.
-
-### Filing Bug Reports and Submitting Pull Requests
-If you encounter a bug, please follow these steps to report it:
-
-* **Bug Reports**: File bug reports on the [GitHub Issues](https://github.com/KafetzisThomas/PassManagerWeb/issues) page.
-* **Pull Requests**: Open pull requests on the [GitHub Pull Requests](https://github.com/KafetzisThomas/PassManagerWeb/pulls) page.
-
-Before contributing, please review the [License](https://github.com/KafetzisThomas/PassManagerWeb/blob/main/LICENSE) to understand the terms and conditions governing the use and distribution of PassManager.
-
-Thank you for your interest in improving PassManager!
+Thank you for supporting PassManager!
