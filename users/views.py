@@ -47,6 +47,9 @@ def account(request):
             if user.enable_2fa:
                 user.otp_secret = pyotp.random_base32()
                 send_2fa_verification(user, user.otp_secret)
+                messages.success(
+                    request, "2FA enabled! Check your email for the OTP key."
+                )
             else:
                 user.otp_secret = ""
 
