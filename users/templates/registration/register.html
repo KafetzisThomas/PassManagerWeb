@@ -15,32 +15,3 @@
         <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 {% endblock content %}
-
-{% block footer %}
-    <!-- footer start -->
-    <footer class="footer bg-light text-dark py-2">
-        <div class="container">
-            <hr class="border-dark mb-1" width="100%">
-            <div class="row justify-content-between align-items-center">
-                <div class="col-12 col-md-6 mt-3 text-center text-md-start">
-                    <p>&copy; <script>document.write(new Date().getFullYear());</script> KafetzisThomas</p>
-                </div>
-                <div class="col-12 col-md-6 text-center text-md-end  mt-md-0">
-                    <a href="https://www.paypal.me/kafetzisthomas" target="_blank" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button" style="text-decoration: none;">
-                        <i class="bi bi-heart-fill"></i> Donate
-                    </a>
-                    <a href="mailto: passmanagerweb@gmail.com" target="_blank" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
-                        <i class="bi bi-envelope-fill"></i>
-                    </a>
-                    <a href="https://x.com/PassManagerWeb" target="_blank" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
-                        <i class="bi bi-twitter-x"></i>
-                    </a>
-                    <a href="https://github.com/KafetzisThomas/PassManagerWeb" target="_blank" class="btn btn-link btn-floating btn-md text-dark m-1 border" role="button">
-                        <i class="bi bi-github"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- footer end -->
-{% endblock footer %}

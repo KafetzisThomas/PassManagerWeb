@@ -7,20 +7,15 @@ body {
   font-style: normal;
 }
 
-/* Navigation link styles */
-.nav-link {
-  color: #808080;
-  font-weight: 500;
-}
-
-/* Hover state styles for navigation links */
-.nav-link:hover {
-  color: #fff;
-}
-
-/* Active state styles for navigation links */
-.nav-link.active {
-  color: #fff;
+/* Sidebar styles */
+.sidebar {
+  position: fixed;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  width: 250px;
+  z-index: 1030;
 }
 
 /* Item styles */
