@@ -39,30 +39,16 @@ def new_item(request):
         form = ItemForm(data=request.POST)
         obj = form.save(commit=False)
 
-        url_entry = obj.url
         username_entry = obj.username
-        password_entry = obj.password
         notes_entry = obj.notes
 
         if form.is_valid():
             action = request.POST.get("action", "value")
             if action == "save":
-                obj.username = encrypt(
-                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.password = encrypt(
-                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.notes = encrypt(
-                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
+                obj = form.save(commit=False)
                 obj.owner = request.user
-
-                form.save()
-                messages.success(
-                    request,
-                    "Item created successfully.",
-                )
+                obj.save()
+                messages.success(request, "Item created successfully.")
                 return redirect("passmanager:vault")
 
             elif action == "generate_password":
@@ -122,22 +108,10 @@ def edit_item(request, item_id):
             notes_entry = obj.notes
 
             if action == "save":
-                obj.username = encrypt(
-                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.password = encrypt(
-                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.notes = encrypt(
-                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
+                obj = form.save(commit=False)
                 obj.owner = request.user
-
-                form.save()
-                messages.success(
-                    request,
-                    "Item modified successfully.",
-                )
+                obj.save()
+                messages.success(request, "Item modified successfully.")
                 return redirect("passmanager:vault")
 
             elif action == "generate_password":
@@ -168,25 +142,8 @@ def edit_item(request, item_id):
             )
 
     else:
-        # Decrypt the fields for display in the form
-        decrypted_username = decrypt(
-            item.username.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            item.password.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
-        decrypted_notes = decrypt(
-            item.notes.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
-
-        initial_data = {
-            "name": item.name,
-            "username": decrypted_username,
-            "password": decrypted_password,
-            "url": item.url,
-            "notes": decrypted_notes,
-        }
-        form = ItemForm(instance=item, initial=initial_data)
+        item.decrypt_sensitive_fields()
+        form = ItemForm(instance=item)
 
     context = {"item": item, "form": form}
     return render(request, "passmanager/edit_item.html", context)

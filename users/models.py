@@ -1,5 +1,7 @@
-from django.contrib.auth.models import AbstractUser
+import os
+import base64
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext as _
 from .managers import CustomUserManager
 
@@ -15,6 +17,7 @@ SESSION_TIMEOUT_CHOICES = (
 
 class CustomUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
+    encryption_salt = models.CharField(max_length=32, blank=True, null=True)
     enable_2fa = models.BooleanField(default=False, verbose_name="Enable 2FA")
     otp_secret = models.CharField(max_length=32)
     session_timeout = models.IntegerField(
@@ -26,6 +29,11 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager()
+
+    def save(self, *args, **kwargs):
+        if not self.encryption_salt:
+            self.encryption_salt = base64.urlsafe_b64encode(os.urandom(16)).decode()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.email
