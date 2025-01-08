@@ -1,6 +1,6 @@
 <div align="center">
     <h1>
-        <img src="passmanager/static/images/logo.png" width="400" alt="Logo Icon"/>
+        <img src="static/images/logo.png" width="400" alt="Logo Icon"/>
     </h1>
     <p>Securely manage your passwords of your online accounts.<br><a href="https://passmanagerweb.onrender.com/">https://passmanagerweb.onrender.com/</a><br>Written in Python/Django</p>
     <h3>
@@ -89,17 +89,17 @@ $ python3 manage.py test users.tests passmanager.tests
 
 <div align = 'center'>
     <h2>Vault</h2>
-    <img src='assets/vault_page.png' alt='Vault'>
+    <img src='static/images/vault_page.png' alt='Vault'>
     <br><h2>Password Generator</h2>
-    <img src='assets/password_generator_page.png' alt='Password Generator'>
+    <img src='static/images/password_generator_page.png' alt='Password Generator'>
     <br><h2>Import Data</h2>
-    <img src='assets/import_data_page.png' alt='Import Data'>
+    <img src='static/images/import_data_page.png' alt='Import Data'>
     <br><h2>Password Checkup</h2>
-    <img src = 'assets/password_checkup_page.png' alt='Password Checkup'>
+    <img src = 'static/images/password_checkup_page.png' alt='Password Checkup'>
     <br><h2>New Item</h2>
-    <img src='assets/new_item_page.png' alt='New Item'>
+    <img src='static/images/new_item_page.png' alt='New Item'>
     <br><h2>Edit Item</h2>
-    <img src='assets/edit_item_page.png' alt='Edit Item'><br>
+    <img src='static/images/edit_item_page.png' alt='Edit Item'><br>
 </div>
 
 ## Contributing Guidelines for PassManager
