@@ -89,23 +89,17 @@ $ python3 manage.py test users.tests passmanager.tests
 
 <div align = 'center'>
     <h2>Vault</h2>
-    <img src = 'https://github.com/user-attachments/assets/0e6ea80f-02c4-43c8-aec5-9b756fa46cd6' alt = 'Vault'>
-    <br>
-    <h2>Password Generator</h2>
-    <img src = 'https://github.com/KafetzisThomas/PassManagerWeb/assets/105563667/2a4f2ed8-23aa-4d32-9516-1a22c097c00f' alt = 'Password Generator'>
-    <br>
-    <h2>Import Data</h2>
-    <img src = 'https://github.com/user-attachments/assets/9beccc33-4d80-4078-b688-91bf817343a6' alt = 'Import Data'>
-    <br>
-    <h2>Password Checkup</h2>
-    <img src = 'https://github.com/user-attachments/assets/245b8cbd-3d20-4113-913e-bf58a07f163a' alt = 'Password Checkup'>
-    <br>
-    <h2>New Item</h2>
-    <img src = 'https://github.com/user-attachments/assets/804be8ed-e866-4124-80ff-88bdd47c4807' alt = 'New Item'>
-    <br>
-    <h2>Edit Item</h2>
-    <img src = 'https://github.com/user-attachments/assets/055f8a1c-f04c-4a38-8216-35112fdc4ed7' alt = 'Edit Item'>
-    <br>
+    <img src='assets/vault_page.png' alt='Vault'>
+    <br><h2>Password Generator</h2>
+    <img src='assets/password_generator_page.png' alt='Password Generator'>
+    <br><h2>Import Data</h2>
+    <img src='assets/import_data_page.png' alt='Import Data'>
+    <br><h2>Password Checkup</h2>
+    <img src = 'assets/password_checkup_page.png' alt='Password Checkup'>
+    <br><h2>New Item</h2>
+    <img src='assets/new_item_page.png' alt='New Item'>
+    <br><h2>Edit Item</h2>
+    <img src='assets/edit_item_page.png' alt='Edit Item'><br>
 </div>
 
 ## Contributing Guidelines for PassManager
