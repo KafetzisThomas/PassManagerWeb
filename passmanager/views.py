@@ -224,24 +224,12 @@ def upload_csv(request):
 
             for row in csv_reader:
                 name, username, password, url, notes = row
-
-                # Encrypt fields before saving
-                encrypted_username = encrypt(
-                    username.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                encrypted_password = encrypt(
-                    password.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                encrypted_notes = encrypt(
-                    notes.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-
                 Item.objects.create(
                     name=name,
-                    username=encrypted_username,
-                    password=encrypted_password,
+                    username=username,
+                    password=password,
                     url=url,
-                    notes=encrypted_notes,
+                    notes=notes,
                     owner=request.user,
                 )
 
