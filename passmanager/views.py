@@ -196,25 +196,8 @@ def download_csv(request):
     data = Item.objects.filter(owner=request.user)
 
     for item in data:
-        decrypted_username = decrypt(item.username, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
-        decrypted_password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
-        decrypted_notes = decrypt(item.notes, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
-
-        writer.writerow(
-            [
-                item.name,
-                decrypted_username,
-                decrypted_password,
-                item.url,
-                decrypted_notes,
-            ]
-        )
+        item.decrypt_sensitive_fields()
+        writer.writerow([item.name, item.username, item.password, item.url, item.notes])
 
     return response
 
