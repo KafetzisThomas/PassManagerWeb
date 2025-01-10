@@ -276,27 +276,26 @@ def password_checkup(request):
     items = Item.objects.filter(owner=request.user)
     results = []
     for item in items:
-        password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode("utf-8")
-        is_pwned = check_password(password)
-        if password:
-            if is_pwned:
-                results.append(
-                    {
-                        "name": item.name,
-                        "status": f"Exposed {is_pwned} time(s)",
-                        "recommendation": "Changing this password is recommended.",
-                        "severity": "High",
-                    }
-                )
-            else:
-                results.append(
-                    {
-                        "name": item.name,
-                        "status": "No breaches found.",
-                        "recommendation": "This password appears to be safe.",
-                        "severity": "Low",
-                    }
-                )
+        item.decrypt_sensitive_fields()
+        password_status = check_password(item.password) if item.password else None
+        if password_status:
+            results.append(
+                {
+                    "name": item.name,
+                    "status": f"Exposed {password_status} time(s)",
+                    "recommendation": "Changing this password is recommended.",
+                    "severity": "High",
+                }
+            )
+        else:
+            results.append(
+                {
+                    "name": item.name,
+                    "status": "No breaches found.",
+                    "recommendation": "This password appears to be safe.",
+                    "severity": "Low",
+                }
+            )
 
     context = {"results": results}
     return render(request, "passmanager/password_checkup.html", context)
