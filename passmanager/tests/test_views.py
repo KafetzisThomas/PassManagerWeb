@@ -506,7 +506,7 @@ class DownloadCsvViewTest(TestCase):
         )
         self.client.login(email="testuser@example.com", password="password")
 
-        self.item = Item.objects.create(
+        self.item = Item(
             name="Test Item",
             username="testuser",
             password="testpassword",
@@ -630,36 +630,33 @@ class PasswordCheckupViewTests(TestCase):
         )
         self.client.login(email="testuser@example.com", password="password")
 
-        self.item1 = Item.objects.create(
+        self.item1 = Item(
             name="Test Item 1",
             username="testuser1",
-            password=encrypt(
-                "testpassword12".encode(), self.encryption_key.encode()
-            ).decode(),
+            password="testpassword12",
             url="http://example.com",
             notes="Test notes",
             owner=self.user,
         )
-        self.item2 = Item.objects.create(
+        self.item2 = Item(
             name="Test Item 2",
             username="testuser2",
-            password=encrypt(
-                "tEst__pA$$word".encode(), self.encryption_key.encode()
-            ).decode(),
+            password="tEst__pA$$word",
             url="http://example.com",
             notes="Test notes",
             owner=self.user,
         )
 
-    @override_settings(ENCRYPTION_KEY="mocked_encryption_key")
+        self.item1.encrypt_sensitive_fields()
+        self.item1.save()
+        self.item2.encrypt_sensitive_fields()
+        self.item2.save()
+
     @patch("passmanager.views.check_password")
-    @patch("os.getenv")
-    def test_password_checkup(self, mock_getenv, mock_check_password):
+    def test_password_checkup(self, mock_check_password):
         """
         Test for check if the password has been pwned.
         """
-        # Mock encryption_key env variable & check_password function
-        mock_getenv.return_value = self.encryption_key
         mock_check_password.side_effect = lambda password: {
             # Fake values for testing
             "testpassword12": 4,
