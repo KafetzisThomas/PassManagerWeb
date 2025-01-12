@@ -224,7 +224,7 @@ def upload_csv(request):
 
             for row in csv_reader:
                 name, username, password, url, notes = row
-                Item.objects.create(
+                item = Item(
                     name=name,
                     username=username,
                     password=password,
@@ -232,6 +232,8 @@ def upload_csv(request):
                     notes=notes,
                     owner=request.user,
                 )
+                item.encrypt_sensitive_fields()
+                item.save()
 
             messages.success(request, "Passwords imported successfully!")
             return redirect("passmanager:vault")
