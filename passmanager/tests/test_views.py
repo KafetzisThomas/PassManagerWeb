@@ -575,14 +575,12 @@ class UploadCsvViewTests(TestCase):
         self.assertTemplateUsed(response, "passmanager/upload_csv.html")
         self.assertIsInstance(response.context["form"], ImportPasswordsForm)
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_valid_csv_upload(self):
         """
         Test valid csv upload saves encrypted data to the database.
         """
         csv_content = b"name,username,password,url,notes\nTest user,test_user,test_pass,example.com,example notes"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
-        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
 
         # Post csv file to the view
         response = self.client.post(
@@ -592,19 +590,13 @@ class UploadCsvViewTests(TestCase):
         self.assertEqual(Item.objects.count(), 1)
 
         item = Item.objects.first()
-        decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
+        item.decrypt_sensitive_fields()
 
         self.assertEqual(item.name, "Test user")
-        self.assertEqual(decrypted_username, "test_user")
-        self.assertEqual(decrypted_password, "test_pass")
+        self.assertEqual(item.username, "test_user")
+        self.assertEqual(item.password, "test_pass")
         self.assertEqual(item.url, "example.com")
-        self.assertEqual(decrypted_notes, "example notes")
+        self.assertEqual(item.notes, "example notes")
         self.assertEqual(item.owner, self.user)
 
     def test_invalid_csv_header(self):
