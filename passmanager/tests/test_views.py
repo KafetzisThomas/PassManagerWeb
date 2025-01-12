@@ -225,7 +225,6 @@ class NewItemViewTests(TestCase):
         self.assertNotEqual(item.notes, "Encrypted notes")
 
         item.decrypt_sensitive_fields()
-
         self.assertEqual(item.name, "Encrypted Item")
         self.assertEqual(item.username, "encrypteduser")
         self.assertEqual(item.password, "encryptedpassword")
@@ -360,7 +359,6 @@ class EditItemViewTests(TestCase):
 
         self.item.refresh_from_db()
         self.item.decrypt_sensitive_fields()
-
         self.assertEqual(self.item.name, "Encrypted Item")
         self.assertEqual(self.item.username, "encrypteduser")
         self.assertEqual(self.item.password, "encryptedpassword")
@@ -508,19 +506,17 @@ class DownloadCsvViewTest(TestCase):
         )
         self.client.login(email="testuser@example.com", password="password")
 
-        self.encryption_key = os.getenv("ENCRYPTION_KEY").encode()
         self.item = Item.objects.create(
             name="Test Item",
-            username=encrypt("testuser".encode(), self.encryption_key).decode("utf-8"),
-            password=encrypt("testpassword".encode(), self.encryption_key).decode(
-                "utf-8"
-            ),
+            username="testuser",
+            password="testpassword",
             url="https://example.com",
-            notes=encrypt("Test notes".encode(), self.encryption_key).decode("utf-8"),
+            notes="Test notes",
             owner=self.user,
         )
+        self.item.encrypt_sensitive_fields()
+        self.item.save()
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_download_csv(self):
         """
         Test csv file returns with properly decrypted user data.
@@ -542,24 +538,15 @@ class DownloadCsvViewTest(TestCase):
         rows = list(reader)
         self.assertEqual(len(rows), 1)  # Only 1 row of data
 
-        decrypted_username = decrypt(
-            self.item.username.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            self.item.password.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_notes = decrypt(self.item.notes.encode(), self.encryption_key).decode(
-            "utf-8"
-        )
-
+        self.item.decrypt_sensitive_fields()
         self.assertEqual(
             rows[0],
             [
                 "Test Item",
-                decrypted_username,
-                decrypted_password,
+                "testuser",
+                "testpassword",
                 "https://example.com",
-                decrypted_notes,
+                "Test notes",
             ],
         )
 
