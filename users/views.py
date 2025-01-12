@@ -1,5 +1,5 @@
 import pyotp
-from passmanager.models import Item, derive_key_from_master_password
+from passmanager.models import Item
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 from django.contrib.auth.views import LoginView
@@ -43,28 +43,21 @@ def account(request):
         if form.is_valid():
             user = form.save(commit=False)
 
-            old_password = request.user.password
             new_password = form.cleaned_data["password1"]
-
             if new_password:
-                salt = user.encryption_salt.encode()
-                old_key = derive_key_from_master_password(old_password, salt)
-                new_key = derive_key_from_master_password(new_password, salt)
-                print(f"Old key: {old_key}, {type(old_key)}")
-                print(f"New key: {new_key}")
-
                 items = Item.objects.filter(owner=user)
                 for item in items:
                     # Decrypt fields with the old key
-                    item.username = item.decrypt_field(old_key, item.username)
-                    item.password = item.decrypt_field(old_key, item.password)
-                    item.notes = item.decrypt_field(old_key, item.notes)
+                    print(f"Old key: {item.get_key()}")
+                    item.username = item.decrypt_field(item.get_key(), item.username)
+                    item.password = item.decrypt_field(item.get_key(), item.password)
+                    item.notes = item.decrypt_field(item.get_key(), item.notes)
 
-                    # Re-encrypt fields with the new key
-                    item.username = item.encrypt_field(new_key, item.username)
-                    item.password = item.encrypt_field(new_key, item.password)
-                    item.notes = item.encrypt_field(new_key, item.notes)
+                    user.set_password(new_password)
+                    user.save()
 
+                    item.owner = request.user
+                    item.encrypt_sensitive_fields()
                     item.save()
 
             # Handle 2FA enable/disable & OTP secret generation
@@ -78,11 +71,11 @@ def account(request):
             else:
                 user.otp_secret = ""
 
-            user.save()
+            # user.save()
             send_update_account_notification(user)
-            update_session_auth_hash(
-                request, request.user
-            )  # Important for keeping the user logged in
+            # update_session_auth_hash(
+            #    request, request.user
+            # )  # Important for keeping the user logged in
             messages.success(
                 request, "Your account credentials was successfully updated!"
             )

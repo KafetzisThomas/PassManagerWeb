@@ -144,6 +144,7 @@ def edit_item(request, item_id):
             )
 
     else:
+        print(f"Key: {item.get_key()}")
         item.decrypt_sensitive_fields()
         form = ItemForm(instance=item)
 
