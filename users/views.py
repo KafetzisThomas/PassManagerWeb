@@ -3,7 +3,7 @@ from passmanager.models import Item
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 from django.contrib.auth.views import LoginView
-from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import CustomUser
@@ -42,20 +42,20 @@ def account(request):
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-
             new_password = form.cleaned_data["password1"]
+
             if new_password:
                 items = Item.objects.filter(owner=user)
                 for item in items:
                     # Decrypt fields with the old key
-                    print(f"Old key: {item.get_key()}")
                     item.username = item.decrypt_field(item.get_key(), item.username)
                     item.password = item.decrypt_field(item.get_key(), item.password)
                     item.notes = item.decrypt_field(item.get_key(), item.notes)
 
+                    # Update user's master password
                     user.set_password(new_password)
-                    user.save()
 
+                    # Re-encrypt fields with the new key
                     item.owner = request.user
                     item.encrypt_sensitive_fields()
                     item.save()
@@ -71,11 +71,8 @@ def account(request):
             else:
                 user.otp_secret = ""
 
-            # user.save()
+            user.save()
             send_update_account_notification(user)
-            # update_session_auth_hash(
-            #    request, request.user
-            # )  # Important for keeping the user logged in
             messages.success(
                 request, "Your account credentials was successfully updated!"
             )

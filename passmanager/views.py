@@ -1,13 +1,12 @@
-import os
 import csv
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from .models import Item
 from django.http import Http404, HttpResponse
-from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from django.contrib import messages
-from .utils import encrypt, decrypt, check_password, generate_password
+from .models import Item
+from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from .utils import check_password, generate_password
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -105,7 +104,6 @@ def edit_item(request, item_id):
         if form.is_valid():
             obj = form.save(commit=False)
             username_entry = obj.username
-            password_entry = obj.password
             notes_entry = obj.notes
 
             if action == "save":
@@ -144,7 +142,6 @@ def edit_item(request, item_id):
             )
 
     else:
-        print(f"Key: {item.get_key()}")
         item.decrypt_sensitive_fields()
         form = ItemForm(instance=item)
 
