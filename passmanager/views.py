@@ -47,6 +47,7 @@ def new_item(request):
             if action == "save":
                 obj = form.save(commit=False)
                 obj.owner = request.user
+                obj.encrypt_sensitive_fields()
                 obj.save()
                 messages.success(request, "Item created successfully.")
                 return redirect("passmanager:vault")
@@ -110,6 +111,7 @@ def edit_item(request, item_id):
             if action == "save":
                 obj = form.save(commit=False)
                 obj.owner = request.user
+                obj.encrypt_sensitive_fields()
                 obj.save()
                 messages.success(request, "Item modified successfully.")
                 return redirect("passmanager:vault")

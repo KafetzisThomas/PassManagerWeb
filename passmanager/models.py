@@ -51,16 +51,14 @@ class Item(models.Model):
         salt = self.owner.encryption_salt.encode()
         return derive_key_from_master_password(self.owner.password, salt)
 
-    def save(self, *args, **kwargs):
+    def encrypt_sensitive_fields(self):
         """
-        Encrypt sensitive fields before saving.
+        Manually encrypt sensitive fields.
         """
         key = self.get_key()
         self.username = self.encrypt_field(key, self.username)
         self.password = self.encrypt_field(key, self.password)
         self.notes = self.encrypt_field(key, self.notes)
-        super().save(*args, **kwargs)
-        print(key)
 
         key = None  # Zero out the content of the key in memory
         del key  # Securely forget the encryption key
