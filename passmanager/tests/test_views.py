@@ -15,7 +15,6 @@ from django.urls import reverse
 from users.models import CustomUser
 from ..models import Item
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
-from ..utils import encrypt, decrypt
 
 
 class HomeViewTests(TestCase):
@@ -205,7 +204,6 @@ class NewItemViewTests(TestCase):
             response.context["form"].initial["password"], "generatedpassword123"
         )
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_new_item_view_post_save_action_with_encryption(self):
         """
         Test if the new_item view correctly encrypts data before saving.
@@ -220,26 +218,19 @@ class NewItemViewTests(TestCase):
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
-        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
 
         item = Item.objects.get(name="Encrypted Item")
         self.assertNotEqual(item.username, "encrypteduser")
         self.assertNotEqual(item.password, "encryptedpassword")
         self.assertNotEqual(item.notes, "Encrypted notes")
 
-        decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
+        item.decrypt_sensitive_fields()
 
         self.assertEqual(item.name, "Encrypted Item")
-        self.assertEqual(decrypted_username, "encrypteduser")
-        self.assertEqual(decrypted_password, "encryptedpassword")
+        self.assertEqual(item.username, "encrypteduser")
+        self.assertEqual(item.password, "encryptedpassword")
         self.assertEqual(item.url, "http://example.com")
-        self.assertEqual(decrypted_notes, "Encrypted notes")
+        self.assertEqual(item.notes, "Encrypted notes")
 
 
 class EditItemViewTests(TestCase):
