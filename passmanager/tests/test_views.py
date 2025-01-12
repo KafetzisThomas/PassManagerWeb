@@ -341,13 +341,10 @@ class EditItemViewTests(TestCase):
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_edit_item_view_post_save_action_with_encryption(self):
         """
         Verifies that item attributes are correctly encrypted and decrypted after a save action.
         """
-        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
-
         data = {
             "name": "Encrypted Item",
             "username": "encrypteduser",
@@ -362,21 +359,13 @@ class EditItemViewTests(TestCase):
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         self.item.refresh_from_db()
-        decrypted_username = decrypt(
-            self.item.username.encode(), encryption_key
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            self.item.password.encode(), encryption_key
-        ).decode("utf-8")
-        decrypted_notes = decrypt(self.item.notes.encode(), encryption_key).decode(
-            "utf-8"
-        )
+        self.item.decrypt_sensitive_fields()
 
         self.assertEqual(self.item.name, "Encrypted Item")
-        self.assertEqual(decrypted_username, "encrypteduser")
-        self.assertEqual(decrypted_password, "encryptedpassword")
+        self.assertEqual(self.item.username, "encrypteduser")
+        self.assertEqual(self.item.password, "encryptedpassword")
         self.assertEqual(self.item.url, "http://example.com")
-        self.assertEqual(decrypted_notes, "Encrypted notes")
+        self.assertEqual(self.item.notes, "Encrypted notes")
 
 
 class DeleteItemViewTests(TestCase):
