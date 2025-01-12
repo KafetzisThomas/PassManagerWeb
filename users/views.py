@@ -3,7 +3,7 @@ from passmanager.models import Item
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 from django.contrib.auth.views import LoginView
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import CustomUser
@@ -73,6 +73,9 @@ def account(request):
 
             user.save()
             send_update_account_notification(user)
+            update_session_auth_hash(
+                request, request.user
+            )  # Important for keeping the user logged in
             messages.success(
                 request, "Your account credentials was successfully updated!"
             )
