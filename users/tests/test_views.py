@@ -1,6 +1,6 @@
 """
 This module contains test cases for the following views:
-* register, account, delete_account
+register, account, delete_account, CustomLogin, TwoFactorVerification.
 """
 
 import pyotp
@@ -9,13 +9,13 @@ from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
 from django.contrib.auth.hashers import check_password
+from passmanager.models import Item
+from ..models import CustomUser
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     CustomUserChangeForm,
 )
-from passmanager.models import Item
-from ..models import CustomUser
 
 
 @patch("turnstile.fields.TurnstileField.validate", return_value=True)

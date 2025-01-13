@@ -1,17 +1,16 @@
 """
 This module contains test cases for the following views:
-* home, vault, new_item, edit_item, delete_item, password_generator, download_csv, upload_csv
+* home, vault, new_item, edit_item, delete_item, password_generator, download_csv, upload_csv, password_checkup
 """
 
 import os
 import csv
 import base64
-from django.test import TestCase, Client, override_settings
+from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.messages import get_messages
 from unittest.mock import patch
 from django.urls import reverse
-
 from users.models import CustomUser
 from ..models import Item
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm

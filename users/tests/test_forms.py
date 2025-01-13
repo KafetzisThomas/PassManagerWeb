@@ -1,9 +1,7 @@
 """
 This module contains test cases for the following classes:
-* CustomUserCreationForm (validation, required fields, and the save method)
-* CustomAuthenticationForm (validation and authentication logic)
-* TwoFactorVerificationForm (OTP validation)
-* CustomUserChangeForm (validation and saving functionality)
+CustomUserCreationForm, CustomAuthenticationForm,
+TwoFactorVerificationForm, CustomUserChangeForm.
 """
 
 import pyotp
