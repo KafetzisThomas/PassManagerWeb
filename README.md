@@ -17,7 +17,7 @@
 
 ## Features
 
-- [X] **AES 256 Encryption**: Securely store and manage passwords with AES 256-bit encryption, ensuring top-tier security for **sensitive information**.
+- [X] **AES 256 Encryption**: Securely store and manage passwords with AES 256-bit encryption. Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.
 - [X] **Multi-Factor Authentication**: Protect your account with your favorite authenticator app.
 - [X] **Password Generator Tool**: Built-in tool to generate `strong`, `random` passwords, with `customizable` options (length, character types).
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
@@ -57,7 +57,6 @@ $ nano main/.env
 Add the following environment variables (modify as needed):
 ```bash
 ➜ SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
-➜ ENCRYPTION_KEY="example_encryption_key"  # https://cryptography.io/en/latest/fernet/#cryptography.fernet.Fernet
 ➜ DEBUG=True  # For development
 ➜ EMAIL_HOST_USER="example_email_host"
 ➜ EMAIL_HOST_PASSWORD="example_email_password"
