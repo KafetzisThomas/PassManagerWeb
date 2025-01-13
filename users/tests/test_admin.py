@@ -32,6 +32,7 @@ class CustomUserAdminTest(TestCase):
             (
                 "username",
                 "email",
+                "encryption_salt",
                 "enable_2fa",
                 "otp_secret",
                 "session_timeout",
@@ -48,7 +49,8 @@ class CustomUserAdminTest(TestCase):
         """
         custom_user_admin = CustomUserAdmin(CustomUser, self.site)
         self.assertEqual(
-            custom_user_admin.list_filter, ("is_active", "is_staff", "is_superuser")
+            custom_user_admin.list_filter,
+            ("is_active", "is_staff", "is_superuser", "enable_2fa", "session_timeout"),
         )
 
     def test_admin_fieldsets(self):
@@ -58,6 +60,10 @@ class CustomUserAdminTest(TestCase):
         custom_user_admin = CustomUserAdmin(CustomUser, self.site)
         expected_fieldsets = (
             (None, {"fields": ("username", "email", "password")}),
+            (
+                "Encryption Settings",
+                {"fields": ("encryption_salt", "enable_2fa", "otp_secret")},
+            ),
             (
                 "Permissions",
                 {
@@ -95,6 +101,7 @@ class CustomUserAdminTest(TestCase):
                         "password2",
                         "is_staff",
                         "is_active",
+                        "enable_2fa",
                         "session_timeout",
                     ),
                 },
@@ -107,7 +114,7 @@ class CustomUserAdminTest(TestCase):
         Test that the search fields are correctly configured.
         """
         custom_user_admin = CustomUserAdmin(CustomUser, self.site)
-        self.assertEqual(custom_user_admin.search_fields, ("email",))
+        self.assertEqual(custom_user_admin.search_fields, ("email", "username"))
 
     def test_admin_ordering(self):
         """
