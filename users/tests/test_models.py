@@ -1,8 +1,8 @@
 """
 This module contains test cases for the CustomUser model.
-The tests cover various aspects of the model, including user creation,
-unique email constraint, otp_secret field validation, custom user manager,
-and the __str__ method.
+The tests cover various aspects of the model, including:
+user creation, unique email constraint, otp field validation,
+salt generation, custom user manager, __str__ method.
 """
 
 from django.test import TestCase
@@ -74,6 +74,14 @@ class CustomUserModelTests(TestCase):
         """
         user = self.user_model.objects.create_user(**self.user_data)
         self.assertIsInstance(user, self.user_model)
+
+    def test_salt_generation(self):
+        """
+        Test that salt is automatically generated if not provided.
+        """
+        data = self.user_data.copy()
+        user = self.user_model.objects.create_user(**data)
+        self.assertIsNotNone(user.encryption_salt)
 
     def test_str_method(self):
         """
