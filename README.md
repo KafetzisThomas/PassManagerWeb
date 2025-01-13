@@ -17,7 +17,7 @@
 
 ## Features
 
-- [X] **AES 256 Encryption**: Securely store and manage passwords with AES 256-bit encryption. Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.
+- [X] **AES-128 Encryption**: Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.
 - [X] **Multi-Factor Authentication**: Protect your account with your favorite authenticator app.
 - [X] **Password Generator Tool**: Built-in tool to generate `strong`, `random` passwords, with `customizable` options (length, character types).
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
