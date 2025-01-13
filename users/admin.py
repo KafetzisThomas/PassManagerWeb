@@ -13,6 +13,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = (
         "username",
         "email",
+        "encryption_salt",
         "enable_2fa",
         "otp_secret",
         "session_timeout",
@@ -21,9 +22,19 @@ class CustomUserAdmin(UserAdmin):
         "is_superuser",
         "last_login",
     )
-    list_filter = ("is_active", "is_staff", "is_superuser")
+    list_filter = (
+        "is_active",
+        "is_staff",
+        "is_superuser",
+        "enable_2fa",
+        "session_timeout",
+    )
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
+        (
+            "Encryption Settings",
+            {"fields": ("encryption_salt", "enable_2fa", "otp_secret")},
+        ),
         (
             "Permissions",
             {
@@ -54,12 +65,13 @@ class CustomUserAdmin(UserAdmin):
                     "password2",
                     "is_staff",
                     "is_active",
+                    "enable_2fa",
                     "session_timeout",
                 ),
             },
         ),
     )
-    search_fields = ("email",)
+    search_fields = ("email", "username")
     ordering = ("email",)
 
 

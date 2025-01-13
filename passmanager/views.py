@@ -1,13 +1,12 @@
-import os
 import csv
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from .models import Item
 from django.http import Http404, HttpResponse
-from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from django.contrib import messages
-from .utils import encrypt, decrypt, check_password, generate_password
+from .models import Item
+from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from .utils import check_password, generate_password
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,30 +38,17 @@ def new_item(request):
         form = ItemForm(data=request.POST)
         obj = form.save(commit=False)
 
-        url_entry = obj.url
         username_entry = obj.username
-        password_entry = obj.password
         notes_entry = obj.notes
 
         if form.is_valid():
             action = request.POST.get("action", "value")
             if action == "save":
-                obj.username = encrypt(
-                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.password = encrypt(
-                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.notes = encrypt(
-                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
+                obj = form.save(commit=False)
                 obj.owner = request.user
-
-                form.save()
-                messages.success(
-                    request,
-                    "Item created successfully.",
-                )
+                obj.encrypt_sensitive_fields()
+                obj.save()
+                messages.success(request, "Item created successfully.")
                 return redirect("passmanager:vault")
 
             elif action == "generate_password":
@@ -118,26 +104,14 @@ def edit_item(request, item_id):
         if form.is_valid():
             obj = form.save(commit=False)
             username_entry = obj.username
-            password_entry = obj.password
             notes_entry = obj.notes
 
             if action == "save":
-                obj.username = encrypt(
-                    username_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.password = encrypt(
-                    password_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                obj.notes = encrypt(
-                    notes_entry.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
+                obj = form.save(commit=False)
                 obj.owner = request.user
-
-                form.save()
-                messages.success(
-                    request,
-                    "Item modified successfully.",
-                )
+                obj.encrypt_sensitive_fields()
+                obj.save()
+                messages.success(request, "Item modified successfully.")
                 return redirect("passmanager:vault")
 
             elif action == "generate_password":
@@ -168,25 +142,8 @@ def edit_item(request, item_id):
             )
 
     else:
-        # Decrypt the fields for display in the form
-        decrypted_username = decrypt(
-            item.username.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            item.password.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
-        decrypted_notes = decrypt(
-            item.notes.encode(), os.getenv("ENCRYPTION_KEY")
-        ).decode("utf-8")
-
-        initial_data = {
-            "name": item.name,
-            "username": decrypted_username,
-            "password": decrypted_password,
-            "url": item.url,
-            "notes": decrypted_notes,
-        }
-        form = ItemForm(instance=item, initial=initial_data)
+        item.decrypt_sensitive_fields()
+        form = ItemForm(instance=item)
 
     context = {"item": item, "form": form}
     return render(request, "passmanager/edit_item.html", context)
@@ -239,25 +196,8 @@ def download_csv(request):
     data = Item.objects.filter(owner=request.user)
 
     for item in data:
-        decrypted_username = decrypt(item.username, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
-        decrypted_password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
-        decrypted_notes = decrypt(item.notes, os.getenv("ENCRYPTION_KEY")).decode(
-            "utf-8"
-        )
-
-        writer.writerow(
-            [
-                item.name,
-                decrypted_username,
-                decrypted_password,
-                item.url,
-                decrypted_notes,
-            ]
-        )
+        item.decrypt_sensitive_fields()
+        writer.writerow([item.name, item.username, item.password, item.url, item.notes])
 
     return response
 
@@ -284,26 +224,16 @@ def upload_csv(request):
 
             for row in csv_reader:
                 name, username, password, url, notes = row
-
-                # Encrypt fields before saving
-                encrypted_username = encrypt(
-                    username.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                encrypted_password = encrypt(
-                    password.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-                encrypted_notes = encrypt(
-                    notes.encode(), os.getenv("ENCRYPTION_KEY")
-                ).decode("utf-8")
-
-                Item.objects.create(
+                item = Item(
                     name=name,
-                    username=encrypted_username,
-                    password=encrypted_password,
+                    username=username,
+                    password=password,
                     url=url,
-                    notes=encrypted_notes,
+                    notes=notes,
                     owner=request.user,
                 )
+                item.encrypt_sensitive_fields()
+                item.save()
 
             messages.success(request, "Passwords imported successfully!")
             return redirect("passmanager:vault")
@@ -319,27 +249,26 @@ def password_checkup(request):
     items = Item.objects.filter(owner=request.user)
     results = []
     for item in items:
-        password = decrypt(item.password, os.getenv("ENCRYPTION_KEY")).decode("utf-8")
-        is_pwned = check_password(password)
-        if password:
-            if is_pwned:
-                results.append(
-                    {
-                        "name": item.name,
-                        "status": f"Exposed {is_pwned} time(s)",
-                        "recommendation": "Changing this password is recommended.",
-                        "severity": "High",
-                    }
-                )
-            else:
-                results.append(
-                    {
-                        "name": item.name,
-                        "status": "No breaches found.",
-                        "recommendation": "This password appears to be safe.",
-                        "severity": "Low",
-                    }
-                )
+        item.decrypt_sensitive_fields()
+        password_status = check_password(item.password) if item.password else None
+        if password_status:
+            results.append(
+                {
+                    "name": item.name,
+                    "status": f"Exposed {password_status} time(s)",
+                    "recommendation": "Changing this password is recommended.",
+                    "severity": "High",
+                }
+            )
+        else:
+            results.append(
+                {
+                    "name": item.name,
+                    "status": "No breaches found.",
+                    "recommendation": "This password appears to be safe.",
+                    "severity": "Low",
+                }
+            )
 
     context = {"results": results}
     return render(request, "passmanager/password_checkup.html", context)

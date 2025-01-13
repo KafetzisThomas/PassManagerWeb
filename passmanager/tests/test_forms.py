@@ -1,13 +1,11 @@
 """
 This module contains test cases for the following classes:
-* ItemForm (validation and saving functionality)
-* PasswordGeneratorForm (validation and functionality)
+ItemForm, PasswordGeneratorForm, ImportPasswordsForm.
 """
 
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
-
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from ..models import Item
 

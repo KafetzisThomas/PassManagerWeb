@@ -1,21 +1,19 @@
 """
 This module contains test cases for the following views:
-* home, vault, new_item, edit_item, delete_item, password_generator, download_csv, upload_csv
+* home, vault, new_item, edit_item, delete_item, password_generator, download_csv, upload_csv, password_checkup
 """
 
 import os
 import csv
 import base64
-from django.test import TestCase, Client, override_settings
+from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.messages import get_messages
 from unittest.mock import patch
 from django.urls import reverse
-
 from users.models import CustomUser
 from ..models import Item
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
-from ..utils import encrypt, decrypt
 
 
 class HomeViewTests(TestCase):
@@ -205,7 +203,6 @@ class NewItemViewTests(TestCase):
             response.context["form"].initial["password"], "generatedpassword123"
         )
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_new_item_view_post_save_action_with_encryption(self):
         """
         Test if the new_item view correctly encrypts data before saving.
@@ -220,26 +217,18 @@ class NewItemViewTests(TestCase):
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
-        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
 
         item = Item.objects.get(name="Encrypted Item")
         self.assertNotEqual(item.username, "encrypteduser")
         self.assertNotEqual(item.password, "encryptedpassword")
         self.assertNotEqual(item.notes, "Encrypted notes")
 
-        decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
-
+        item.decrypt_sensitive_fields()
         self.assertEqual(item.name, "Encrypted Item")
-        self.assertEqual(decrypted_username, "encrypteduser")
-        self.assertEqual(decrypted_password, "encryptedpassword")
+        self.assertEqual(item.username, "encrypteduser")
+        self.assertEqual(item.password, "encryptedpassword")
         self.assertEqual(item.url, "http://example.com")
-        self.assertEqual(decrypted_notes, "Encrypted notes")
+        self.assertEqual(item.notes, "Encrypted notes")
 
 
 class EditItemViewTests(TestCase):
@@ -350,13 +339,10 @@ class EditItemViewTests(TestCase):
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_edit_item_view_post_save_action_with_encryption(self):
         """
         Verifies that item attributes are correctly encrypted and decrypted after a save action.
         """
-        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
-
         data = {
             "name": "Encrypted Item",
             "username": "encrypteduser",
@@ -371,21 +357,12 @@ class EditItemViewTests(TestCase):
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         self.item.refresh_from_db()
-        decrypted_username = decrypt(
-            self.item.username.encode(), encryption_key
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            self.item.password.encode(), encryption_key
-        ).decode("utf-8")
-        decrypted_notes = decrypt(self.item.notes.encode(), encryption_key).decode(
-            "utf-8"
-        )
-
+        self.item.decrypt_sensitive_fields()
         self.assertEqual(self.item.name, "Encrypted Item")
-        self.assertEqual(decrypted_username, "encrypteduser")
-        self.assertEqual(decrypted_password, "encryptedpassword")
+        self.assertEqual(self.item.username, "encrypteduser")
+        self.assertEqual(self.item.password, "encryptedpassword")
         self.assertEqual(self.item.url, "http://example.com")
-        self.assertEqual(decrypted_notes, "Encrypted notes")
+        self.assertEqual(self.item.notes, "Encrypted notes")
 
 
 class DeleteItemViewTests(TestCase):
@@ -528,19 +505,17 @@ class DownloadCsvViewTest(TestCase):
         )
         self.client.login(email="testuser@example.com", password="password")
 
-        self.encryption_key = os.getenv("ENCRYPTION_KEY").encode()
-        self.item = Item.objects.create(
+        self.item = Item(
             name="Test Item",
-            username=encrypt("testuser".encode(), self.encryption_key).decode("utf-8"),
-            password=encrypt("testpassword".encode(), self.encryption_key).decode(
-                "utf-8"
-            ),
+            username="testuser",
+            password="testpassword",
             url="https://example.com",
-            notes=encrypt("Test notes".encode(), self.encryption_key).decode("utf-8"),
+            notes="Test notes",
             owner=self.user,
         )
+        self.item.encrypt_sensitive_fields()
+        self.item.save()
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_download_csv(self):
         """
         Test csv file returns with properly decrypted user data.
@@ -562,24 +537,15 @@ class DownloadCsvViewTest(TestCase):
         rows = list(reader)
         self.assertEqual(len(rows), 1)  # Only 1 row of data
 
-        decrypted_username = decrypt(
-            self.item.username.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_password = decrypt(
-            self.item.password.encode(), self.encryption_key
-        ).decode("utf-8")
-        decrypted_notes = decrypt(self.item.notes.encode(), self.encryption_key).decode(
-            "utf-8"
-        )
-
+        self.item.decrypt_sensitive_fields()
         self.assertEqual(
             rows[0],
             [
                 "Test Item",
-                decrypted_username,
-                decrypted_password,
+                "testuser",
+                "testpassword",
                 "https://example.com",
-                decrypted_notes,
+                "Test notes",
             ],
         )
 
@@ -608,14 +574,12 @@ class UploadCsvViewTests(TestCase):
         self.assertTemplateUsed(response, "passmanager/upload_csv.html")
         self.assertIsInstance(response.context["form"], ImportPasswordsForm)
 
-    @override_settings(ENCRYPTION_KEY=base64.urlsafe_b64encode(os.urandom(32)))
     def test_valid_csv_upload(self):
         """
         Test valid csv upload saves encrypted data to the database.
         """
         csv_content = b"name,username,password,url,notes\nTest user,test_user,test_pass,example.com,example notes"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
-        encryption_key = os.getenv("ENCRYPTION_KEY").encode()
 
         # Post csv file to the view
         response = self.client.post(
@@ -625,19 +589,13 @@ class UploadCsvViewTests(TestCase):
         self.assertEqual(Item.objects.count(), 1)
 
         item = Item.objects.first()
-        decrypted_username = decrypt(item.username.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_password = decrypt(item.password.encode(), encryption_key).decode(
-            "utf-8"
-        )
-        decrypted_notes = decrypt(item.notes.encode(), encryption_key).decode("utf-8")
+        item.decrypt_sensitive_fields()
 
         self.assertEqual(item.name, "Test user")
-        self.assertEqual(decrypted_username, "test_user")
-        self.assertEqual(decrypted_password, "test_pass")
+        self.assertEqual(item.username, "test_user")
+        self.assertEqual(item.password, "test_pass")
         self.assertEqual(item.url, "example.com")
-        self.assertEqual(decrypted_notes, "example notes")
+        self.assertEqual(item.notes, "example notes")
         self.assertEqual(item.owner, self.user)
 
     def test_invalid_csv_header(self):
@@ -671,36 +629,33 @@ class PasswordCheckupViewTests(TestCase):
         )
         self.client.login(email="testuser@example.com", password="password")
 
-        self.item1 = Item.objects.create(
+        self.item1 = Item(
             name="Test Item 1",
             username="testuser1",
-            password=encrypt(
-                "testpassword12".encode(), self.encryption_key.encode()
-            ).decode(),
+            password="testpassword12",
             url="http://example.com",
             notes="Test notes",
             owner=self.user,
         )
-        self.item2 = Item.objects.create(
+        self.item2 = Item(
             name="Test Item 2",
             username="testuser2",
-            password=encrypt(
-                "tEst__pA$$word".encode(), self.encryption_key.encode()
-            ).decode(),
+            password="tEst__pA$$word",
             url="http://example.com",
             notes="Test notes",
             owner=self.user,
         )
 
-    @override_settings(ENCRYPTION_KEY="mocked_encryption_key")
+        self.item1.encrypt_sensitive_fields()
+        self.item1.save()
+        self.item2.encrypt_sensitive_fields()
+        self.item2.save()
+
     @patch("passmanager.views.check_password")
-    @patch("os.getenv")
-    def test_password_checkup(self, mock_getenv, mock_check_password):
+    def test_password_checkup(self, mock_check_password):
         """
         Test for check if the password has been pwned.
         """
-        # Mock encryption_key env variable & check_password function
-        mock_getenv.return_value = self.encryption_key
         mock_check_password.side_effect = lambda password: {
             # Fake values for testing
             "testpassword12": 4,

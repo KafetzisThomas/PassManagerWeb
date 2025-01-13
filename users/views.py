@@ -1,23 +1,24 @@
 import pyotp
+from passmanager.models import Item
 from django.shortcuts import render, redirect
-from .models import CustomUser
 from django.views.generic.edit import FormView
+from django.contrib.auth.views import LoginView
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import CustomUser
 from .forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     TwoFactorVerificationForm,
     CustomUserChangeForm,
 )
-from django.contrib.auth import login, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from .utils import (
     send_new_user_registration,
     send_2fa_verification,
     send_delete_account_notification,
     send_update_account_notification,
 )
-from django.contrib.auth.views import LoginView
 
 
 def register(request):
@@ -41,6 +42,23 @@ def account(request):
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
             user = form.save(commit=False)
+            new_password = form.cleaned_data["password1"]
+
+            if new_password:
+                items = Item.objects.filter(owner=user)
+                for item in items:
+                    # Decrypt fields with the old key
+                    item.username = item.decrypt_field(item.get_key(), item.username)
+                    item.password = item.decrypt_field(item.get_key(), item.password)
+                    item.notes = item.decrypt_field(item.get_key(), item.notes)
+
+                    # Update user's master password
+                    user.set_password(new_password)
+
+                    # Re-encrypt fields with the new key
+                    item.owner = request.user
+                    item.encrypt_sensitive_fields()
+                    item.save()
 
             # Handle 2FA enable/disable & OTP secret generation
             user.enable_2fa = form.cleaned_data.get("enable_2fa", False)

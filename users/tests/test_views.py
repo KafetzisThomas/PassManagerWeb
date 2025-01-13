@@ -1,6 +1,6 @@
 """
 This module contains test cases for the following views:
-* register, account, delete_account
+register, account, delete_account, CustomLogin, TwoFactorVerification.
 """
 
 import pyotp
@@ -9,12 +9,13 @@ from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
 from django.contrib.auth.hashers import check_password
+from passmanager.models import Item
+from ..models import CustomUser
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     CustomUserChangeForm,
 )
-from ..models import CustomUser
 
 
 @patch("turnstile.fields.TurnstileField.validate", return_value=True)
@@ -97,6 +98,21 @@ class AccountViewTest(TestCase):
         self.client.login(email="testuser@example.com", password="password")
         self.account_url = reverse("users:account")
 
+        # Some items to test encryption
+        self.items = []
+        for _ in range(3):
+            item = Item(
+                owner=self.user,
+                username="testuser",
+                password="testpassword",
+                notes="Test notes",
+            )
+            item.encrypt_sensitive_fields()
+            item.save()
+
+            # Add item to the list
+            self.items.append(item)
+
     def test_account_view_get(self):
         """
         Test rendering the account page with GET request.
@@ -107,9 +123,9 @@ class AccountViewTest(TestCase):
         self.assertIsInstance(response.context["form"], CustomUserChangeForm)
         self.assertEqual(response.context["form"].instance, self.user)
 
-    def test_account_view_post_valid_form(self):
+    def test_account_view_post_valid_form_with_password_change(self):
         """
-        Test updating account credentials with valid form data.
+        Test updating account credentials with valid form data & password change.
         """
         form_data = {
             "email": "updateduser@example.com",
@@ -131,6 +147,12 @@ class AccountViewTest(TestCase):
         # Check that the OTP secret is generated & saved
         self.assertIsNotNone(updated_user.otp_secret)
         self.assertIsInstance(updated_user.otp_secret, str)
+
+        # Verify items are re-encrypted
+        for item in self.items:
+            self.assertNotEqual(item.username, "testuser")
+            self.assertNotEqual(item.password, "testpassword")
+            self.assertNotEqual(item.notes, "Test notes")
 
     def test_account_view_post_invalid_form(self):
         """
