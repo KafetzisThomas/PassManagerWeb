@@ -46,19 +46,27 @@ def account(request):
 
             if new_password:
                 items = Item.objects.filter(owner=user)
-                for item in items:
-                    # Decrypt fields with the old key
-                    item.username = item.decrypt_field(item.get_key(), item.username)
-                    item.password = item.decrypt_field(item.get_key(), item.password)
-                    item.notes = item.decrypt_field(item.get_key(), item.notes)
 
-                    # Update user's master password
-                    user.set_password(new_password)
+                if items.exists():
+                    old_key = items.first().get_key()
+                    for item in items:
+                        # Decrypt fields with the old key
+                        item.username = item.decrypt_field(old_key, item.username)
+                        item.password = item.decrypt_field(old_key, item.password)
+                        item.notes = item.decrypt_field(old_key, item.notes)
 
-                    # Re-encrypt fields with the new key
-                    item.owner = request.user
-                    item.encrypt_sensitive_fields()
-                    item.save()
+                # Update user's master password
+                user.set_password(new_password)
+                user.save()
+
+                # Re-encrypt fields with the new key
+                if items.exists():
+                    for item in items:
+                        new_key = item.get_key()
+                        item.username = item.encrypt_field(new_key, item.username)
+                        item.password = item.encrypt_field(new_key, item.password)
+                        item.notes = item.encrypt_field(new_key, item.notes)
+                        item.save()
 
             # Handle 2FA enable/disable & OTP secret generation
             user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
@@ -77,7 +85,7 @@ def account(request):
                 request, request.user
             )  # Important for keeping the user logged in
             messages.success(
-                request, "Your account credentials was successfully updated!"
+                request, "Your account credentials were successfully updated!"
             )
             return redirect("passmanager:vault")
     else:
