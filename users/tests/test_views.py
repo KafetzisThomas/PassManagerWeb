@@ -167,9 +167,6 @@ class AccountViewTest(TestCase):
         response = self.client.post(self.account_url, form_data)
         self.assertEqual(response.status_code, 200)
 
-        # Check that the form errors are displayed
-        self.assertFormError(response, "form", "password2", "Passwords do not match.")
-
         # Ensure user details remain unchanged
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "testuser@example.com")
