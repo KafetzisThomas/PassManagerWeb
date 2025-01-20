@@ -15,6 +15,7 @@ from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 
 
@@ -199,6 +200,88 @@ class AccountViewTest(TestCase):
         self.client.logout()
         response = self.client.get(self.account_url)
         self.assertRedirects(response, f"/user/login/?next=/user/account/")
+
+
+class UpdateMasterPasswordViewTest(TestCase):
+    """
+    Test case for the update_master_password view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="oldpassword", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="oldpassword")
+        self.update_master_password_url = reverse("users:update_master_password")
+
+        # Some items to test encryption
+        self.items = []
+        for _ in range(3):
+            item = Item(
+                owner=self.user,
+                username="testuser",
+                password="testpassword",
+                notes="Test notes",
+            )
+            item.encrypt_sensitive_fields()
+            item.save()
+
+            # Add item to the list
+            self.items.append(item)
+
+    def test_update_master_password_view_get(self):
+        """
+        Test rendering the update_master_password page with GET request.
+        """
+        response = self.client.get(self.update_master_password_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/update_master_password.html")
+        self.assertIsInstance(response.context["form"], MasterPasswordChangeForm)
+
+    def test_update_master_password_view_post_valid_form(self):
+        """
+        Test updating master password with valid form data.
+        """
+        form_data = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
+        }
+        response = self.client.post(self.update_master_password_url, form_data)
+
+        # Re-login after password update (simulating what happens after real password change)
+        self.client.login(email="testuser@example.com", password="newpassword123")
+        self.assertRedirects(response, reverse("passmanager:vault"))
+
+        # Check if the user's password is updated
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("newpassword123"))
+
+        # Verify items are re-encrypted
+        for item in self.items:
+            self.assertNotEqual(item.username, "testuser")
+            self.assertNotEqual(item.password, "testpassword")
+            self.assertNotEqual(item.notes, "Test notes")
+
+    def test_update_master_password_view_post_invalid_form(self):
+        """
+        Test updating master password with invalid form data.
+        """
+        form_data = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "wrongpassword",
+        }
+        response = self.client.post(self.update_master_password_url, form_data)
+        self.assertEqual(response.status_code, 200)
+
+        # Ensure user's password remains unchanged
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("oldpassword"))
 
 
 class DeleteAccountViewTest(TestCase):
