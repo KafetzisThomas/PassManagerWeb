@@ -109,11 +109,11 @@
                 </li>
             {% endif %}
         </ul>
-        <hr>
         <div class="dropdown">
             <a href="#" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                 <strong><i class="bi bi-person-circle"></i> {{ request.user.username }}</strong>
             </a>
+            <hr class="border-light">
             <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
                 {% if user.is_authenticated %}
                     {% if request.user.is_superuser == 1 %}
@@ -130,6 +130,9 @@
                     </li>
                 {% endif %}
             </ul>
+            <div class="text-light small mt-2">
+                <strong>&copy; <script>document.write(new Date().getFullYear());</script> KafetzisThomas</strong>
+            </div>
         </div>
     </nav>
     <!-- sidebar end -->
