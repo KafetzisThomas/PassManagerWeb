@@ -1,7 +1,7 @@
 """
 This module contains test cases for the following classes:
-CustomUserCreationForm, CustomAuthenticationForm,
-TwoFactorVerificationForm, CustomUserChangeForm.
+CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
+CustomUserChangeForm, MasterPasswordChangeForm.
 """
 
 import pyotp
