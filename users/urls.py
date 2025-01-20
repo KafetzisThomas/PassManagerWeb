@@ -17,6 +17,12 @@ urlpatterns = [
     ),
     # Account page
     path("account/", views.account, name="account"),
+    # Update master password page
+    path(
+        "account/update_master_password/",
+        views.update_master_password,
+        name="update_master_password",
+    ),
     # Registration page
     path("register/", views.register, name="register"),
     # Delete account page

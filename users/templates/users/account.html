@@ -19,6 +19,9 @@
                 <a class="btn btn-danger mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button">
                     <i class="bi bi-trash"></i> Delete account
                 </a>
+                <a class="btn btn-success ms-1" href="{% url 'users:update_master_password' %}" role="button">
+                    <i class="bi bi-key"></i> Update Master Password
+                </a>
             </div>
             <div class="d-flex flex-column flex-md-row">
                 <a class="btn btn-success" href="{% url 'passmanager:download_csv' %}" role="button">

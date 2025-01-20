@@ -12,6 +12,7 @@ from .forms import (
     CustomAuthenticationForm,
     TwoFactorVerificationForm,
     CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 from .utils import (
     send_new_user_registration,
@@ -42,31 +43,6 @@ def account(request):
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            new_password = form.cleaned_data["password1"]
-
-            if new_password:
-                items = Item.objects.filter(owner=user)
-
-                if items.exists():
-                    old_key = items.first().get_key()
-                    for item in items:
-                        # Decrypt fields with the old key
-                        item.username = item.decrypt_field(old_key, item.username)
-                        item.password = item.decrypt_field(old_key, item.password)
-                        item.notes = item.decrypt_field(old_key, item.notes)
-
-                # Update user's master password
-                user.set_password(new_password)
-                user.save()
-
-                # Re-encrypt fields with the new key
-                if items.exists():
-                    for item in items:
-                        new_key = item.get_key()
-                        item.username = item.encrypt_field(new_key, item.username)
-                        item.password = item.encrypt_field(new_key, item.password)
-                        item.notes = item.encrypt_field(new_key, item.notes)
-                        item.save()
 
             # Handle 2FA enable/disable & OTP secret generation
             user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
@@ -93,6 +69,52 @@ def account(request):
 
     context = {"form": form}
     return render(request, "users/account.html", context)
+
+
+@login_required
+def update_master_password(request):
+    if request.method == "POST":
+        form = MasterPasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data["old_password"]
+            new_password = form.cleaned_data["new_password1"]
+
+            # Authenticate old password
+            if not request.user.check_password(old_password):
+                messages.error(request, "Old master password is incorrect.")
+                return redirect("users:update_master_password")
+
+            user = request.user
+            items = Item.objects.filter(owner=user)
+
+            if items.exists():
+                old_key = items.first().get_key()
+                for item in items:
+                    # Decrypt fields with the old key
+                    item.username = item.decrypt_field(old_key, item.username)
+                    item.password = item.decrypt_field(old_key, item.password)
+                    item.notes = item.decrypt_field(old_key, item.notes)
+
+            # Update user's master password
+            user.set_password(new_password)
+            user.save()
+
+            # Re-encrypt fields with the new key
+            if items.exists():
+                for item in items:
+                    new_key = item.get_key()
+                    item.username = item.encrypt_field(new_key, item.username)
+                    item.password = item.encrypt_field(new_key, item.password)
+                    item.notes = item.encrypt_field(new_key, item.notes)
+                    item.save()
+
+            messages.success(request, "Your master password was successfully updated!")
+            return redirect("passmanager:vault")
+    else:
+        form = MasterPasswordChangeForm(user=request.user)
+
+    context = {"form": form}
+    return render(request, "users/update_master_password.html", context)
 
 
 @login_required
