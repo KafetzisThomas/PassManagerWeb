@@ -13,6 +13,7 @@ from ..forms import (
     CustomAuthenticationForm,
     TwoFactorVerificationForm,
     CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 
 
@@ -282,4 +283,77 @@ class CustomUserChangeFormTests(TestCase):
             "enable_2fa": self.enable_2fa,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+
+class MasterPasswordChangeFormTests(TestCase):
+    """
+    Test suite for the MasterPasswordChangeForm.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment by creating a test user.
+        """
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="oldpassword", username="testuser"
+        )
+        self.form_data_valid = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
+        }
+        self.form_data_invalid_old_password = {
+            "old_password": "wrongpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
+        }
+        self.form_data_mismatch_passwords = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "differentpassword",
+        }
+
+    def test_form_valid_data(self):
+        """
+        Test that the form is valid when all required fields are provided and passwords match.
+        """
+        form = MasterPasswordChangeForm(user=self.user, data=self.form_data_valid)
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_form_invalid_old_password(self):
+        """
+        Test that the form is invalid when the old password is incorrect.
+        """
+        form = MasterPasswordChangeForm(
+            user=self.user, data=self.form_data_invalid_old_password
+        )
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_mismatch_passwords(self):
+        """
+        Test that the form is invalid when the new passwords do not match.
+        """
+        form = MasterPasswordChangeForm(
+            user=self.user, data=self.form_data_mismatch_passwords
+        )
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_missing_old_password(self):
+        """
+        Test that the form is invalid when the old password is missing.
+        """
+        data = self.form_data_valid.copy()
+        data.pop("old_password")
+        form = MasterPasswordChangeForm(user=self.user, data=data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_missing_new_password_fields(self):
+        """
+        Test that the form is invalid when the new_password fields are missing.
+        """
+        data = self.form_data_valid.copy()
+        data.pop("new_password1")
+        data.pop("new_password2")
+        form = MasterPasswordChangeForm(user=self.user, data=data)
         self.assertFalse(form.is_valid(), form.errors)
