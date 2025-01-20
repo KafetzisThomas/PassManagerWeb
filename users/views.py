@@ -40,30 +40,39 @@ def register(request):
 @login_required
 def account(request):
     if request.method == "POST":
+        action = request.POST.get("action")
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
+
         if form.is_valid():
-            user = form.save(commit=False)
+            if action == "save":
+                user = form.save(commit=False)
 
-            # Handle 2FA enable/disable & OTP secret generation
-            user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
-            if user.enable_2fa:
-                user.otp_secret = pyotp.random_base32()
-                send_2fa_verification(user, user.otp_secret)
+                # Handle 2FA enable/disable & OTP secret generation
+                user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+                if user.enable_2fa:
+                    user.otp_secret = pyotp.random_base32()
+                    send_2fa_verification(user, user.otp_secret)
+                    messages.success(
+                        request, "2FA enabled! Check your email for the OTP key."
+                    )
+                else:
+                    user.otp_secret = ""
+
+                user.save()
+                send_update_account_notification(user)
+                update_session_auth_hash(
+                    request, request.user
+                )  # Important for keeping the user logged in
                 messages.success(
-                    request, "2FA enabled! Check your email for the OTP key."
+                    request, "Your account credentials were successfully updated!"
                 )
-            else:
-                user.otp_secret = ""
-
-            user.save()
-            send_update_account_notification(user)
-            update_session_auth_hash(
-                request, request.user
-            )  # Important for keeping the user logged in
-            messages.success(
-                request, "Your account credentials were successfully updated!"
-            )
-            return redirect("passmanager:vault")
+                return redirect("passmanager:vault")
+            elif action == "update_master_password":
+                return redirect("users:update_master_password")
+            elif action == "export_data":
+                return redirect("passmanager:download_csv")
+        else:
+            messages.error(request, "There was an error updating your account.")
     else:
         form = CustomUserChangeForm(instance=request.user)
 
@@ -119,7 +128,7 @@ def update_master_password(request):
 
 @login_required
 def delete_account(request):
-    user = CustomUser.objects.get(id=request.user.id)
+    user = request.user
     user.delete()
     send_delete_account_notification(user)
     return redirect("passmanager:home")
