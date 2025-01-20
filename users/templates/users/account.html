@@ -11,22 +11,34 @@
     <form action="{% url 'users:account' %}" method="post" class="form">
         {% csrf_token %}
         {{ form|crispy }}
-        <div class="d-flex flex-column flex-md-row justify-content-between">
-            <div class="mb-2 mb-md-0 d-flex flex-column flex-md-row">
-                <button name="submit" class="btn btn-primary mb-2 mb-md-0 me-md-2">
-                    <i class="bi bi-floppy"></i> Save changes
-                </button>
-                <a class="btn btn-danger mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#delete_account_modal" role="button">
-                    <i class="bi bi-trash"></i> Delete account
-                </a>
-            </div>
-            <div class="d-flex flex-column flex-md-row">
-                <a class="btn btn-success" href="{% url 'passmanager:download_csv' %}" role="button">
-                    <i class="bi-filetype-csv"></i> Export data
-                </a>
-            </div>
+        <div class="btn-group w-100">
+            <button type="submit" name="submit" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-list"></i> Action
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li>
+                    <button class="dropdown-item" type="submit" name="action" value="save">
+                        <i class="bi bi-floppy"></i> Save Changes
+                    </button>
+                </li>
+                <li>
+                    <button class="dropdown-item" type="submit" name="action" value="update_master_password">
+                        <i class="bi bi-key"></i> Update Master Password
+                    </button>
+                </li>
+                <li>
+                    <button class="dropdown-item" type="submit" name="action" value="export_data">
+                        <i class="bi-filetype-csv"></i> Export Data
+                    </button>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#delete_account_modal">
+                        <i class="bi bi-trash"></i> Delete Account
+                    </button>
+                </li>
+            </ul>
         </div>
-        <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 
     <!-- Delete account modal start -->

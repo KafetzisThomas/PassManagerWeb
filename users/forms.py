@@ -1,12 +1,13 @@
 import pyotp
-from turnstile.fields import TurnstileField
 from django.contrib.auth import get_user_model
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.core.exceptions import ValidationError
+from turnstile.fields import TurnstileField
 from .models import CustomUser
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.password_validation import validate_password
+from django import forms
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    AuthenticationForm,
+    PasswordChangeForm,
+)
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -83,43 +84,18 @@ class TwoFactorVerificationForm(forms.Form):
 
 
 class CustomUserChangeForm(forms.ModelForm):
-    password1 = forms.CharField(
-        label="New Master Password", widget=forms.PasswordInput, required=False
-    )
-    password2 = forms.CharField(
-        label="Confirm New Master Password", widget=forms.PasswordInput, required=False
-    )
-
     class Meta:
         model = CustomUser
-        fields = (
-            "email",
-            "username",
-            "password1",
-            "password2",
-            "session_timeout",
-            "enable_2fa",
-        )
+        fields = ("email", "username", "session_timeout", "enable_2fa")
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password1 = cleaned_data.get("password1")
-        password2 = cleaned_data.get("password2")
 
-        if password1 and password1 != password2:
-            self.add_error("password2", "Passwords do not match.")
-
-        if password1:
-            try:
-                validate_password(password1)
-            except ValidationError as e:
-                self.add_error("password1", e)
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        password = self.cleaned_data.get("password1")
-        if password:
-            user.set_password(password)
-        if commit:
-            user.save()
-        return user
+class MasterPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        label="Old Master Password", widget=forms.PasswordInput
+    )
+    new_password1 = forms.CharField(
+        label="New Master Password", widget=forms.PasswordInput
+    )
+    new_password2 = forms.CharField(
+        label="Confirm New Master Password", widget=forms.PasswordInput
+    )

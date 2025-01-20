@@ -1,7 +1,7 @@
 """
 This module contains test cases for the following classes:
-CustomUserCreationForm, CustomAuthenticationForm,
-TwoFactorVerificationForm, CustomUserChangeForm.
+CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
+CustomUserChangeForm, MasterPasswordChangeForm.
 """
 
 import pyotp
@@ -13,6 +13,7 @@ from ..forms import (
     CustomAuthenticationForm,
     TwoFactorVerificationForm,
     CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 
 
@@ -224,76 +225,11 @@ class CustomUserChangeFormTests(TestCase):
         form_data = {
             "email": "updated@example.com",
             "username": "updated_username",
-            "password1": "newpassword123",
-            "password2": "newpassword123",
             "session_timeout": 600,
             "enable_2fa": True,
         }
         form = CustomUserChangeForm(instance=self.user, data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
-
-    def test_form_invalid_passwords_not_matching(self):
-        """
-        Test that the form is invalid when passwords do not match.
-        """
-        form_data = {
-            "email": self.test_email,
-            "username": self.test_username,
-            "password1": "newpassword123",
-            "password2": "differentpassword",
-            "session_timeout": self.session_timeout,
-            "enable_2fa": self.enable_2fa,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertFalse(form.is_valid(), form.errors)
-
-    def test_form_invalid_password_not_meeting_requirements(self):
-        """
-        Test that the form is invalid when the new password does not meet validation requirements.
-        """
-        form_data = {
-            "email": self.test_email,
-            "username": self.test_username,
-            "password1": "weak",
-            "password2": "weak",
-            "session_timeout": self.session_timeout,
-            "enable_2fa": self.enable_2fa,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertFalse(form.is_valid(), form.errors)
-
-    def test_form_save(self):
-        """
-        Test that the form's save method updates the user's password correctly.
-        """
-        new_password = "newpassword123"
-        form_data = {
-            "email": self.test_email,
-            "username": self.test_username,
-            "password1": new_password,
-            "password2": new_password,
-            "session_timeout": self.session_timeout,
-            "enable_2fa": True,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid(), form.errors)
-        updated_user = form.save()
-        self.assertTrue(updated_user.check_password(new_password))
-
-    def test_form_save_no_password_change(self):
-        """
-        Test that the form's save method does not change the password if no new password is provided.
-        """
-        form_data = {
-            "email": self.test_email,
-            "username": self.test_username,
-            "session_timeout": self.session_timeout,
-            "enable_2fa": self.enable_2fa,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid(), form.errors)
-        updated_user = form.save()
-        self.assertTrue(updated_user.check_password(self.test_password))
 
     def test_form_enable_2fa_toggle(self):
         """
@@ -309,3 +245,115 @@ class CustomUserChangeFormTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         updated_user = form.save()
         self.assertTrue(updated_user.enable_2fa)
+
+    def test_form_invalid_email(self):
+        """
+        Test that the form is invalid when an incorrect email is provided.
+        """
+        form_data = {
+            "email": "invalid-email",
+            "username": self.test_username,
+            "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_missing_username(self):
+        """
+        Test that the form is invalid when the username is missing.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": "",
+            "session_timeout": self.session_timeout,
+            "enable_2fa": self.enable_2fa,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_invalid_session_timeout(self):
+        """
+        Test that the form is invalid when an incorrect session timeout is provided.
+        """
+        form_data = {
+            "email": self.test_email,
+            "username": self.test_username,
+            "session_timeout": "invalid_timeout",
+            "enable_2fa": self.enable_2fa,
+        }
+        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+
+class MasterPasswordChangeFormTests(TestCase):
+    """
+    Test suite for the MasterPasswordChangeForm.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment by creating a test user.
+        """
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="oldpassword", username="testuser"
+        )
+        self.form_data_valid = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
+        }
+        self.form_data_invalid_old_password = {
+            "old_password": "wrongpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
+        }
+        self.form_data_mismatch_passwords = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "differentpassword",
+        }
+
+    def test_form_valid_data(self):
+        """
+        Test that the form is valid when all required fields are provided and passwords match.
+        """
+        form = MasterPasswordChangeForm(user=self.user, data=self.form_data_valid)
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_form_invalid_old_password(self):
+        """
+        Test that the form is invalid when the old password is incorrect.
+        """
+        form = MasterPasswordChangeForm(
+            user=self.user, data=self.form_data_invalid_old_password
+        )
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_mismatch_passwords(self):
+        """
+        Test that the form is invalid when the new passwords do not match.
+        """
+        form = MasterPasswordChangeForm(
+            user=self.user, data=self.form_data_mismatch_passwords
+        )
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_missing_old_password(self):
+        """
+        Test that the form is invalid when the old password is missing.
+        """
+        data = self.form_data_valid.copy()
+        data.pop("old_password")
+        form = MasterPasswordChangeForm(user=self.user, data=data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_missing_new_password_fields(self):
+        """
+        Test that the form is invalid when the new_password fields are missing.
+        """
+        data = self.form_data_valid.copy()
+        data.pop("new_password1")
+        data.pop("new_password2")
+        form = MasterPasswordChangeForm(user=self.user, data=data)
+        self.assertFalse(form.is_valid(), form.errors)

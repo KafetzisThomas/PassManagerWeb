@@ -1,6 +1,6 @@
 """
 This module contains test cases for the following views:
-register, account, delete_account, CustomLogin, TwoFactorVerification.
+register, account, update_master_password, delete_account, CustomLogin, TwoFactorVerification.
 """
 
 import pyotp
@@ -8,13 +8,13 @@ from django.test import TestCase, Client
 from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import SESSION_KEY
-from django.contrib.auth.hashers import check_password
 from passmanager.models import Item
 from ..models import CustomUser
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 
 
@@ -98,6 +98,82 @@ class AccountViewTest(TestCase):
         self.client.login(email="testuser@example.com", password="password")
         self.account_url = reverse("users:account")
 
+    def test_account_view_get(self):
+        """
+        Test rendering the account page with GET request.
+        """
+        response = self.client.get(self.account_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/account.html")
+        self.assertIsInstance(response.context["form"], CustomUserChangeForm)
+        self.assertEqual(response.context["form"].instance, self.user)
+
+    def test_account_view_post_valid_form(self):
+        """
+        Test updating account credentials with valid form data.
+        """
+        form_data = {
+            "email": "updateduser@example.com",
+            "username": "updateduser",
+            "session_timeout": 300,
+            "enable_2fa": True,
+            "action": "save",
+        }
+        response = self.client.post(self.account_url, form_data)
+        self.assertRedirects(response, reverse("passmanager:vault"))
+
+        # Check if user details are updated
+        updated_user = CustomUser.objects.get(email="updateduser@example.com")
+        self.assertEqual(updated_user.username, "updateduser")
+        self.assertEqual(updated_user.session_timeout, 300)
+        self.assertTrue(updated_user.enable_2fa)
+
+        # Check that the OTP secret is generated & saved
+        self.assertIsNotNone(updated_user.otp_secret)
+        self.assertIsInstance(updated_user.otp_secret, str)
+
+    def test_account_view_post_invalid_email(self):
+        """
+        Test updating account credentials with an invalid email.
+        """
+        form_data = {
+            "email": "invalid-email",
+            "username": "updateduser",
+            "action": "save",
+        }
+        response = self.client.post(self.account_url, form_data)
+        self.assertEqual(response.status_code, 200)
+
+        # Ensure user details remain unchanged
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "testuser@example.com")
+        self.assertEqual(self.user.username, "testuser")
+
+    def test_account_view_not_logged_in(self):
+        """
+        Test accessing the view when not logged in.
+        """
+        self.client.logout()
+        response = self.client.get(self.account_url)
+        self.assertRedirects(response, f"/user/login/?next=/user/account/")
+
+
+class UpdateMasterPasswordViewTest(TestCase):
+    """
+    Test case for the update_master_password view.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        """
+        self.client = Client()
+        self.user = CustomUser.objects.create_user(
+            email="testuser@example.com", password="oldpassword", username="testuser"
+        )
+        self.client.login(email="testuser@example.com", password="oldpassword")
+        self.update_master_password_url = reverse("users:update_master_password")
+
         # Some items to test encryption
         self.items = []
         for _ in range(3):
@@ -113,40 +189,33 @@ class AccountViewTest(TestCase):
             # Add item to the list
             self.items.append(item)
 
-    def test_account_view_get(self):
+    def test_update_master_password_view_get(self):
         """
-        Test rendering the account page with GET request.
+        Test rendering the update_master_password page with GET request.
         """
-        response = self.client.get(self.account_url)
+        response = self.client.get(self.update_master_password_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/account.html")
-        self.assertIsInstance(response.context["form"], CustomUserChangeForm)
-        self.assertEqual(response.context["form"].instance, self.user)
+        self.assertTemplateUsed(response, "users/update_master_password.html")
+        self.assertIsInstance(response.context["form"], MasterPasswordChangeForm)
 
-    def test_account_view_post_valid_form_with_password_change(self):
+    def test_update_master_password_view_post_valid_form(self):
         """
-        Test updating account credentials with valid form data & password change.
+        Test updating master password with valid form data.
         """
         form_data = {
-            "email": "updateduser@example.com",
-            "username": "updateduser",
-            "password1": "newpassword123",
-            "password2": "newpassword123",
-            "session_timeout": 300,
-            "enable_2fa": True,
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
         }
-        response = self.client.post(self.account_url, form_data)
+        response = self.client.post(self.update_master_password_url, form_data)
+
+        # Re-login after password update (simulating what happens after real password change)
+        self.client.login(email="testuser@example.com", password="newpassword123")
         self.assertRedirects(response, reverse("passmanager:vault"))
 
-        # Check if user details are updated
-        updated_user = CustomUser.objects.get(email="updateduser@example.com")
-        self.assertEqual(updated_user.username, "updateduser")
-        self.assertTrue(check_password("newpassword123", updated_user.password))
-        self.assertTrue(updated_user.enable_2fa)
-
-        # Check that the OTP secret is generated & saved
-        self.assertIsNotNone(updated_user.otp_secret)
-        self.assertIsInstance(updated_user.otp_secret, str)
+        # Check if the user's password is updated
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("newpassword123"))
 
         # Verify items are re-encrypted
         for item in self.items:
@@ -154,51 +223,21 @@ class AccountViewTest(TestCase):
             self.assertNotEqual(item.password, "testpassword")
             self.assertNotEqual(item.notes, "Test notes")
 
-    def test_account_view_post_invalid_form(self):
+    def test_update_master_password_view_post_invalid_form(self):
         """
-        Test handling of invalid form submission.
+        Test updating master password with invalid form data.
         """
         form_data = {
-            "email": "updateduser@example.com",
-            "username": "updateduser",
-            "password1": "newpassword123",
-            "password2": "wrongpassword",
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "wrongpassword",
         }
-        response = self.client.post(self.account_url, form_data)
+        response = self.client.post(self.update_master_password_url, form_data)
         self.assertEqual(response.status_code, 200)
 
-        # Ensure user details remain unchanged
+        # Ensure user's password remains unchanged
         self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "testuser@example.com")
-        self.assertEqual(self.user.username, "testuser")
-
-    def test_account_view_post_no_changes(self):
-        """
-        Test submitting the form with no changes.
-        """
-        form_data = {
-            "email": "testuser@example.com",
-            "username": "testuser",
-            "password1": "",
-            "password2": "",
-            "session_timeout": 300,
-            "enable_2fa": True,
-        }
-        response = self.client.post(self.account_url, form_data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        # Ensure user details remain unchanged
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "testuser@example.com")
-        self.assertEqual(self.user.username, "testuser")
-
-    def test_account_view_not_logged_in(self):
-        """
-        Test accessing the view when not logged in.
-        """
-        self.client.logout()
-        response = self.client.get(self.account_url)
-        self.assertRedirects(response, f"/user/login/?next=/user/account/")
+        self.assertTrue(self.user.check_password("oldpassword"))
 
 
 class DeleteAccountViewTest(TestCase):

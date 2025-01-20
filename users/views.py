@@ -12,6 +12,7 @@ from .forms import (
     CustomAuthenticationForm,
     TwoFactorVerificationForm,
     CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 from .utils import (
     send_new_user_registration,
@@ -39,55 +40,39 @@ def register(request):
 @login_required
 def account(request):
     if request.method == "POST":
+        action = request.POST.get("action")
         form = CustomUserChangeForm(instance=request.user, data=request.POST)
+
         if form.is_valid():
-            user = form.save(commit=False)
-            new_password = form.cleaned_data["password1"]
+            if action == "save":
+                user = form.save(commit=False)
 
-            if new_password:
-                items = Item.objects.filter(owner=user)
+                # Handle 2FA enable/disable & OTP secret generation
+                user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+                if user.enable_2fa:
+                    user.otp_secret = pyotp.random_base32()
+                    send_2fa_verification(user, user.otp_secret)
+                    messages.success(
+                        request, "2FA enabled! Check your email for the OTP key."
+                    )
+                else:
+                    user.otp_secret = ""
 
-                if items.exists():
-                    old_key = items.first().get_key()
-                    for item in items:
-                        # Decrypt fields with the old key
-                        item.username = item.decrypt_field(old_key, item.username)
-                        item.password = item.decrypt_field(old_key, item.password)
-                        item.notes = item.decrypt_field(old_key, item.notes)
-
-                # Update user's master password
-                user.set_password(new_password)
                 user.save()
-
-                # Re-encrypt fields with the new key
-                if items.exists():
-                    for item in items:
-                        new_key = item.get_key()
-                        item.username = item.encrypt_field(new_key, item.username)
-                        item.password = item.encrypt_field(new_key, item.password)
-                        item.notes = item.encrypt_field(new_key, item.notes)
-                        item.save()
-
-            # Handle 2FA enable/disable & OTP secret generation
-            user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
-            if user.enable_2fa:
-                user.otp_secret = pyotp.random_base32()
-                send_2fa_verification(user, user.otp_secret)
+                send_update_account_notification(user)
+                update_session_auth_hash(
+                    request, request.user
+                )  # Important for keeping the user logged in
                 messages.success(
-                    request, "2FA enabled! Check your email for the OTP key."
+                    request, "Your account credentials were successfully updated!"
                 )
-            else:
-                user.otp_secret = ""
-
-            user.save()
-            send_update_account_notification(user)
-            update_session_auth_hash(
-                request, request.user
-            )  # Important for keeping the user logged in
-            messages.success(
-                request, "Your account credentials were successfully updated!"
-            )
-            return redirect("passmanager:vault")
+                return redirect("passmanager:vault")
+            elif action == "update_master_password":
+                return redirect("users:update_master_password")
+            elif action == "export_data":
+                return redirect("passmanager:download_csv")
+        else:
+            messages.error(request, "There was an error updating your account.")
     else:
         form = CustomUserChangeForm(instance=request.user)
 
@@ -96,8 +81,54 @@ def account(request):
 
 
 @login_required
+def update_master_password(request):
+    if request.method == "POST":
+        form = MasterPasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data["old_password"]
+            new_password = form.cleaned_data["new_password1"]
+
+            # Authenticate old password
+            if not request.user.check_password(old_password):
+                messages.error(request, "Old master password is incorrect.")
+                return redirect("users:update_master_password")
+
+            user = request.user
+            items = Item.objects.filter(owner=user)
+
+            if items.exists():
+                old_key = items.first().get_key()
+                for item in items:
+                    # Decrypt fields with the old key
+                    item.username = item.decrypt_field(old_key, item.username)
+                    item.password = item.decrypt_field(old_key, item.password)
+                    item.notes = item.decrypt_field(old_key, item.notes)
+
+            # Update user's master password
+            user.set_password(new_password)
+            user.save()
+
+            # Re-encrypt fields with the new key
+            if items.exists():
+                for item in items:
+                    new_key = item.get_key()
+                    item.username = item.encrypt_field(new_key, item.username)
+                    item.password = item.encrypt_field(new_key, item.password)
+                    item.notes = item.encrypt_field(new_key, item.notes)
+                    item.save()
+
+            messages.success(request, "Your master password was successfully updated!")
+            return redirect("passmanager:vault")
+    else:
+        form = MasterPasswordChangeForm(user=request.user)
+
+    context = {"form": form}
+    return render(request, "users/update_master_password.html", context)
+
+
+@login_required
 def delete_account(request):
-    user = CustomUser.objects.get(id=request.user.id)
+    user = request.user
     user.delete()
     send_delete_account_notification(user)
     return redirect("passmanager:home")
