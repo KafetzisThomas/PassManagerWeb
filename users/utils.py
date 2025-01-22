@@ -67,3 +67,18 @@ def send_update_account_notification(user):
     )
 
     send_mail(subject, None, email_from, recipient_list, html_message=html_message)
+
+
+def send_master_password_update(user):
+    subject = "Security Notification: Master Password Updated"
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [user.email]
+
+    html_message = render_to_string(
+        "email_templates/update_master_password.html",
+        {
+            "user_name": user.username,
+        },
+    )
+
+    send_mail(subject, None, email_from, recipient_list, html_message=html_message)
