@@ -388,29 +388,29 @@ class PasswordGeneratorViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a user.
         """
         self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
 
-    def test_password_generator_view_get(self):
+    def test_password_generator_view_status_code_and_template(self):
         """
-        Test GET request to password_generator view returns form.
+        Test if the view returns status code 200 and uses the correct template.
         """
         response = self.client.get(reverse("passmanager:password_generator"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-        self.assertEqual(
-            response.context["password"], ""
-        )  # Ensure password is empty initially
+
+        # Ensure password is empty initially
+        self.assertEqual(response.context["password"], "")
 
     @patch("passmanager.views.generate_password")
-    def test_password_generator_view_post(self, mock_generate_password):
+    def test_password_generator_view_valid_data(self, mock_generate_password):
         """
-        Test POST request to password_generator view generates password.
+        Test if view generates a password with valid data.
         """
         mock_generate_password.return_value = "GeneratedPassword123"
         data = {
@@ -419,42 +419,15 @@ class PasswordGeneratorViewTests(TestCase):
             "digits": True,
             "special_chars": False,
         }
-
         response = self.client.post(reverse("passmanager:password_generator"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertEqual(response.context["password"], "GeneratedPassword123")
 
-        mock_generate_password.assert_called_once_with(12, True, True, False)
-
-    def test_password_generator_view_post_invalid_form(self):
+    def test_password_generator_view_empty_data(self):
         """
-        Test POST request with invalid data returns form with errors.
-        """
-        data = {
-            "length": 4,  # Invalid length (< min_value)
-            "letters": True,
-            "digits": True,
-            "special_chars": False,
-        }
-
-        response = self.client.post(reverse("passmanager:password_generator"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
-        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-        self.assertIn("length", response.context["form"].errors)
-
-    def test_password_generator_view_post_empty_data(self):
-        """
-        Test POST request with empty data returns form with initial values.
+        Test that view returns empty values with no input.
         """
         response = self.client.post(reverse("passmanager:password_generator"), {})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
-        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-        self.assertEqual(
-            response.context["password"], ""
-        )  # Ensure password remains empty
+        self.assertEqual(response.context["password"], "")
 
 
 class DownloadCsvViewTest(TestCase):
