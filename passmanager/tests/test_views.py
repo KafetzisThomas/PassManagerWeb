@@ -439,12 +439,13 @@ class DownloadCsvViewTest(TestCase):
         """
         Set up test data and create a test user.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
 
+        # Create test item
         self.item = Item(
             name="Test Item",
             username="testuser",
@@ -456,7 +457,7 @@ class DownloadCsvViewTest(TestCase):
         self.item.encrypt_sensitive_fields()
         self.item.save()
 
-    def test_download_csv(self):
+    def test_download_csv_view(self):
         """
         Test csv file returns with properly decrypted user data.
         """
