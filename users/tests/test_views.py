@@ -223,20 +223,19 @@ class DeleteAccountViewTest(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a test user.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
-        self.delete_account_url = reverse("users:delete_account")
+        self.client.login(email="testuser@example.com", password="password123")
 
     def test_delete_account_view(self):
         """
-        Test deleting the user account with a POST request.
+        Test deleting the user account successfully.
         """
-        response = self.client.post(self.delete_account_url)
+        response = self.client.post(reverse("users:delete_account"))
         self.assertRedirects(response, reverse("passmanager:home"))
 
         # Check that the user is deleted
@@ -247,7 +246,7 @@ class DeleteAccountViewTest(TestCase):
         Test accessing the view when not logged in.
         """
         self.client.logout()
-        response = self.client.post(self.delete_account_url)
+        response = self.client.post(reverse("users:delete_account"))
         self.assertRedirects(
             response, f"/user/login/?next=/user/account/delete_account/"
         )
