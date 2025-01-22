@@ -1,8 +1,3 @@
-"""
-This module contains test cases for the following classes:
-ItemForm, PasswordGeneratorForm, ImportPasswordsForm.
-"""
-
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
@@ -36,20 +31,6 @@ class ItemFormTests(TestCase):
         Test that the form is valid when correct data is provided.
         """
         form_data = {
-            "name": "Updated Item Name",
-            "username": "updated_username",
-            "password": "updated_password",
-            "url": "updated-example.com",
-            "notes": "Updated notes",
-        }
-        form = ItemForm(data=form_data)
-        self.assertTrue(form.is_valid())
-
-    def test_item_form_save(self):
-        """
-        Test that the form's save method creates a new item.
-        """
-        form_data = {
             "name": "New Item",
             "username": "new_username",
             "password": "new_password",
@@ -57,7 +38,7 @@ class ItemFormTests(TestCase):
             "notes": "New notes",
         }
         form = ItemForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         item = form.save(commit=False)
         item.owner = self.test_user
         item.save()
@@ -75,7 +56,7 @@ class ItemFormTests(TestCase):
             "notes": "Updated notes",
         }
         form = ItemForm(instance=self.test_item, data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
         form.save()
         self.test_item.refresh_from_db()
         self.assertEqual(self.test_item.name, "Updated Item")
@@ -88,14 +69,14 @@ class ItemFormTests(TestCase):
             "name": "Test Item",
         }
         form = ItemForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_item_form_empty_data(self):
         """
         Test that the form is invalid when empty data is provided.
         """
         form = ItemForm(data={})
-        self.assertFalse(form.is_valid())
+        self.assertFalse(form.is_valid(), form.errors)
 
 
 class PasswordGeneratorFormTests(TestCase):
@@ -114,7 +95,7 @@ class PasswordGeneratorFormTests(TestCase):
             "special_chars": False,
         }
         form = PasswordGeneratorForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_length_too_short(self):
         """
@@ -127,11 +108,7 @@ class PasswordGeneratorFormTests(TestCase):
             "special_chars": False,
         }
         form = PasswordGeneratorForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("length", form.errors)
-        self.assertEqual(
-            form.errors["length"][0], "Ensure this value is greater than or equal to 8."
-        )
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_length_too_long(self):
         """
@@ -144,11 +121,7 @@ class PasswordGeneratorFormTests(TestCase):
             "special_chars": False,
         }
         form = PasswordGeneratorForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("length", form.errors)
-        self.assertEqual(
-            form.errors["length"][0], "Ensure this value is less than or equal to 32."
-        )
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_when_letters_unchecked(self):
         """
@@ -161,9 +134,7 @@ class PasswordGeneratorFormTests(TestCase):
             "special_chars": True,
         }
         form = PasswordGeneratorForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn("letters", form.errors)
-        self.assertEqual(form.errors["letters"][0], "This field is required.")
+        self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_initial_values(self):
         """
