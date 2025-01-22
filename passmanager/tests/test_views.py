@@ -322,15 +322,18 @@ class DeleteItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test data and create a test user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.other_user = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="password", username="otheruser"
+        self.other_user = self.user_model.objects.create_user(
+            email="otheruser@example.com", password="password456", username="otheruser"
         )
-        self.client = Client()
+        self.client.login(email="testuser@example.com", password="password123")
+
+        # Create test item
         self.item = Item.objects.create(
             name="Test Item",
             username="testuser",
@@ -342,9 +345,8 @@ class DeleteItemViewTests(TestCase):
 
     def test_delete_item_view_logged_in_owner(self):
         """
-        Test that an owner can successfully delete their own item.
+        Test that owner can successfully delete their own items.
         """
-        self.client.force_login(self.user)
         response = self.client.post(
             reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
         )
@@ -352,10 +354,25 @@ class DeleteItemViewTests(TestCase):
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
+    def test_delete_item_view_other_user(self):
+        """
+        Test that another user cannot delete someone else's item.
+        """
+        self.client.login(email="otheruser@example.com", password="password456")
+        response = self.client.post(
+            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Ensure the item still exists
+        item = Item.objects.get(id=self.item.id)
+        self.assertEqual(item.name, "Test Item")
+
     def test_delete_item_view_not_logged_in(self):
         """
         Test that a not logged-in user is redirected to the login page.
         """
+        self.client.logout()
         response = self.client.post(
             reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
         )
