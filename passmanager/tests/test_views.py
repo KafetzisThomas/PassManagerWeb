@@ -1,14 +1,10 @@
-"""
-This module contains test cases for the following views:
-* home, vault, new_item, edit_item, delete_item, password_generator, download_csv, upload_csv, password_checkup
-"""
-
 import os
 import csv
 import base64
 from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.messages import get_messages
+from django.contrib.auth import get_user_model
 from unittest.mock import patch
 from django.urls import reverse
 from users.models import CustomUser
@@ -65,14 +61,14 @@ class VaultViewTests(TestCase):
         """
         Set up test data and create test users.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="12345", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.user2 = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="54321", username="otheruser"
+        self.user2 = self.user_model.objects.create_user(
+            email="otheruser@example.com", password="password456", username="otheruser"
         )
-
-        self.client.login(email="testuser@example.com", password="12345")
+        self.client.login(email="testuser@example.com", password="password123")
 
         # Create test items for both users
         for i in range(5):
@@ -91,19 +87,14 @@ class VaultViewTests(TestCase):
         response = self.client.get(reverse("passmanager:vault"))
         self.assertRedirects(response, "/user/login/?next=/vault/")
 
-    def test_vault_view_status_code(self):
+    def test_new_item_view_status_code_and_template(self):
         """
-        Test if the vault view returns a status code 200 for logged-in users.
+        Test if the vault view returns a status code 200 & uses the correct template.
         """
         response = self.client.get(reverse("passmanager:vault"))
         self.assertEqual(response.status_code, 200)
-
-    def test_vault_view_template_used(self):
-        """
-        Test if the vault view uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:vault"))
         self.assertTemplateUsed(response, "passmanager/vault.html")
+        self.assertIsInstance(response.context["form"], ItemForm)
 
     def test_vault_view_items_for_logged_in_user(self):
         """
