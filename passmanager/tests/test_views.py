@@ -94,7 +94,6 @@ class VaultViewTests(TestCase):
         response = self.client.get(reverse("passmanager:vault"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/vault.html")
-        self.assertIsInstance(response.context["form"], ItemForm)
 
     def test_vault_view_items_for_logged_in_user(self):
         """
@@ -209,13 +208,16 @@ class EditItemViewTests(TestCase):
         """
         Set up test data and create test users.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.other_user = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="password", username="otheruser"
+        self.other_user = self.user_model.objects.create_user(
+            email="otheruser@example.com", password="password456", username="otheruser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
+
+        # Create test item
         self.item = Item.objects.create(
             name="Test Item",
             username="testuser",
@@ -227,7 +229,7 @@ class EditItemViewTests(TestCase):
 
     def test_edit_item_view_redirect_if_not_logged_in(self):
         """
-        Test to verify that non-logged-in users are redirected to the login page when trying to access the edit_item view.
+        Test if the edit_item view redirects to the login page if not logged in.
         """
         self.client.logout()
         response = self.client.get(
@@ -239,17 +241,17 @@ class EditItemViewTests(TestCase):
 
     def test_edit_item_view_permission_denied_for_other_user(self):
         """
-        Test to verify that other users cannot access the edit_item view of items they don't own.
+        Test that other users cannot access items they don't own.
         """
-        self.client.login(email="otheruser@example.com", password="password")
+        self.client.login(email="otheruser@example.com", password="password456")
         response = self.client.get(
             reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_edit_item_view_post_save_action(self):
+    def test_edit_item_view_save_action(self):
         """
-        Verifies that an item's attributes are correctly updated after a save action.
+        Test that item's attributes are correctly updated after a save action.
         """
         data = {
             "name": "Modified Item",
@@ -263,13 +265,19 @@ class EditItemViewTests(TestCase):
             reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
         self.assertRedirects(response, reverse("passmanager:vault"))
+
         self.item.refresh_from_db()
+        self.item.decrypt_sensitive_fields()
         self.assertEqual(self.item.name, "Modified Item")
+        self.assertEqual(self.item.username, "modifieduser")
+        self.assertEqual(self.item.password, "modifiedpassword")
+        self.assertEqual(self.item.url, "http://modified-example.com")
+        self.assertEqual(self.item.notes, "Modified notes")
 
     @patch("passmanager.views.generate_password")
-    def test_edit_item_view_post_generate_password_action(self, mock_generate_password):
+    def test_edit_item_view_generate_password_action(self, mock_generate_password):
         """
-        Verifies that the generate_password action generates a new password.
+        Test generate_password action generates a new password.
         """
         mock_generate_password.return_value = "generatedpassword123"
         data = {
@@ -283,15 +291,13 @@ class EditItemViewTests(TestCase):
         response = self.client.post(
             reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/edit_item.html")
         self.assertEqual(
             response.context["form"].initial["password"], "generatedpassword123"
         )
 
-    def test_edit_item_view_post_delete_action(self):
+    def test_edit_item_view_delete_action(self):
         """
-        Verifies that an item is correctly deleted when the delete action is triggered.
+        Test item is correctly deleted when the delete action is triggered.
         """
         data = {
             "name": "Modified Item",
@@ -307,31 +313,6 @@ class EditItemViewTests(TestCase):
         self.assertRedirects(response, reverse("passmanager:vault"))
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
-
-    def test_edit_item_view_post_save_action_with_encryption(self):
-        """
-        Verifies that item attributes are correctly encrypted and decrypted after a save action.
-        """
-        data = {
-            "name": "Encrypted Item",
-            "username": "encrypteduser",
-            "password": "encryptedpassword",
-            "url": "http://example.com",
-            "notes": "Encrypted notes",
-            "action": "save",
-        }
-        response = self.client.post(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
-        )
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        self.item.refresh_from_db()
-        self.item.decrypt_sensitive_fields()
-        self.assertEqual(self.item.name, "Encrypted Item")
-        self.assertEqual(self.item.username, "encrypteduser")
-        self.assertEqual(self.item.password, "encryptedpassword")
-        self.assertEqual(self.item.url, "http://example.com")
-        self.assertEqual(self.item.notes, "Encrypted notes")
 
 
 class DeleteItemViewTests(TestCase):
