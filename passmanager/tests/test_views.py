@@ -1,15 +1,11 @@
-import os
 import csv
-import base64
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.messages import get_messages
 from django.contrib.auth import get_user_model
 from unittest.mock import patch
 from django.urls import reverse
-from users.models import CustomUser
-from ..models import Item
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from ..models import Item
 
 
 class HomeViewTests(TestCase):
@@ -390,7 +386,8 @@ class PasswordGeneratorViewTests(TestCase):
         """
         Set up the test environment by creating a user.
         """
-        self.user = CustomUser.objects.create_user(
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
             email="testuser@example.com", password="password123", username="testuser"
         )
         self.client.login(email="testuser@example.com", password="password123")
@@ -564,12 +561,13 @@ class PasswordCheckupViewTests(TestCase):
         """
         Set up test data and create a test user.
         """
-        self.encryption_key = base64.urlsafe_b64encode(os.urandom(32)).decode()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
 
+        # Create test items
         self.item1 = Item(
             name="Test Item 1",
             username="testuser1",
@@ -593,9 +591,9 @@ class PasswordCheckupViewTests(TestCase):
         self.item2.save()
 
     @patch("passmanager.views.check_password")
-    def test_password_checkup(self, mock_check_password):
+    def test_password_checkup_view(self, mock_check_password):
         """
-        Test for check if the password has been pwned.
+        Test checkup verifies if password has been pwned.
         """
         mock_check_password.side_effect = lambda password: {
             # Fake values for testing
