@@ -117,16 +117,18 @@ class TwoFactorVerificationFormTests(TestCase):
         """
         Set up the test environment by creating a test user.
         """
-        self.test_username = "testuser"
-        self.test_email = "testuser@example.com"
-        self.test_password = "testpassword"
-        self.test_otp_secret = pyotp.random_base32()
-
-        self.user = CustomUser.objects.create_user(
-            username=self.test_username,
-            email=self.test_email,
-            password=self.test_password,
-            otp_secret=self.test_otp_secret,
+        self.user_model = get_user_model()
+        self.otp_secret = pyotp.random_base32()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com",
+            username="testuser",
+            password="testpassword123",
+            otp_secret=self.otp_secret,
+        )
+        self.user_without_otp = self.user_model.objects.create_user(
+            username="testuser2",
+            email="testuser2@example.com",
+            password="testpassword456",
         )
 
     def test_form_valid_with_correct_otp(self):
@@ -141,20 +143,15 @@ class TwoFactorVerificationFormTests(TestCase):
         """
         Test that the form is invalid when no user is provided.
         """
-        form = TwoFactorVerificationForm(data={"otp": self.test_otp_secret})
+        form = TwoFactorVerificationForm(data={"otp": self.otp_secret})
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_without_otp_secret(self):
         """
         Test that the form is invalid when the user lacks an OTP secret.
         """
-        user_without_otp = CustomUser.objects.create_user(
-            username="testuser2",
-            email="testuser2@example.com",
-            password=self.test_password,
-        )
         form = TwoFactorVerificationForm(
-            data={"otp": self.test_otp_secret}, user=user_without_otp
+            data={"otp": self.otp_secret}, user=self.user_without_otp
         )
         self.assertFalse(form.is_valid(), form.errors)
 
@@ -162,9 +159,7 @@ class TwoFactorVerificationFormTests(TestCase):
         """
         Test that the form is invalid when an incorrect OTP is provided.
         """
-        form = TwoFactorVerificationForm(
-            data={"otp": self.test_otp_secret}, user=self.user
-        )
+        form = TwoFactorVerificationForm(data={"otp": self.otp_secret}, user=self.user)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_with_empty_otp(self):
