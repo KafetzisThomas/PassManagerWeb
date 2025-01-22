@@ -1,12 +1,8 @@
-"""
-This module contains test cases for the following views:
-register, account, update_master_password, delete_account, CustomLogin, TwoFactorVerification.
-"""
-
 import pyotp
 from django.test import TestCase, Client
 from unittest.mock import MagicMock, patch
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 from django.contrib.auth import SESSION_KEY
 from passmanager.models import Item
 from ..models import CustomUser
@@ -25,60 +21,49 @@ class RegisterViewTest(TestCase):
     """
 
     def setUp(self):
-        """
-        Set up the test environment.
-        """
-        self.client = Client()
-        self.register_url = reverse("users:register")
-
-    def test_register_view_get(self, mock: MagicMock):
-        """
-        Test that the register view returns the registration form on GET request.
-        """
-        response = self.client.get(self.register_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/register.html")
-        self.assertIsInstance(response.context["form"], CustomUserCreationForm)
-
-    def test_register_view_post_valid_form(self, mock: MagicMock):
-        """
-        Test registering a new user with a valid form submission.
-        """
-        form_data = {
+        self.user_model = get_user_model()
+        self.form_data = {
             "email": "testuser@example.com",
             "username": "testuser",
             "password1": "testpassword123",
             "password2": "testpassword123",
             "captcha_verification": "testsecret",
         }
-        response = self.client.post(self.register_url, form_data)
+
+    def test_register_view_status_code_and_template(self, mock: MagicMock):
+        """
+        Test if the register view returns a status code 200 & uses the correct template.
+        """
+        response = self.client.get(reverse("users:register"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/register.html")
+        self.assertIsInstance(response.context["form"], CustomUserCreationForm)
+
+    def test_register_view_valid(self, mock: MagicMock):
+        """
+        Test registering a new user with valid data.
+        """
+        response = self.client.post(reverse("users:register"), self.form_data)
         self.assertRedirects(response, reverse("users:login"))
 
         # Check if the user is created in the database
         self.assertTrue(
-            CustomUser.objects.filter(email="testuser@example.com").exists()
+            self.user_model.objects.filter(email=self.form_data["email"]).exists()
         )
 
         # Check if the user is still logged out
         self.assertNotIn(SESSION_KEY, self.client.session)
 
-    def test_register_view_post_invalid_form(self, mock: MagicMock):
+    def test_register_view_post_invalid(self, mock: MagicMock):
         """
-        Test registering a new user with an invalid form submission.
+        Test registering a new user with invalid data.
         """
-        form_data = {
-            "email": "testuser@example.com",
-            "username": "testuser",
-            "password1": "testpassword123",
-            "password2": "wrongpassword",
-            "captcha_verification": "testsecret",
-        }
-        response = self.client.post(self.register_url, form_data)
-        self.assertEqual(response.status_code, 200)
+        self.form_data["password2"] = "wrongpassword"
+        self.client.post(reverse("users:register"), self.form_data)
 
         # Check that user is not created in the database
         self.assertFalse(
-            CustomUser.objects.filter(email="testuser@example.com").exists()
+            self.user_model.objects.filter(email="testuser@example.com").exists()
         )
 
 
