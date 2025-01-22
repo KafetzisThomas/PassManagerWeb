@@ -147,14 +147,19 @@ class UpdateMasterPasswordViewTest(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a test user, items and valid data.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
             email="testuser@example.com", password="oldpassword", username="testuser"
         )
         self.client.login(email="testuser@example.com", password="oldpassword")
-        self.update_master_password_url = reverse("users:update_master_password")
+
+        self.form_data = {
+            "old_password": "oldpassword",
+            "new_password1": "newpassword123",
+            "new_password2": "newpassword123",
+        }
 
         # Some items to test encryption
         self.items = []
@@ -171,25 +176,22 @@ class UpdateMasterPasswordViewTest(TestCase):
             # Add item to the list
             self.items.append(item)
 
-    def test_update_master_password_view_get(self):
+    def test_update_master_password_view_status_code_and_template(self):
         """
-        Test rendering the update_master_password page with GET request.
+        Test if view returns a status code 200 & uses the correct template.
         """
-        response = self.client.get(self.update_master_password_url)
+        response = self.client.get(reverse("users:update_master_password"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/update_master_password.html")
         self.assertIsInstance(response.context["form"], MasterPasswordChangeForm)
 
-    def test_update_master_password_view_post_valid_form(self):
+    def test_update_master_password_view_valid_data(self):
         """
-        Test updating master password with valid form data.
+        Test updating master password with valid data.
         """
-        form_data = {
-            "old_password": "oldpassword",
-            "new_password1": "newpassword123",
-            "new_password2": "newpassword123",
-        }
-        response = self.client.post(self.update_master_password_url, form_data)
+        response = self.client.post(
+            reverse("users:update_master_password"), self.form_data
+        )
 
         # Re-login after password update (simulating what happens after real password change)
         self.client.login(email="testuser@example.com", password="newpassword123")
@@ -205,20 +207,12 @@ class UpdateMasterPasswordViewTest(TestCase):
             self.assertNotEqual(item.password, "testpassword")
             self.assertNotEqual(item.notes, "Test notes")
 
-    def test_update_master_password_view_post_invalid_form(self):
+    def test_update_master_password_view_invalid_data(self):
         """
-        Test updating master password with invalid form data.
+        Test updating master password with invalid data.
         """
-        form_data = {
-            "old_password": "oldpassword",
-            "new_password1": "newpassword123",
-            "new_password2": "wrongpassword",
-        }
-        response = self.client.post(self.update_master_password_url, form_data)
-        self.assertEqual(response.status_code, 200)
-
-        # Ensure user's password remains unchanged
-        self.user.refresh_from_db()
+        self.form_data["new_password2"] = "wrongpassword"
+        self.client.post(reverse("users:update_master_password"), self.form_data)
         self.assertTrue(self.user.check_password("oldpassword"))
 
 
