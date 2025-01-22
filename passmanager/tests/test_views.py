@@ -13,18 +13,12 @@ class HomeViewTests(TestCase):
     Test case for the home view.
     """
 
-    def test_home_view_status_code(self):
+    def test_home_view_status_code_and_template(self):
         """
-        Test if the home view returns a status code 200.
+        Test if the home view returns a status code 200 & uses the correct template.
         """
         response = self.client.get(reverse("passmanager:home"))
         self.assertEqual(response.status_code, 200)
-
-    def test_home_view_template_used(self):
-        """
-        Test if the home view uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:home"))
         self.assertTemplateUsed(response, "passmanager/home.html")
 
 
@@ -33,18 +27,12 @@ class FaqViewTests(TestCase):
     Test case for the faq view.
     """
 
-    def test_faq_view_status_code(self):
+    def test_faq_view_status_code_and_template(self):
         """
-        Test if the faq view returns a status code 200.
+        Test if the faq view returns a status code 200 & uses the correct template.
         """
         response = self.client.get(reverse("passmanager:faq"))
         self.assertEqual(response.status_code, 200)
-
-    def test_faq_view_template_used(self):
-        """
-        Test if the faq view uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:faq"))
         self.assertTemplateUsed(response, "passmanager/faq.html")
 
 
@@ -55,7 +43,7 @@ class VaultViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test environment by defining data and creating users.
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
@@ -83,7 +71,7 @@ class VaultViewTests(TestCase):
         response = self.client.get(reverse("passmanager:vault"))
         self.assertRedirects(response, "/user/login/?next=/vault/")
 
-    def test_new_item_view_status_code_and_template(self):
+    def test_vault_view_status_code_and_template(self):
         """
         Test if the vault view returns a status code 200 & uses the correct template.
         """
@@ -202,7 +190,7 @@ class EditItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test environment by defining data and creating users.
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
@@ -318,7 +306,7 @@ class DeleteItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test environment by defining data and creating a user.
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
@@ -427,14 +415,14 @@ class PasswordGeneratorViewTests(TestCase):
         self.assertEqual(response.context["password"], "")
 
 
-class DownloadCsvViewTest(TestCase):
+class DownloadCsvViewTests(TestCase):
     """
     Test case for the download_csv view.
     """
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test environment by defining data and creating a user.
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
@@ -559,7 +547,7 @@ class PasswordCheckupViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test environment by defining data and creating a user.
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(

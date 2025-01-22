@@ -11,7 +11,7 @@ class ItemModelTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test environment by defining data and creating users.
         """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
@@ -36,6 +36,16 @@ class ItemModelTests(TestCase):
         Test that an item can be created with the given data.
         """
         item = Item.objects.create(**self.item_data)
+        item.encrypt_sensitive_fields()
+
+        # Ensure fields differ from og values
+        self.assertNotEqual(item.username, self.item_data["username"])
+        self.assertNotEqual(item.password, self.item_data["password"])
+        self.assertNotEqual(item.notes, self.item_data["notes"])
+
+        item.decrypt_sensitive_fields()
+
+        # Ensure fields are decrypted back to og values
         self.assertEqual(item.name, self.item_data["name"])
         self.assertEqual(item.username, self.item_data["username"])
         self.assertEqual(item.password, self.item_data["password"])
@@ -62,42 +72,6 @@ class ItemModelTests(TestCase):
         self.user.delete()
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=item.id)
-
-    def test_encrypt_sensitive_fields(self):
-        """
-        Test the encryption of sensitive fields.
-        """
-        item = Item.objects.create(**self.item_data)
-        og_username = item.username
-        og_password = item.password
-        og_notes = item.notes
-
-        item.encrypt_sensitive_fields()
-
-        # Ensure fields differ from og values
-        self.assertNotEqual(item.username, og_username)
-        self.assertNotEqual(item.password, og_password)
-        self.assertNotEqual(item.notes, og_notes)
-
-    def test_decrypt_sensitive_fields(self):
-        """
-        Test the decryption of sensitive fields.
-        """
-        item = Item.objects.create(**self.item_data)
-        item.encrypt_sensitive_fields()
-        encrypted_username = item.username
-        encrypted_password = item.password
-        encrypted_notes = item.notes
-
-        item.decrypt_sensitive_fields()
-
-        # Ensure fields are decrypted back to og values
-        self.assertNotEqual(item.username, encrypted_username)
-        self.assertNotEqual(item.password, encrypted_password)
-        self.assertNotEqual(item.notes, encrypted_notes)
-        self.assertEqual(item.username, self.item_data["username"])
-        self.assertEqual(item.password, self.item_data["password"])
-        self.assertEqual(item.notes, self.item_data["notes"])
 
     def test_get_key(self):
         """

@@ -114,7 +114,7 @@ class TwoFactorVerificationFormTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment by creating a test user.
+        Set up the test environment by creating users.
         """
         self.user_model = get_user_model()
         self.otp_secret = pyotp.random_base32()

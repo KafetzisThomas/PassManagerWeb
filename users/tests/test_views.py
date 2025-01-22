@@ -1,11 +1,10 @@
 import pyotp
-from django.test import TestCase, Client
+from django.test import TestCase
 from unittest.mock import MagicMock, patch
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth import SESSION_KEY
 from passmanager.models import Item
-from ..models import CustomUser
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -16,7 +15,7 @@ from ..forms import (
 
 
 @patch("turnstile.fields.TurnstileField.validate", return_value=True)
-class RegisterViewTest(TestCase):
+class RegisterViewTests(TestCase):
     """
     Test case for the register view.
     """
@@ -71,7 +70,7 @@ class RegisterViewTest(TestCase):
         )
 
 
-class AccountViewTest(TestCase):
+class AccountViewTests(TestCase):
     """
     Test case for the account view.
     """
@@ -141,7 +140,7 @@ class AccountViewTest(TestCase):
         self.assertRedirects(response, f"/user/login/?next=/user/account/")
 
 
-class UpdateMasterPasswordViewTest(TestCase):
+class UpdateMasterPasswordViewTests(TestCase):
     """
     Test case for the update_master_password view.
     """
@@ -217,7 +216,7 @@ class UpdateMasterPasswordViewTest(TestCase):
         self.assertTrue(self.user.check_password("oldpassword"))
 
 
-class DeleteAccountViewTest(TestCase):
+class DeleteAccountViewTests(TestCase):
     """
     Test case for the delete_account view.
     """
@@ -238,9 +237,10 @@ class DeleteAccountViewTest(TestCase):
         """
         response = self.client.post(reverse("users:delete_account"))
         self.assertRedirects(response, reverse("passmanager:home"))
+        self.assertEqual(response.status_code, 200)
 
         # Check that the user is deleted
-        self.assertFalse(CustomUser.objects.filter(id=self.user.id).exists())
+        self.assertFalse(self.user_model.objects.filter(id=self.user.id).exists())
 
     def test_delete_account_view_not_logged_in(self):
         """
@@ -253,7 +253,7 @@ class DeleteAccountViewTest(TestCase):
         )
 
         # Ensure the user is not deleted
-        self.assertTrue(CustomUser.objects.filter(id=self.user.id).exists())
+        self.assertTrue(self.user_model.objects.filter(id=self.user.id).exists())
 
 
 class CustomLoginViewTests(TestCase):
