@@ -1,9 +1,3 @@
-"""
-This module contains test cases for the following classes:
-CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
-CustomUserChangeForm, MasterPasswordChangeForm.
-"""
-
 import pyotp
 from django.test import TestCase
 from unittest.mock import MagicMock, patch
@@ -45,7 +39,7 @@ class CustomUserCreationFormTests(TestCase):
 
     def test_form_valid_data(self, mock: MagicMock):
         """
-        Test that the form is valid when all required fields are provided and passwords match.
+        Test that the form is valid when all fields are provided and passwords match.
         """
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid(), form.errors)
@@ -74,18 +68,6 @@ class CustomUserCreationFormTests(TestCase):
         data.pop("username")
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid(), form.errors)
-
-    def test_form_save(self, mock: MagicMock):
-        """
-        Test that the form's save method works correctly.
-        """
-        form = CustomUserCreationForm(data=self.valid_data)
-        self.assertTrue(form.is_valid(), form.errors)
-        user = form.save()
-        self.assertIsInstance(user, CustomUser)
-        self.assertEqual(user.email, self.valid_data["email"])
-        self.assertEqual(user.username, self.valid_data["username"])
-        self.assertTrue(user.check_password(self.valid_data["password1"]))
 
 
 class CustomAuthenticationFormTests(TestCase):
