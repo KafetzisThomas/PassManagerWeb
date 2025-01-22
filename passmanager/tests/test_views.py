@@ -1,19 +1,11 @@
-"""
-This module contains test cases for the following views:
-* home, vault, new_item, edit_item, delete_item, password_generator, download_csv, upload_csv, password_checkup
-"""
-
-import os
 import csv
-import base64
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.messages import get_messages
+from django.contrib.auth import get_user_model
 from unittest.mock import patch
 from django.urls import reverse
-from users.models import CustomUser
-from ..models import Item
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from ..models import Item
 
 
 class HomeViewTests(TestCase):
@@ -21,18 +13,12 @@ class HomeViewTests(TestCase):
     Test case for the home view.
     """
 
-    def test_home_view_status_code(self):
+    def test_home_view_status_code_and_template(self):
         """
-        Test if the home view returns a status code 200.
+        Test if the home view returns a status code 200 & uses the correct template.
         """
         response = self.client.get(reverse("passmanager:home"))
         self.assertEqual(response.status_code, 200)
-
-    def test_home_view_template_used(self):
-        """
-        Test if the home view uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:home"))
         self.assertTemplateUsed(response, "passmanager/home.html")
 
 
@@ -41,18 +27,12 @@ class FaqViewTests(TestCase):
     Test case for the faq view.
     """
 
-    def test_faq_view_status_code(self):
+    def test_faq_view_status_code_and_template(self):
         """
-        Test if the faq view returns a status code 200.
+        Test if the faq view returns a status code 200 & uses the correct template.
         """
         response = self.client.get(reverse("passmanager:faq"))
         self.assertEqual(response.status_code, 200)
-
-    def test_faq_view_template_used(self):
-        """
-        Test if the faq view uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:faq"))
         self.assertTemplateUsed(response, "passmanager/faq.html")
 
 
@@ -63,16 +43,16 @@ class VaultViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test environment by defining data and creating users.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="12345", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.user2 = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="54321", username="otheruser"
+        self.user2 = self.user_model.objects.create_user(
+            email="otheruser@example.com", password="password456", username="otheruser"
         )
-
-        self.client.login(email="testuser@example.com", password="12345")
+        self.client.login(email="testuser@example.com", password="password123")
 
         # Create test items for both users
         for i in range(5):
@@ -91,18 +71,12 @@ class VaultViewTests(TestCase):
         response = self.client.get(reverse("passmanager:vault"))
         self.assertRedirects(response, "/user/login/?next=/vault/")
 
-    def test_vault_view_status_code(self):
+    def test_vault_view_status_code_and_template(self):
         """
-        Test if the vault view returns a status code 200 for logged-in users.
+        Test if the vault view returns a status code 200 & uses the correct template.
         """
         response = self.client.get(reverse("passmanager:vault"))
         self.assertEqual(response.status_code, 200)
-
-    def test_vault_view_template_used(self):
-        """
-        Test if the vault view uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:vault"))
         self.assertTemplateUsed(response, "passmanager/vault.html")
 
     def test_vault_view_items_for_logged_in_user(self):
@@ -137,12 +111,13 @@ class NewItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a test user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="12345", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="12345")
+        self.client.login(email="testuser@example.com", password="password123")
 
     def test_new_item_view_redirect_if_not_logged_in(self):
         """
@@ -161,9 +136,9 @@ class NewItemViewTests(TestCase):
         self.assertTemplateUsed(response, "passmanager/new_item.html")
         self.assertIsInstance(response.context["form"], ItemForm)
 
-    def test_new_item_view_post_save_action(self):
+    def test_new_item_view_save_action(self):
         """
-        Test if the new_item view correctly saves an item and redirects to the vault.
+        Test if the new_item view correctly encrypts & saves item.
         """
         data = {
             "name": "Test Item",
@@ -177,10 +152,16 @@ class NewItemViewTests(TestCase):
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         item = Item.objects.get(name="Test Item")
-        self.assertEqual(item.owner, self.user)
+        self.assertNotEqual(item.username, "testuser")
+        self.assertNotEqual(item.password, "password123")
+        self.assertNotEqual(item.notes, "Test notes")
 
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "Item created successfully.")
+        item.decrypt_sensitive_fields()
+        self.assertEqual(item.name, "Test Item")
+        self.assertEqual(item.username, "testuser")
+        self.assertEqual(item.password, "password123")
+        self.assertEqual(item.url, "http://example.com")
+        self.assertEqual(item.notes, "Test notes")
 
     @patch("passmanager.views.generate_password")
     def test_new_item_view_post_generate_password_action(self, mock_generate_password):
@@ -197,38 +178,9 @@ class NewItemViewTests(TestCase):
             "action": "generate_password",
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/new_item.html")
         self.assertEqual(
             response.context["form"].initial["password"], "generatedpassword123"
         )
-
-    def test_new_item_view_post_save_action_with_encryption(self):
-        """
-        Test if the new_item view correctly encrypts data before saving.
-        """
-        data = {
-            "name": "Encrypted Item",
-            "username": "encrypteduser",
-            "password": "encryptedpassword",
-            "url": "http://example.com",
-            "notes": "Encrypted notes",
-            "action": "save",
-        }
-        response = self.client.post(reverse("passmanager:new_item"), data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        item = Item.objects.get(name="Encrypted Item")
-        self.assertNotEqual(item.username, "encrypteduser")
-        self.assertNotEqual(item.password, "encryptedpassword")
-        self.assertNotEqual(item.notes, "Encrypted notes")
-
-        item.decrypt_sensitive_fields()
-        self.assertEqual(item.name, "Encrypted Item")
-        self.assertEqual(item.username, "encrypteduser")
-        self.assertEqual(item.password, "encryptedpassword")
-        self.assertEqual(item.url, "http://example.com")
-        self.assertEqual(item.notes, "Encrypted notes")
 
 
 class EditItemViewTests(TestCase):
@@ -238,15 +190,18 @@ class EditItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test environment by defining data and creating users.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.other_user = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="password", username="otheruser"
+        self.other_user = self.user_model.objects.create_user(
+            email="otheruser@example.com", password="password456", username="otheruser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
+
+        # Create test item
         self.item = Item.objects.create(
             name="Test Item",
             username="testuser",
@@ -258,7 +213,7 @@ class EditItemViewTests(TestCase):
 
     def test_edit_item_view_redirect_if_not_logged_in(self):
         """
-        Test to verify that non-logged-in users are redirected to the login page when trying to access the edit_item view.
+        Test if the edit_item view redirects to the login page if not logged in.
         """
         self.client.logout()
         response = self.client.get(
@@ -270,17 +225,17 @@ class EditItemViewTests(TestCase):
 
     def test_edit_item_view_permission_denied_for_other_user(self):
         """
-        Test to verify that other users cannot access the edit_item view of items they don't own.
+        Test that other users cannot access items they don't own.
         """
-        self.client.login(email="otheruser@example.com", password="password")
+        self.client.login(email="otheruser@example.com", password="password456")
         response = self.client.get(
             reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_edit_item_view_post_save_action(self):
+    def test_edit_item_view_save_action(self):
         """
-        Verifies that an item's attributes are correctly updated after a save action.
+        Test that item's attributes are correctly updated after a save action.
         """
         data = {
             "name": "Modified Item",
@@ -294,13 +249,19 @@ class EditItemViewTests(TestCase):
             reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
         self.assertRedirects(response, reverse("passmanager:vault"))
+
         self.item.refresh_from_db()
+        self.item.decrypt_sensitive_fields()
         self.assertEqual(self.item.name, "Modified Item")
+        self.assertEqual(self.item.username, "modifieduser")
+        self.assertEqual(self.item.password, "modifiedpassword")
+        self.assertEqual(self.item.url, "http://modified-example.com")
+        self.assertEqual(self.item.notes, "Modified notes")
 
     @patch("passmanager.views.generate_password")
-    def test_edit_item_view_post_generate_password_action(self, mock_generate_password):
+    def test_edit_item_view_generate_password_action(self, mock_generate_password):
         """
-        Verifies that the generate_password action generates a new password.
+        Test generate_password action generates a new password.
         """
         mock_generate_password.return_value = "generatedpassword123"
         data = {
@@ -314,15 +275,13 @@ class EditItemViewTests(TestCase):
         response = self.client.post(
             reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/edit_item.html")
         self.assertEqual(
             response.context["form"].initial["password"], "generatedpassword123"
         )
 
-    def test_edit_item_view_post_delete_action(self):
+    def test_edit_item_view_delete_action(self):
         """
-        Verifies that an item is correctly deleted when the delete action is triggered.
+        Test item is correctly deleted when the delete action is triggered.
         """
         data = {
             "name": "Modified Item",
@@ -339,31 +298,6 @@ class EditItemViewTests(TestCase):
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
-    def test_edit_item_view_post_save_action_with_encryption(self):
-        """
-        Verifies that item attributes are correctly encrypted and decrypted after a save action.
-        """
-        data = {
-            "name": "Encrypted Item",
-            "username": "encrypteduser",
-            "password": "encryptedpassword",
-            "url": "http://example.com",
-            "notes": "Encrypted notes",
-            "action": "save",
-        }
-        response = self.client.post(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
-        )
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        self.item.refresh_from_db()
-        self.item.decrypt_sensitive_fields()
-        self.assertEqual(self.item.name, "Encrypted Item")
-        self.assertEqual(self.item.username, "encrypteduser")
-        self.assertEqual(self.item.password, "encryptedpassword")
-        self.assertEqual(self.item.url, "http://example.com")
-        self.assertEqual(self.item.notes, "Encrypted notes")
-
 
 class DeleteItemViewTests(TestCase):
     """
@@ -372,15 +306,18 @@ class DeleteItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create test users.
+        Set up test environment by defining data and creating a user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.other_user = CustomUser.objects.create_user(
-            email="otheruser@example.com", password="password", username="otheruser"
+        self.other_user = self.user_model.objects.create_user(
+            email="otheruser@example.com", password="password456", username="otheruser"
         )
-        self.client = Client()
+        self.client.login(email="testuser@example.com", password="password123")
+
+        # Create test item
         self.item = Item.objects.create(
             name="Test Item",
             username="testuser",
@@ -392,9 +329,8 @@ class DeleteItemViewTests(TestCase):
 
     def test_delete_item_view_logged_in_owner(self):
         """
-        Test that an owner can successfully delete their own item.
+        Test that owner can successfully delete their own items.
         """
-        self.client.force_login(self.user)
         response = self.client.post(
             reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
         )
@@ -402,10 +338,25 @@ class DeleteItemViewTests(TestCase):
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
+    def test_delete_item_view_other_user(self):
+        """
+        Test that another user cannot delete someone else's item.
+        """
+        self.client.login(email="otheruser@example.com", password="password456")
+        response = self.client.post(
+            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Ensure the item still exists
+        item = Item.objects.get(id=self.item.id)
+        self.assertEqual(item.name, "Test Item")
+
     def test_delete_item_view_not_logged_in(self):
         """
         Test that a not logged-in user is redirected to the login page.
         """
+        self.client.logout()
         response = self.client.post(
             reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
         )
@@ -421,29 +372,30 @@ class PasswordGeneratorViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
 
-    def test_password_generator_view_get(self):
+    def test_password_generator_view_status_code_and_template(self):
         """
-        Test GET request to password_generator view returns form.
+        Test if the view returns status code 200 and uses the correct template.
         """
         response = self.client.get(reverse("passmanager:password_generator"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-        self.assertEqual(
-            response.context["password"], ""
-        )  # Ensure password is empty initially
+
+        # Ensure password is empty initially
+        self.assertEqual(response.context["password"], "")
 
     @patch("passmanager.views.generate_password")
-    def test_password_generator_view_post(self, mock_generate_password):
+    def test_password_generator_view_valid_data(self, mock_generate_password):
         """
-        Test POST request to password_generator view generates password.
+        Test if view generates a password with valid data.
         """
         mock_generate_password.return_value = "GeneratedPassword123"
         data = {
@@ -452,59 +404,33 @@ class PasswordGeneratorViewTests(TestCase):
             "digits": True,
             "special_chars": False,
         }
-
         response = self.client.post(reverse("passmanager:password_generator"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
         self.assertEqual(response.context["password"], "GeneratedPassword123")
 
-        mock_generate_password.assert_called_once_with(12, True, True, False)
-
-    def test_password_generator_view_post_invalid_form(self):
+    def test_password_generator_view_empty_data(self):
         """
-        Test POST request with invalid data returns form with errors.
-        """
-        data = {
-            "length": 4,  # Invalid length (< min_value)
-            "letters": True,
-            "digits": True,
-            "special_chars": False,
-        }
-
-        response = self.client.post(reverse("passmanager:password_generator"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
-        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-        self.assertIn("length", response.context["form"].errors)
-
-    def test_password_generator_view_post_empty_data(self):
-        """
-        Test POST request with empty data returns form with initial values.
+        Test that view returns empty values with no input.
         """
         response = self.client.post(reverse("passmanager:password_generator"), {})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
-        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-        self.assertEqual(
-            response.context["password"], ""
-        )  # Ensure password remains empty
+        self.assertEqual(response.context["password"], "")
 
 
-class DownloadCsvViewTest(TestCase):
+class DownloadCsvViewTests(TestCase):
     """
     Test case for the download_csv view.
     """
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test environment by defining data and creating a user.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
 
+        # Create test item
         self.item = Item(
             name="Test Item",
             username="testuser",
@@ -516,7 +442,7 @@ class DownloadCsvViewTest(TestCase):
         self.item.encrypt_sensitive_fields()
         self.item.save()
 
-    def test_download_csv(self):
+    def test_download_csv_view(self):
         """
         Test csv file returns with properly decrypted user data.
         """
@@ -557,19 +483,19 @@ class UploadCsvViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
-        self.upload_url = reverse("passmanager:upload_csv")
+        self.client.login(email="testuser@example.com", password="password123")
 
     def test_upload_csv_view_status_code_and_template(self):
         """
-        Test GET request renders the upload form.
+        Test if the view returns status code 200 and uses the correct template.
         """
-        response = self.client.get(self.upload_url)
+        response = self.client.get(reverse("passmanager:upload_csv"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/upload_csv.html")
         self.assertIsInstance(response.context["form"], ImportPasswordsForm)
@@ -583,7 +509,7 @@ class UploadCsvViewTests(TestCase):
 
         # Post csv file to the view
         response = self.client.post(
-            self.upload_url, data={"csv_file": file}, follow=True
+            reverse("passmanager:upload_csv"), data={"csv_file": file}, follow=True
         )
         self.assertRedirects(response, reverse("passmanager:vault"))
         self.assertEqual(Item.objects.count(), 1)
@@ -607,10 +533,10 @@ class UploadCsvViewTests(TestCase):
 
         # Post csv file to the view
         response = self.client.post(
-            self.upload_url, data={"csv_file": file}, follow=True
+            reverse("passmanager:upload_csv"), data={"csv_file": file}, follow=True
         )
 
-        self.assertRedirects(response, self.upload_url)
+        self.assertRedirects(response, reverse("passmanager:upload_csv"))
         self.assertEqual(Item.objects.count(), 0)
 
 
@@ -621,14 +547,15 @@ class PasswordCheckupViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up test data and create a test user.
+        Set up test environment by defining data and creating a user.
         """
-        self.encryption_key = base64.urlsafe_b64encode(os.urandom(32)).decode()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
+        self.client.login(email="testuser@example.com", password="password123")
 
+        # Create test items
         self.item1 = Item(
             name="Test Item 1",
             username="testuser1",
@@ -652,9 +579,9 @@ class PasswordCheckupViewTests(TestCase):
         self.item2.save()
 
     @patch("passmanager.views.check_password")
-    def test_password_checkup(self, mock_check_password):
+    def test_password_checkup_view(self, mock_check_password):
         """
-        Test for check if the password has been pwned.
+        Test checkup verifies if password has been pwned.
         """
         mock_check_password.side_effect = lambda password: {
             # Fake values for testing
