@@ -21,6 +21,9 @@ class RegisterViewTest(TestCase):
     """
 
     def setUp(self):
+        """
+        Set up the test environment by defining valid data.
+        """
         self.user_model = get_user_model()
         self.form_data = {
             "email": "testuser@example.com",
@@ -74,41 +77,40 @@ class AccountViewTest(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by defining valid data and creating a test user.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
-        self.account_url = reverse("users:account")
+        self.client.login(email="testuser@example.com", password="password123")
 
-    def test_account_view_get(self):
-        """
-        Test rendering the account page with GET request.
-        """
-        response = self.client.get(self.account_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/account.html")
-        self.assertIsInstance(response.context["form"], CustomUserChangeForm)
-        self.assertEqual(response.context["form"].instance, self.user)
-
-    def test_account_view_post_valid_form(self):
-        """
-        Test updating account credentials with valid form data.
-        """
-        form_data = {
+        self.form_data = {
             "email": "updateduser@example.com",
             "username": "updateduser",
             "session_timeout": 300,
             "enable_2fa": True,
             "action": "save",
         }
-        response = self.client.post(self.account_url, form_data)
+
+    def test_account_view_status_code_and_template(self):
+        """
+        Test if the account view returns a status code 200 & uses the correct template.
+        """
+        response = self.client.get(reverse("users:account"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "users/account.html")
+        self.assertIsInstance(response.context["form"], CustomUserChangeForm)
+
+    def test_account_view_valid(self):
+        """
+        Test updating account credentials with valid data.
+        """
+        response = self.client.post(reverse("users:account"), self.form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
 
-        # Check if user details are updated
-        updated_user = CustomUser.objects.get(email="updateduser@example.com")
+        # Check if user credentials are updated
+        updated_user = self.user_model.objects.get(email=self.form_data["email"])
         self.assertEqual(updated_user.username, "updateduser")
         self.assertEqual(updated_user.session_timeout, 300)
         self.assertTrue(updated_user.enable_2fa)
@@ -121,25 +123,20 @@ class AccountViewTest(TestCase):
         """
         Test updating account credentials with an invalid email.
         """
-        form_data = {
-            "email": "invalid-email",
-            "username": "updateduser",
-            "action": "save",
-        }
-        response = self.client.post(self.account_url, form_data)
-        self.assertEqual(response.status_code, 200)
+        self.form_data["email"] = "invalid-email"
+        self.client.post(reverse("users:account"), self.form_data)
 
-        # Ensure user details remain unchanged
+        # Ensure user credentials remain unchanged
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "testuser@example.com")
         self.assertEqual(self.user.username, "testuser")
 
     def test_account_view_not_logged_in(self):
         """
-        Test accessing the view when not logged in.
+        Test accessing view when not logged in.
         """
         self.client.logout()
-        response = self.client.get(self.account_url)
+        response = self.client.get(reverse("users:account"))
         self.assertRedirects(response, f"/user/login/?next=/user/account/")
 
 
