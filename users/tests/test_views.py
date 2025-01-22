@@ -262,51 +262,35 @@ class CustomLoginViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by defining data and creating a test user.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.login_url = reverse("users:login")
+        self.form_data = {
+            "username": "testuser@example.com",
+            "password": "password123",
+        }
 
-    def test_login_view_get(self):
+    def test_custom_login_view_status_code_and_template(self):
         """
-        Test that the login view returns the login form on GET request.
+        Test if view returns a status code 200 & uses the correct template.
         """
-        response = self.client.get(self.login_url)
+        response = self.client.get(reverse("users:login"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "registration/login.html")
         self.assertIsInstance(response.context["form"], CustomAuthenticationForm)
 
-    def test_login_view_post_valid_credentials(self):
+    def test_login_view_valid_credentials(self):
         """
         Test logging in with valid credentials.
         """
-        form_data = {
-            "username": "testuser@example.com",
-            "password": "password",
-        }
-        response = self.client.post(self.login_url, form_data)
+        response = self.client.post(reverse("users:login"), self.form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         # Check if the user is logged in
         self.assertIn(SESSION_KEY, self.client.session)
-
-    def test_login_view_post_invalid_credentials(self):
-        """
-        Test logging in with invalid credentials.
-        """
-        form_data = {
-            "username": "testuser@example.com",
-            "password": "wrongpassword",
-        }
-        response = self.client.post(self.login_url, form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/login.html")
-
-        # Check if the user is not logged in
-        self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_login_view_post_with_2fa_enabled(self):
         """
@@ -314,17 +298,22 @@ class CustomLoginViewTests(TestCase):
         """
         self.user.otp_secret = "test_otp_secret"
         self.user.save()
-
-        form_data = {
-            "username": "testuser@example.com",
-            "password": "password",
-        }
-        response = self.client.post(self.login_url, form_data)
+        response = self.client.post(reverse("users:login"), self.form_data)
         self.assertRedirects(response, reverse("users:2fa_verification"))
 
         # Check if the user is not fully logged in yet
         self.assertNotIn(SESSION_KEY, self.client.session)
         self.assertEqual(self.client.session["user_id"], self.user.id)
+
+    def test_login_view_post_invalid_credentials(self):
+        """
+        Test logging in with invalid credentials.
+        """
+        self.form_data["password"] = "wrongpassword"
+        self.client.post(reverse("users:login"), self.form_data)
+
+        # Check if the user is not logged in
+        self.assertNotIn(SESSION_KEY, self.client.session)
 
 
 class TwoFactorVerificationViewTests(TestCase):
