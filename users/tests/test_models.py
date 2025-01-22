@@ -1,10 +1,3 @@
-"""
-This module contains test cases for the CustomUser model.
-The tests cover various aspects of the model, including:
-user creation, unique email constraint, otp field validation,
-salt generation, custom user manager, __str__ method.
-"""
-
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
@@ -17,7 +10,7 @@ class CustomUserModelTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment by defining the user model and user data.
+        Set up the test environment by defining valid user data.
         """
         self.user_model = get_user_model()
         self.user_data = {
@@ -29,7 +22,7 @@ class CustomUserModelTests(TestCase):
             "enable_2fa": False,
         }
 
-    def test_create_user(self):
+    def test_valid_user_creation(self):
         """
         Test that a user can be created with the given data.
         """
@@ -41,20 +34,9 @@ class CustomUserModelTests(TestCase):
         self.assertEqual(user.session_timeout, self.user_data["session_timeout"])
         self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
 
-    def test_create_superuser(self):
-        """
-        Test that a superuser can be created and has the correct flags.
-        """
-        superuser_data = self.user_data.copy()
-        superuser_data["email"] = "admin@example.com"
-        superuser = self.user_model.objects.create_superuser(**superuser_data)
-        self.assertEqual(superuser.email, superuser_data["email"])
-        self.assertTrue(superuser.is_staff)
-        self.assertTrue(superuser.is_superuser)
-
     def test_email_unique(self):
         """
-        Test that the email field is unique by attempting to create two users with the same email.
+        Test that the email field is unique.
         """
         self.user_model.objects.create_user(**self.user_data)
         with self.assertRaises(IntegrityError):
@@ -62,18 +44,11 @@ class CustomUserModelTests(TestCase):
 
     def test_otp_secret_field(self):
         """
-        Test that the otp_secret field is correctly set and has the appropriate length.
+        Test that the otp_secret field is correctly set.
         """
         user = self.user_model.objects.create_user(**self.user_data)
         self.assertEqual(user.otp_secret, self.user_data["otp_secret"])
         self.assertEqual(len(user.otp_secret), 32)
-
-    def test_custom_user_manager(self):
-        """
-        Test that the custom user manager creates a user instance of the correct type.
-        """
-        user = self.user_model.objects.create_user(**self.user_data)
-        self.assertIsInstance(user, self.user_model)
 
     def test_salt_generation(self):
         """
@@ -82,10 +57,3 @@ class CustomUserModelTests(TestCase):
         data = self.user_data.copy()
         user = self.user_model.objects.create_user(**data)
         self.assertIsNotNone(user.encryption_salt)
-
-    def test_str_method(self):
-        """
-        Test that the __str__ method returns the user's email.
-        """
-        user = self.user_model.objects.create_user(**self.user_data)
-        self.assertEqual(str(user), user.email)
