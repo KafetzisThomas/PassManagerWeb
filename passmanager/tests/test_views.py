@@ -498,19 +498,19 @@ class UploadCsvViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="password", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="password")
-        self.upload_url = reverse("passmanager:upload_csv")
+        self.client.login(email="testuser@example.com", password="password123")
 
     def test_upload_csv_view_status_code_and_template(self):
         """
-        Test GET request renders the upload form.
+        Test if the view returns status code 200 and uses the correct template.
         """
-        response = self.client.get(self.upload_url)
+        response = self.client.get(reverse("passmanager:upload_csv"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "passmanager/upload_csv.html")
         self.assertIsInstance(response.context["form"], ImportPasswordsForm)
@@ -524,7 +524,7 @@ class UploadCsvViewTests(TestCase):
 
         # Post csv file to the view
         response = self.client.post(
-            self.upload_url, data={"csv_file": file}, follow=True
+            reverse("passmanager:upload_csv"), data={"csv_file": file}, follow=True
         )
         self.assertRedirects(response, reverse("passmanager:vault"))
         self.assertEqual(Item.objects.count(), 1)
@@ -548,10 +548,10 @@ class UploadCsvViewTests(TestCase):
 
         # Post csv file to the view
         response = self.client.post(
-            self.upload_url, data={"csv_file": file}, follow=True
+            reverse("passmanager:upload_csv"), data={"csv_file": file}, follow=True
         )
 
-        self.assertRedirects(response, self.upload_url)
+        self.assertRedirects(response, reverse("passmanager:upload_csv"))
         self.assertEqual(Item.objects.count(), 0)
 
 
