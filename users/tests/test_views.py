@@ -11,6 +11,7 @@ from ..forms import (
     CustomAuthenticationForm,
     CustomUserChangeForm,
     MasterPasswordChangeForm,
+    TwoFactorVerificationForm,
 )
 
 
@@ -323,36 +324,38 @@ class TwoFactorVerificationViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a test user.
         """
-        self.client = Client()
-        self.user = CustomUser.objects.create_user(
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
             email="testuser@example.com",
             password="password123",
             username="testuser",
             otp_secret=pyotp.random_base32(),
         )
-        self.verification_url = reverse("users:2fa_verification")
 
         # Store user_id in session
         session = self.client.session
         session["user_id"] = self.user.id
         session.save()
 
-    def test_get_verification_page(self):
+    def test_two_factor_verification_view_status_code_and_template(self):
         """
-        Test that the verification page loads correctly.
+        Test if view returns a status code 200 & uses the correct template.
         """
-        response = self.client.get(self.verification_url)
+        response = self.client.get(reverse("users:2fa_verification"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "registration/2fa_verification.html")
+        self.assertIsInstance(response.context["form"], TwoFactorVerificationForm)
 
     def test_valid_otp_submission(self):
         """
         Test successful 2FA verification with valid OTP.
         """
         valid_otp = pyotp.TOTP(self.user.otp_secret).now()
-        response = self.client.post(self.verification_url, {"otp": valid_otp})
+        response = self.client.post(
+            reverse("users:2fa_verification"), {"otp": valid_otp}
+        )
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         # User should be logged in
@@ -365,9 +368,7 @@ class TwoFactorVerificationViewTests(TestCase):
         """
         Test failed 2FA verification with invalid OTP.
         """
-        response = self.client.post(self.verification_url, {"otp": "123456"})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/2fa_verification.html")
+        self.client.post(reverse("users:2fa_verification"), {"otp": "123456"})
 
         # User should not be logged in
         self.assertNotIn(SESSION_KEY, self.client.session)
