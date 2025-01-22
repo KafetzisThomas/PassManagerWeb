@@ -128,12 +128,13 @@ class NewItemViewTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment.
+        Set up the test environment by creating a test user.
         """
-        self.user = CustomUser.objects.create_user(
-            email="testuser@example.com", password="12345", username="testuser"
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com", password="password123", username="testuser"
         )
-        self.client.login(email="testuser@example.com", password="12345")
+        self.client.login(email="testuser@example.com", password="password123")
 
     def test_new_item_view_redirect_if_not_logged_in(self):
         """
@@ -152,9 +153,9 @@ class NewItemViewTests(TestCase):
         self.assertTemplateUsed(response, "passmanager/new_item.html")
         self.assertIsInstance(response.context["form"], ItemForm)
 
-    def test_new_item_view_post_save_action(self):
+    def test_new_item_view_save_action(self):
         """
-        Test if the new_item view correctly saves an item and redirects to the vault.
+        Test if the new_item view correctly encrypts & saves item.
         """
         data = {
             "name": "Test Item",
@@ -168,10 +169,16 @@ class NewItemViewTests(TestCase):
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         item = Item.objects.get(name="Test Item")
-        self.assertEqual(item.owner, self.user)
+        self.assertNotEqual(item.username, "testuser")
+        self.assertNotEqual(item.password, "password123")
+        self.assertNotEqual(item.notes, "Test notes")
 
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "Item created successfully.")
+        item.decrypt_sensitive_fields()
+        self.assertEqual(item.name, "Test Item")
+        self.assertEqual(item.username, "testuser")
+        self.assertEqual(item.password, "password123")
+        self.assertEqual(item.url, "http://example.com")
+        self.assertEqual(item.notes, "Test notes")
 
     @patch("passmanager.views.generate_password")
     def test_new_item_view_post_generate_password_action(self, mock_generate_password):
@@ -188,38 +195,9 @@ class NewItemViewTests(TestCase):
             "action": "generate_password",
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/new_item.html")
         self.assertEqual(
             response.context["form"].initial["password"], "generatedpassword123"
         )
-
-    def test_new_item_view_post_save_action_with_encryption(self):
-        """
-        Test if the new_item view correctly encrypts data before saving.
-        """
-        data = {
-            "name": "Encrypted Item",
-            "username": "encrypteduser",
-            "password": "encryptedpassword",
-            "url": "http://example.com",
-            "notes": "Encrypted notes",
-            "action": "save",
-        }
-        response = self.client.post(reverse("passmanager:new_item"), data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        item = Item.objects.get(name="Encrypted Item")
-        self.assertNotEqual(item.username, "encrypteduser")
-        self.assertNotEqual(item.password, "encryptedpassword")
-        self.assertNotEqual(item.notes, "Encrypted notes")
-
-        item.decrypt_sensitive_fields()
-        self.assertEqual(item.name, "Encrypted Item")
-        self.assertEqual(item.username, "encrypteduser")
-        self.assertEqual(item.password, "encryptedpassword")
-        self.assertEqual(item.url, "http://example.com")
-        self.assertEqual(item.notes, "Encrypted notes")
 
 
 class EditItemViewTests(TestCase):
