@@ -1,5 +1,6 @@
 import pyotp
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 from unittest.mock import MagicMock, patch
 from ..models import CustomUser
 from ..forms import (
@@ -79,22 +80,19 @@ class CustomAuthenticationFormTests(TestCase):
         """
         Set up the test environment by creating a test user.
         """
+        self.user_model = get_user_model()
         self.test_email = "testuser@example.com"
         self.test_password = "testpassword"
 
-        self.user = CustomUser.objects.create_user(
-            email=self.test_email,
-            password=self.test_password,
+        self.user = self.user_model.objects.create_user(
+            email=self.test_email, password=self.test_password
         )
 
     def test_form_valid_data(self):
         """
         Test that the form is valid when correct email and password are provided.
         """
-        form_data = {
-            "username": self.test_email,
-            "password": self.test_password,
-        }
+        form_data = {"username": self.test_email, "password": self.test_password}
         form = CustomAuthenticationForm(data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
 
