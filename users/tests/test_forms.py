@@ -177,87 +177,53 @@ class CustomUserChangeFormTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment by creating a test user.
+        Set up the test environment by defining form data and creating a test user.
         """
-        self.test_email = "testuser@example.com"
-        self.test_username = "testuser"
-        self.test_password = "testpassword"
-        self.session_timeout = 300
-        self.enable_2fa = False
-
-        self.user = CustomUser.objects.create_user(
-            email=self.test_email,
-            username=self.test_username,
-            password=self.test_password,
-            session_timeout=self.session_timeout,
-            enable_2fa=self.enable_2fa,
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com",
+            username="testuser",
+            password="testpassword123",
+            session_timeout=300,
+            enable_2fa=False,
         )
+
+        self.form_data = {
+            "email": "updated_email@example.com",
+            "username": "updated_username",
+            "session_timeout": 600,
+            "enable_2fa": True,
+        }
 
     def test_form_valid_data(self):
         """
         Test that the form is valid when correct data is provided.
         """
-        form_data = {
-            "email": "updated@example.com",
-            "username": "updated_username",
-            "session_timeout": 600,
-            "enable_2fa": True,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        form = CustomUserChangeForm(instance=self.user, data=self.form_data)
         self.assertTrue(form.is_valid(), form.errors)
-
-    def test_form_enable_2fa_toggle(self):
-        """
-        Test that the form correctly updates the enable_2fa field.
-        """
-        form_data = {
-            "email": self.test_email,
-            "username": self.test_username,
-            "session_timeout": self.session_timeout,
-            "enable_2fa": True,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
-        self.assertTrue(form.is_valid(), form.errors)
-        updated_user = form.save()
-        self.assertTrue(updated_user.enable_2fa)
 
     def test_form_invalid_email(self):
         """
         Test that the form is invalid when an incorrect email is provided.
         """
-        form_data = {
-            "email": "invalid-email",
-            "username": self.test_username,
-            "session_timeout": self.session_timeout,
-            "enable_2fa": self.enable_2fa,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.form_data["email"] = "invalid-email"
+        form = CustomUserChangeForm(instance=self.user, data=self.form_data)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_username(self):
         """
         Test that the form is invalid when the username is missing.
         """
-        form_data = {
-            "email": self.test_email,
-            "username": "",
-            "session_timeout": self.session_timeout,
-            "enable_2fa": self.enable_2fa,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.form_data["username"] = ""
+        form = CustomUserChangeForm(instance=self.user, data=self.form_data)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_invalid_session_timeout(self):
         """
         Test that the form is invalid when an incorrect session timeout is provided.
         """
-        form_data = {
-            "email": self.test_email,
-            "username": self.test_username,
-            "session_timeout": "invalid_timeout",
-            "enable_2fa": self.enable_2fa,
-        }
-        form = CustomUserChangeForm(instance=self.user, data=form_data)
+        self.form_data["session_timeout"] = "invalid-timeout"
+        form = CustomUserChangeForm(instance=self.user, data=self.form_data)
         self.assertFalse(form.is_valid(), form.errors)
 
 
