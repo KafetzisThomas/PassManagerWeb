@@ -2,7 +2,6 @@ import pyotp
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from unittest.mock import MagicMock, patch
-from ..models import CustomUser
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -234,9 +233,10 @@ class MasterPasswordChangeFormTests(TestCase):
 
     def setUp(self):
         """
-        Set up the test environment by creating a test user.
+        Set up the test environment by defining form data and creating a test user.
         """
-        self.user = CustomUser.objects.create_user(
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
             email="testuser@example.com", password="oldpassword", username="testuser"
         )
         self.form_data_valid = {
@@ -257,7 +257,7 @@ class MasterPasswordChangeFormTests(TestCase):
 
     def test_form_valid_data(self):
         """
-        Test that the form is valid when all required fields are provided and passwords match.
+        Test that the form is valid when all fields are provided and passwords match.
         """
         form = MasterPasswordChangeForm(user=self.user, data=self.form_data_valid)
         self.assertTrue(form.is_valid(), form.errors)
