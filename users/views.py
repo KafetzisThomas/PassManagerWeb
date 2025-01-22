@@ -19,6 +19,7 @@ from .utils import (
     send_2fa_verification,
     send_delete_account_notification,
     send_update_account_notification,
+    send_master_password_update,
 )
 
 
@@ -117,6 +118,7 @@ def update_master_password(request):
                     item.notes = item.encrypt_field(new_key, item.notes)
                     item.save()
 
+            send_master_password_update(user)
             messages.success(request, "Your master password was successfully updated!")
             return redirect("passmanager:vault")
     else:
