@@ -1,7 +1,6 @@
 import csv
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse
 from django.contrib import messages
 from .models import Item
@@ -22,12 +21,8 @@ def faq(request):
 
 @login_required
 def vault(request):
-    items = Item.objects.filter(owner=request.user).order_by("-date_added")
-    paginator = Paginator(items, 4)  # Display 4 items per page
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    context = {"page_obj": page_obj}
-    return render(request, "passmanager/vault.html", context)
+    items = Item.objects.filter(owner=request.user).order_by("name")
+    return render(request, "passmanager/vault.html", {"items": items})
 
 
 @login_required

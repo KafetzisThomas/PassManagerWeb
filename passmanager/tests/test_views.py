@@ -84,24 +84,9 @@ class VaultViewTests(TestCase):
         Test if the vault view returns items only for the logged-in user.
         """
         response = self.client.get(reverse("passmanager:vault"))
-        page_obj = response.context["page_obj"]
-        items = page_obj.object_list
+        items = response.context["items"]
         for item in items:
             self.assertEqual(item.owner, self.user)
-
-    def test_vault_view_pagination(self):
-        """
-        Test if the vault view paginates items correctly.
-        """
-        response = self.client.get(reverse("passmanager:vault"))
-        page_obj = response.context["page_obj"]
-        self.assertTrue(page_obj.has_next())
-        self.assertEqual(len(page_obj), 4)
-
-        response = self.client.get(reverse("passmanager:vault") + "?page=2")
-        page_obj = response.context["page_obj"]
-        self.assertFalse(page_obj.has_next())
-        self.assertEqual(len(page_obj), 1)
 
 
 class NewItemViewTests(TestCase):
