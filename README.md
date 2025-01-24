@@ -95,6 +95,8 @@ $ python3 manage.py test users.tests passmanager.tests
     <img src='static/images/import_data_page.png' alt='Import Data'>
     <br><h2>Password Checkup</h2>
     <img src = 'static/images/password_checkup_page.png' alt='Password Checkup'>
+    <br><h2>Account Settings</h2>
+    <img src='static/images/account_page.png' alt='Account Settings'>
     <br><h2>New Item</h2>
     <img src='static/images/new_item_page.png' alt='New Item'>
     <br><h2>Edit Item</h2>
