@@ -12,7 +12,7 @@
         {% endfor %}
     {% endif %}
 
-    {% for item in page_obj %}
+    {% for item in items %}
         <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
             <article class="media border-dark rounded shadow item-section">
                 <div class="favicon-wrapper me-md-4 me-1">
