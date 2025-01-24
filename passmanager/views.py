@@ -22,7 +22,7 @@ def faq(request):
 
 @login_required
 def vault(request):
-    items = Item.objects.filter(owner=request.user).order_by("-date_added")
+    items = Item.objects.filter(owner=request.user).order_by("name")
     return render(request, "passmanager/vault.html", {"items": items})
 
 
