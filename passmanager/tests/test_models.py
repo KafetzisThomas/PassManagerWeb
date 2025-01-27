@@ -1,4 +1,5 @@
-from cryptography.fernet import Fernet
+import os
+import base64
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from ..models import Item
@@ -19,7 +20,7 @@ class ItemModelTests(TestCase):
         )
 
         # Random salt for testing encryption
-        self.user.encryption_salt = "test_salt"
+        self.user.encryption_salt = base64.urlsafe_b64encode(os.urandom(32)).decode()
         self.user.save()
 
         self.item_data = {
@@ -79,7 +80,8 @@ class ItemModelTests(TestCase):
         """
         item = Item.objects.create(**self.item_data)
         key = item.get_key()
+        key_bytes = base64.urlsafe_b64decode(key)
 
         # Ensure derived key is valid
         self.assertIsInstance(key, bytes)
-        self.assertTrue(Fernet(key))
+        self.assertEqual(len(key_bytes), 32)  # AES 256 GCM = 32 byte key

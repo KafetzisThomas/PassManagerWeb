@@ -1,15 +1,17 @@
+import os
 import base64
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.hashes import SHA256
-from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 from django.conf import settings
 from django.db import models
 
 
 def derive_key_from_master_password(master_password, salt):
     """
-    Derive an encryption key from the user's master password,
-    and encryption salt.
+    Derive a 256 bit encryption key using PBKDF2HMAC.
+    Based on user's master password & encryption salt.
     """
     kdf = PBKDF2HMAC(
         algorithm=SHA256(),
@@ -33,22 +35,41 @@ class Item(models.Model):
 
     def encrypt_field(self, key, value):
         """
-        Encrypt field value using the given key.
+        Encrypt value using AES GCM with a 256 bit key.
         """
-        return Fernet(key).encrypt(value.encode()).decode()
+        key_bytes = base64.urlsafe_b64decode(key)
+        nonce = os.urandom(12)  # 12-bytes nonce for GCM
+        cipher = Cipher(
+            algorithms.AES(key_bytes), modes.GCM(nonce), backend=default_backend()
+        )
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(value.encode()) + encryptor.finalize()
+        tag = encryptor.tag  # 16 bytes
+        combined = nonce + ciphertext + tag
+        return base64.urlsafe_b64encode(combined).decode()
 
     def decrypt_field(self, key, value):
         """
-        Decrypt field value using the given key.
+        Decrypt AES GCM encrypted data using the given key.
         """
-        return Fernet(key).decrypt(value.encode()).decode()
+        key_bytes = base64.urlsafe_b64decode(key)
+        combined = base64.urlsafe_b64decode(value.encode())
+        nonce = combined[:12]
+        ciphertext = combined[12:-16]
+        tag = combined[-16:]
+        cipher = Cipher(
+            algorithms.AES(key_bytes), modes.GCM(nonce, tag), backend=default_backend()
+        )
+        decryptor = cipher.decryptor()
+        decrypted = decryptor.update(ciphertext) + decryptor.finalize()
+        return decrypted.decode()
 
     def get_key(self):
         """
         Derive the encryption key using owner's master password,
         and their encryption salt.
         """
-        salt = self.owner.encryption_salt.encode()
+        salt = base64.urlsafe_b64decode(self.owner.encryption_salt)
         return derive_key_from_master_password(self.owner.password, salt)
 
     def encrypt_sensitive_fields(self):
