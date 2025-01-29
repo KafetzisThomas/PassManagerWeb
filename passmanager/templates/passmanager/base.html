@@ -89,7 +89,7 @@
         <ul class="nav nav-pills flex-column mb-auto">
             {% if user.is_authenticated %}
                 <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Vault">
-                    <a class="nav-link text-light {% if request.path == '/vault/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-safe"></i> Vault</a>
+                    <a class="nav-link text-light {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-safe"></i> Vault</a>
                 </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Password Generator">
                     <a class="nav-link text-light {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'passmanager:password_generator' %}"><i class="bi bi-key"></i> Generator</a>

@@ -89,79 +89,6 @@ body {
   max-width: 100px;
 }
 
-/* Hero section styles */
-.hero-section {
-  background: #212529 no-repeat center;
-  background-size: cover;
-  width: 100%;
-  height: 55vh;
-  position: relative;
-}
-
-/* Overlay styles for hero section */
-.hero-section::before {
-  background-color: #212529;
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-}
-
-/* Container styles within hero section */
-.hero-section .container {
-  height: 100%;
-  z-index: 1;
-  position: relative;
-}
-
-/* Styles for the hero section heading */
-.hero-section h1 {
-  position: relative;
-  padding-bottom: 20px;
-}
-
-/* Styles for pseudo-element to create underline effect */
-.hero-section h1::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 2px;
-  background-color: #fff;
-}
-
-/* Styles for clip-path background shape */
-.clip-path-background {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 10vh;
-  background-color: #fff;
-  clip-path: path('M0,50 C80,0 160,100 240,50 C320,0 400,100 480,50 C560,0 640,100 720,50 C800,0 880,100 960,50 C1040,0 1120,100 1200,50 C1280,0 1360,100 1440,50 C1520,0 1600,100 1680,50 L1680,100 L0,100 Z');
-  z-index: 0;
-  margin-top: 10px;
-  overflow: hidden;
-}
-
-/* Styles for preview image */
-.image-shadow {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  pointer-events: none;
-}
-
 /* List results styles */
 .list-results {
   transition: transform 0.3s ease;
@@ -171,21 +98,4 @@ body {
 .list-results:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Media query for large screens */
-@media (min-width: 960px) {
-  .border-on-lg {
-    border: 1px solid #6c757d;
-    border-radius: 0.25rem;
-    border-color: #6c757d;
-  }
-}
-
-/* Media query for small screens */
-@media (max-width: 959px) {
-  .image-container {
-    max-width: 90%;
-    margin: 0 auto;
-  }
 }
