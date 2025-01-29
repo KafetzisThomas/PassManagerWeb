@@ -23,7 +23,6 @@
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
 - [X] **Import/Export Data**: `Upload` data such as passwords from a CSV file or `download` your stored data in `CSV` format for easy backup or migration.
 - [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
-- [X] **Cloudflare CAPTCHA Verification**: Protects against automated attacks by using CAPTCHA to verify human users.
 
 ## Purpose
 
