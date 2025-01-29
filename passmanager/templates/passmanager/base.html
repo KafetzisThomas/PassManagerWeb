@@ -26,7 +26,7 @@
     <!-- navbar start (for small screens) -->
     <nav class="navbar navbar-expand-lg bg-dark border-bottom border-body d-lg-none" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'passmanager:home' %}">
+            <a class="navbar-brand" href="{% url 'passmanager:vault' %}">
                 <img src="{% static 'images/logo.png' %}" alt="logo" width="150">
             </a>
 
@@ -82,7 +82,7 @@
 
     <!-- sidebar start -->
     <nav class="sidebar d-none d-lg-flex flex-column flex-shrink-0 p-3 bg-dark">
-        <a class="d-flex mx-auto mb-3 mb-md-0 text-light text-decoration-none" href="{% url 'passmanager:home' %}">
+        <a class="d-flex mx-auto mb-3 mb-md-0 text-light text-decoration-none" href="{% url 'passmanager:vault' %}">
             <img src="{% static 'images/logo.png' %}" alt="logo" width="170">
         </a>
         <hr class="border-light">

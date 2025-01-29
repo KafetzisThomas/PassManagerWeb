@@ -133,7 +133,7 @@ def delete_account(request):
     user = request.user
     user.delete()
     send_delete_account_notification(user)
-    return redirect("passmanager:home")
+    return redirect("users:register")
 
 
 class CustomLoginView(LoginView):

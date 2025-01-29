@@ -11,10 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def home(request):
-    return render(request, "passmanager/home.html")
-
-
 def faq(request):
     return render(request, "passmanager/faq.html")
 
