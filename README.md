@@ -2,12 +2,7 @@
     <h1>
         <img src="static/images/logo.png" width="400" alt="Logo Icon"/>
     </h1>
-    <p>Securely manage your passwords of your online accounts.<br><a href="https://passmanagerweb.onrender.com/">https://passmanagerweb.onrender.com/</a><br>Written in Python/Django</p>
-    <h3>
-        <a href="https://github.com/KafetzisThomas/PassManagerWeb">Homepage</a> |
-        <a href="https://passmanagerweb.onrender.com/faq">FAQ</a> | 
-        <a href="https://github.com/KafetzisThomas/PassManagerWeb/graphs/contributors">Contributors</a>
-    </h3>
+    <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
     <a href="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml">
         <img src = "https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt = 'Run Tests'/>
     </a>
@@ -26,7 +21,9 @@
 
 ## Purpose
 
-The primary goal of this project is to **provide an open-source application that anyone can use and learn from**. While the deployed app is available for use, my main intention is not to attract active users or compete with major applications like [Bitwarden](https://bitwarden.com/). Instead, I aim to share the code, primarily written in Django, with those who might find it useful for similar projects or personal use.
+The primary goal of this project is to **provide a self-hostable,  open-source password manager that anyone can use and learn from**.
+While the app is available for use, my main intention is not to attract active users or compete with major applications like [Bitwarden](https://bitwarden.com/).
+Instead, I aim to offer a self-host option for those who prefer full control over their password management and to share the code, primarily written in Django, for educational or personal use.
 
 If you find this project interesting, helpful, or inspiring, please consider giving a `star`, `following`, or even `donating` to support further development.
 
@@ -80,7 +77,7 @@ Now you can access the website at `http://127.0.0.1:8000/` or `http://localhost:
 
 ```bash
 ➜ cd path/to/root/directory
-$ python3 manage.py test users.tests passmanager.tests
+$ python3 manage.py test
 ```
 
 ## Demo Images
@@ -102,7 +99,7 @@ $ python3 manage.py test users.tests passmanager.tests
     <img src='static/images/edit_item_page.png' alt='Edit Item'><br>
 </div>
 
-## Contributing Guidelines for PassManager
+## Contributing Guidelines
 
 ### Pull Requests
 * **Simplicity**: Keep changes focused and easy to review.
