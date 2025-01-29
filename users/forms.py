@@ -1,6 +1,5 @@
 import pyotp
 from django.contrib.auth import get_user_model
-from turnstile.fields import TurnstileField
 from .models import CustomUser
 from django import forms
 from django.contrib.auth.forms import (
@@ -17,11 +16,10 @@ class CustomUserCreationForm(UserCreationForm):
     password2 = forms.CharField(
         label="Confirm Master Password", widget=forms.PasswordInput, required=True
     )
-    captcha_verification = TurnstileField(theme="light", size="flexible")
 
     class Meta:
         model = CustomUser
-        fields = ("email", "username", "password1", "password2", "captcha_verification")
+        fields = ("email", "username", "password1", "password2")
 
     def clean(self):
         """
