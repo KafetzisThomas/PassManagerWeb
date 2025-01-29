@@ -1,7 +1,7 @@
 import pyotp
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -11,7 +11,6 @@ from ..forms import (
 )
 
 
-@patch("turnstile.fields.TurnstileField.validate", return_value=True)
 class CustomUserCreationFormTests(TestCase):
     """
     Test suite for the CustomUserCreationForm.
@@ -26,7 +25,6 @@ class CustomUserCreationFormTests(TestCase):
             "username": "testuser",
             "password1": "SecRet_p@ssword",
             "password2": "SecRet_p@ssword",
-            "captcha_verification": "testsecret",
         }
 
         self.invalid_data = {
@@ -34,24 +32,23 @@ class CustomUserCreationFormTests(TestCase):
             "username": "testuser",
             "password1": "SecRet_p@ssword",
             "password2": "SecRetp@ssword",
-            "captcha_verification": "testsecret",
         }
 
-    def test_form_valid_data(self, mock: MagicMock):
+    def test_form_valid_data(self):
         """
         Test that the form is valid when all fields are provided and passwords match.
         """
         form = CustomUserCreationForm(data=self.valid_data)
         self.assertTrue(form.is_valid(), form.errors)
 
-    def test_form_invalid_data(self, mock: MagicMock):
+    def test_form_invalid_data(self):
         """
         Test that the form is invalid when passwords do not match.
         """
         form = CustomUserCreationForm(data=self.invalid_data)
         self.assertFalse(form.is_valid(), form.errors)
 
-    def test_form_missing_email(self, mock: MagicMock):
+    def test_form_missing_email(self):
         """
         Test that the form is invalid when the email is missing.
         """
@@ -60,7 +57,7 @@ class CustomUserCreationFormTests(TestCase):
         form = CustomUserCreationForm(data=data)
         self.assertFalse(form.is_valid(), form.errors)
 
-    def test_form_missing_username(self, mock: MagicMock):
+    def test_form_missing_username(self):
         """
         Test that the form is invalid when the username is missing.
         """

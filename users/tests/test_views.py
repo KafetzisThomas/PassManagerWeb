@@ -1,6 +1,6 @@
 import pyotp
 from django.test import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth import SESSION_KEY
@@ -14,7 +14,6 @@ from ..forms import (
 )
 
 
-@patch("turnstile.fields.TurnstileField.validate", return_value=True)
 class RegisterViewTests(TestCase):
     """
     Test case for the register view.
@@ -30,10 +29,9 @@ class RegisterViewTests(TestCase):
             "username": "testuser",
             "password1": "testpassword123",
             "password2": "testpassword123",
-            "captcha_verification": "testsecret",
         }
 
-    def test_register_view_status_code_and_template(self, mock: MagicMock):
+    def test_register_view_status_code_and_template(self):
         """
         Test if the register view returns a status code 200 & uses the correct template.
         """
@@ -42,7 +40,7 @@ class RegisterViewTests(TestCase):
         self.assertTemplateUsed(response, "registration/register.html")
         self.assertIsInstance(response.context["form"], CustomUserCreationForm)
 
-    def test_register_view_valid(self, mock: MagicMock):
+    def test_register_view_valid(self):
         """
         Test registering a new user with valid data.
         """
@@ -57,7 +55,7 @@ class RegisterViewTests(TestCase):
         # Check if the user is still logged out
         self.assertNotIn(SESSION_KEY, self.client.session)
 
-    def test_register_view_post_invalid(self, mock: MagicMock):
+    def test_register_view_post_invalid(self):
         """
         Test registering a new user with invalid data.
         """
