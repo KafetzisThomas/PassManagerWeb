@@ -11,10 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def faq(request):
-    return render(request, "passmanager/faq.html")
-
-
 @login_required
 def vault(request):
     items = Item.objects.filter(owner=request.user).order_by("name")

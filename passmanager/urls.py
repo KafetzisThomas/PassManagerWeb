@@ -5,8 +5,6 @@ from . import views
 
 app_name = "passmanager"
 urlpatterns = [
-    # FAQ page
-    path("faq/", views.faq, name="faq"),
     # Vault page
     path("", views.vault, name="vault"),
     # Add a new item page
