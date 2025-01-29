@@ -8,34 +8,6 @@ from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from ..models import Item
 
 
-class HomeViewTests(TestCase):
-    """
-    Test case for the home view.
-    """
-
-    def test_home_view_status_code_and_template(self):
-        """
-        Test if the home view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:home"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/home.html")
-
-
-class FaqViewTests(TestCase):
-    """
-    Test case for the faq view.
-    """
-
-    def test_faq_view_status_code_and_template(self):
-        """
-        Test if the faq view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:faq"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/faq.html")
-
-
 class VaultViewTests(TestCase):
     """
     Test case for the vault view.
@@ -69,7 +41,7 @@ class VaultViewTests(TestCase):
         """
         self.client.logout()
         response = self.client.get(reverse("passmanager:vault"))
-        self.assertRedirects(response, "/user/login/?next=/vault/")
+        self.assertRedirects(response, "/user/login/?next=/")
 
     def test_vault_view_status_code_and_template(self):
         """
