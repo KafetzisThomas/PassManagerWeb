@@ -236,7 +236,7 @@ class DeleteAccountViewTests(TestCase):
         Test deleting the user account successfully.
         """
         response = self.client.post(reverse("users:delete_account"))
-        self.assertRedirects(response, reverse("passmanager:home"))
+        self.assertRedirects(response, reverse("users:register"))
 
         # Check that the user is deleted
         self.assertFalse(self.user_model.objects.filter(id=self.user.id).exists())
