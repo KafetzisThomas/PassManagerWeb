@@ -4,8 +4,9 @@
     </h1>
     <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
     <a href="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml">
-        <img src = "https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt = 'Run Tests'/>
+        <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt="Run Tests"/>
     </a>
+    <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker" alt="Docker Enabled"/>
 </div>
 
 ---
