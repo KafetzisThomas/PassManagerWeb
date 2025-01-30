@@ -6,6 +6,6 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:8000"
     env_file:
       - main/.env
