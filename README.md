@@ -52,13 +52,25 @@ $ nano main/.env
 
 Add the following environment variables (modify as needed):
 ```bash
+# Django settings
 ➜ SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
 ➜ DEBUG=True  # For development
+
+# OPTIONAL: PostgreSQL Configuration (remote production)
+➜ DATABASE_URL="postgres://[username]:[password]@[host]:[port]/[db_name]"
+
+# Email settings
 ➜ EMAIL_HOST_USER="example_email_host"
 ➜ EMAIL_HOST_PASSWORD="example_email_password"
 ```
 
 Save changes and close the file.
+
+<blockquote>
+Note: You can optionally run the application using Docker:<br>
+
+`$ PORT=8000 docker compose up`
+</blockquote>
 
 ### Migrate Database
 
