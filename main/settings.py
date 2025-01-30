@@ -100,7 +100,7 @@ if DEBUG:
         }
     }
 else:
-    # Production using PostgreSQL
+    # Production using PostgreSQL (remote)
     DATABASES = {
         "default": dj_database_url.parse(os.getenv("DATABASE_URL")),
     }
