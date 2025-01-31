@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    container_name: django-docker
+    env_file:
+      - main/.env
+
+  frontend-proxy:
+    image: nginx:latest
+    ports:
+      - "8001:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app

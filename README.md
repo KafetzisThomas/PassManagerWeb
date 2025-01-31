@@ -1,11 +1,12 @@
 <div align="center">
     <h1>
-        <img src="static/images/logo.png" width="400" alt="Logo Icon"/>
+        <img src="passmanager/static/images/logo.png" width="400" alt="Logo Icon"/>
     </h1>
     <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
     <a href="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml">
-        <img src = "https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt = 'Run Tests'/>
+        <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt="Run Tests"/>
     </a>
+    <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker" alt="Docker Enabled"/>
 </div>
 
 ---
@@ -52,13 +53,27 @@ $ nano main/.env
 
 Add the following environment variables (modify as needed):
 ```bash
+# Django settings
 ➜ SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
+➜ ALLOWED_HOSTS="localhost"
+➜ CSRF_TRUSTED_ORIGINS="http://localhost:8001"
 ➜ DEBUG=True  # For development
+
+# OPTIONAL: PostgreSQL Configuration (remote production)
+➜ DATABASE_URL="postgres://[username]:[password]@[host]:[port]/[db_name]"
+
+# Email settings
 ➜ EMAIL_HOST_USER="example_email_host"
 ➜ EMAIL_HOST_PASSWORD="example_email_password"
 ```
 
 Save changes and close the file.
+
+> **Note:** You can deploy the application using Docker:  
+> **NGINX + Gunicorn + External DB**  
+> ```sh
+> $ docker compose up
+> ```
 
 ### Migrate Database
 
@@ -84,19 +99,19 @@ $ python3 manage.py test
 
 <div align = 'center'>
     <h2>Vault</h2>
-    <img src='static/images/vault_page.png' alt='Vault'>
+    <img src='passmanager/static/images/vault_page.png' alt='Vault'>
     <br><h2>Password Generator</h2>
-    <img src='static/images/password_generator_page.png' alt='Password Generator'>
+    <img src='passmanager/static/images/password_generator_page.png' alt='Password Generator'>
     <br><h2>Import Data</h2>
-    <img src='static/images/import_data_page.png' alt='Import Data'>
+    <img src='passmanager/static/images/import_data_page.png' alt='Import Data'>
     <br><h2>Password Checkup</h2>
-    <img src = 'static/images/password_checkup_page.png' alt='Password Checkup'>
+    <img src = 'passmanager/static/images/password_checkup_page.png' alt='Password Checkup'>
     <br><h2>Account Settings</h2>
-    <img src='static/images/account_page.png' alt='Account Settings'>
+    <img src='passmanager/static/images/account_page.png' alt='Account Settings'>
     <br><h2>New Item</h2>
-    <img src='static/images/new_item_page.png' alt='New Item'>
+    <img src='passmanager/static/images/new_item_page.png' alt='New Item'>
     <br><h2>Edit Item</h2>
-    <img src='static/images/edit_item_page.png' alt='Edit Item'><br>
+    <img src='passmanager/static/images/edit_item_page.png' alt='Edit Item'><br>
 </div>
 
 ## Contributing Guidelines
