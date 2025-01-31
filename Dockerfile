@@ -1,24 +1,53 @@
-FROM python:3.10-slim
+# Stage 1: Base build stage
+FROM python:3.10-slim AS builder
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Create the app directory
+RUN mkdir /app
 
+# Set the working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential libpq-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Set environment variables to optimize Python
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1 
 
-COPY requirements.txt /app/
+# Install dependencies first for caching benefit
+RUN pip install --upgrade pip 
+COPY requirements.txt /app/ 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+# Stage 2: Production stage
+FROM python:3.10-slim
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+RUN useradd -m -r appuser && \
+    mkdir /app && \
+    chown -R appuser /app
 
-EXPOSE 8000
+# Copy the Python dependencies from the builder stage
+COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "main.wsgi:application"]
+# Set the working directory
+WORKDIR /app
+
+# Copy application code
+COPY --chown=appuser:appuser . .
+
+# Set environment variables to optimize Python
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1 
+
+# Create the staticfiles directory
+RUN mkdir -p /app/staticfiles && chown appuser:appuser /app/staticfiles
+
+# Switch to non-root user
+USER appuser
+
+# Expose the application port
+EXPOSE 8000 
+
+# Make entry file executable
+RUN chmod +x  /app/entrypoint.prod.sh
+
+# Start the application using Gunicorn
+CMD ["/app/entrypoint.prod.sh"]

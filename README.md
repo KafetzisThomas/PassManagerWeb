@@ -1,6 +1,6 @@
 <div align="center">
     <h1>
-        <img src="static/images/logo.png" width="400" alt="Logo Icon"/>
+        <img src="passmanager/static/passmanager/images/logo.png" width="400" alt="Logo Icon"/>
     </h1>
     <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
     <a href="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml">
@@ -97,19 +97,19 @@ $ python3 manage.py test
 
 <div align = 'center'>
     <h2>Vault</h2>
-    <img src='static/images/vault_page.png' alt='Vault'>
+    <img src='passmanager/static/passmanager/images/vault_page.png' alt='Vault'>
     <br><h2>Password Generator</h2>
-    <img src='static/images/password_generator_page.png' alt='Password Generator'>
+    <img src='passmanager/static/passmanager/images/password_generator_page.png' alt='Password Generator'>
     <br><h2>Import Data</h2>
-    <img src='static/images/import_data_page.png' alt='Import Data'>
+    <img src='passmanager/static/passmanager/images/import_data_page.png' alt='Import Data'>
     <br><h2>Password Checkup</h2>
-    <img src = 'static/images/password_checkup_page.png' alt='Password Checkup'>
+    <img src = 'passmanager/static/passmanager/images/password_checkup_page.png' alt='Password Checkup'>
     <br><h2>Account Settings</h2>
-    <img src='static/images/account_page.png' alt='Account Settings'>
+    <img src='passmanager/static/passmanager/images/account_page.png' alt='Account Settings'>
     <br><h2>New Item</h2>
-    <img src='static/images/new_item_page.png' alt='New Item'>
+    <img src='passmanager/static/passmanager/images/new_item_page.png' alt='New Item'>
     <br><h2>Edit Item</h2>
-    <img src='static/images/edit_item_page.png' alt='Edit Item'><br>
+    <img src='passmanager/static/passmanager/images/edit_item_page.png' alt='Edit Item'><br>
 </div>
 
 ## Contributing Guidelines
