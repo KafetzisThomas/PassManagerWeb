@@ -54,6 +54,9 @@ def send_delete_account_notification(user):
 
 
 def send_update_account_notification(user):
+    if not user.allow_account_update_notifications:
+        return
+
     subject = "Security Notification: Your Account Settings Have Been Updated"
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [user.email]
@@ -70,6 +73,9 @@ def send_update_account_notification(user):
 
 
 def send_master_password_update(user):
+    if not user.allow_master_password_update_notifications:
+        return
+
     subject = "Security Notification: Master Password Updated"
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [user.email]

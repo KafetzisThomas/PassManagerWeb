@@ -20,6 +20,8 @@ class CustomUserModelTests(TestCase):
             "otp_secret": "12345678901234567890123456789012",
             "session_timeout": 300,
             "enable_2fa": False,
+            "allow_account_update_notifications": True,
+            "allow_master_password_update_notifications": True,
         }
 
     def test_valid_user_creation(self):
@@ -32,6 +34,8 @@ class CustomUserModelTests(TestCase):
         self.assertTrue(user.check_password(self.user_data["password"]))
         self.assertEqual(user.otp_secret, self.user_data["otp_secret"])
         self.assertEqual(user.session_timeout, self.user_data["session_timeout"])
+        self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
+        self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
         self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
 
     def test_email_unique(self):
