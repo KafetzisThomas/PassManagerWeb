@@ -180,15 +180,11 @@ class CustomUserChangeFormTests(TestCase):
             email="testuser@example.com",
             username="testuser",
             password="testpassword123",
-            session_timeout=300,
-            enable_2fa=False,
         )
 
         self.form_data = {
             "email": "updated_email@example.com",
             "username": "updated_username",
-            "session_timeout": 600,
-            "enable_2fa": True,
         }
 
     def test_form_valid_data(self):
@@ -211,14 +207,6 @@ class CustomUserChangeFormTests(TestCase):
         Test that the form is invalid when the username is missing.
         """
         self.form_data["username"] = ""
-        form = CustomUserChangeForm(instance=self.user, data=self.form_data)
-        self.assertFalse(form.is_valid(), form.errors)
-
-    def test_form_invalid_session_timeout(self):
-        """
-        Test that the form is invalid when an incorrect session timeout is provided.
-        """
-        self.form_data["session_timeout"] = "invalid-timeout"
         form = CustomUserChangeForm(instance=self.user, data=self.form_data)
         self.assertFalse(form.is_valid(), form.errors)
 
