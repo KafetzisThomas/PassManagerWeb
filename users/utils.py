@@ -54,6 +54,9 @@ def send_delete_account_notification(user):
 
 
 def send_update_account_notification(user):
+    if not user.allow_account_notifications:
+        return
+
     subject = "Security Notification: Your Account Settings Have Been Updated"
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [user.email]

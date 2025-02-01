@@ -84,7 +84,13 @@ class TwoFactorVerificationForm(forms.Form):
 class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ("email", "username", "session_timeout", "enable_2fa")
+        fields = (
+            "email",
+            "username",
+            "session_timeout",
+            "enable_2fa",
+            "allow_account_notifications",
+        )
 
 
 class MasterPasswordChangeForm(PasswordChangeForm):
