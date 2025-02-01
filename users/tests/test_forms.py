@@ -185,6 +185,7 @@ class CustomUserChangeFormTests(TestCase):
         self.form_data = {
             "email": "updated_email@example.com",
             "username": "updated_username",
+            "session_timeout": 600,
         }
 
     def test_form_valid_data(self):
