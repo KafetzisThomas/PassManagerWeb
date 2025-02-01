@@ -23,6 +23,9 @@ class CustomUser(AbstractUser):
     allow_account_notifications = models.BooleanField(
         default=True, verbose_name="Allow Account Notifications"
     )
+    allow_master_password_update_notifications = models.BooleanField(
+        default=True, verbose_name="Allow Master Password Update Notifications"
+    )
     session_timeout = models.IntegerField(
         choices=[(key, value) for value, key in SESSION_TIMEOUT_CHOICES],
         default=900,  # 15 minutes

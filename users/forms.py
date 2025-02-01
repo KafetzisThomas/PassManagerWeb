@@ -90,6 +90,7 @@ class CustomUserChangeForm(forms.ModelForm):
             "session_timeout",
             "enable_2fa",
             "allow_account_notifications",
+            "allow_master_password_update_notifications",
         )
 
 
