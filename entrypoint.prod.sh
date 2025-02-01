@@ -6,6 +6,9 @@ set -o errexit
 # Collect static files
 python manage.py collectstatic --noinput
 
+# Change ownership of static files
+chown -R appuser:appuser /app/staticfiles
+
 # Apply database migrations
 python manage.py migrate --noinput
 
