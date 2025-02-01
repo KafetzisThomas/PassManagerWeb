@@ -20,8 +20,8 @@ class CustomUser(AbstractUser):
     encryption_salt = models.CharField(max_length=44, blank=True, null=True)
     enable_2fa = models.BooleanField(default=False, verbose_name="Enable 2FA")
     otp_secret = models.CharField(max_length=32)
-    allow_account_notifications = models.BooleanField(
-        default=True, verbose_name="Allow Account Notifications"
+    allow_account_update_notifications = models.BooleanField(
+        default=True, verbose_name="Allow Account Update Notifications"
     )
     allow_master_password_update_notifications = models.BooleanField(
         default=True, verbose_name="Allow Master Password Update Notifications"
