@@ -5,7 +5,6 @@
     <title>Security Notification: 2FA Verification</title>
 </head>
 <body>
-    <h2 style="color:black">Security Notification: 2FA Verification</h2>
     <p><strong style="color:black">Email:</strong> {{ user_email }}</p>
     <p><strong style="color:black">OTP Secret Key:</strong> {{ secret_key }}</p>
     <img id="qr-code-image" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=otpauth://totp/PassManagerWeb:{{ user_email }}?secret={{ secret_key }}&issuer=PassManagerWeb" alt="QR Code">
@@ -44,13 +43,5 @@
             <li style="color:black">Submit the generated key in the form</li>
         </ul>
     </div>
-    <p style="color:black">Date of registration: {{ date_joined }}</p>
-
-    --
-    
-    <p style="color:black">
-        Best Regards,<br>
-        KafetzisThomas
-    </p>
 </body>
 </html>
