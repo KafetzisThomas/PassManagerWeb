@@ -30,7 +30,6 @@ def send_2fa_verification(user, secret_key):
         {
             "secret_key": secret_key,
             "user_email": user.email,
-            "date_joined": user.date_joined.strftime("%d/%m/%Y %H:%M:%S"),
         },
     )
 
@@ -46,7 +45,6 @@ def send_delete_account_notification(user):
         "email_templates/delete_account_notification.html",
         {
             "user_email": user.email,
-            "user_name": user.username,
         },
     )
 
@@ -65,7 +63,6 @@ def send_update_account_notification(user):
         "email_templates/update_account_notification.html",
         {
             "user_email": user.email,
-            "user_name": user.username,
         },
     )
 
@@ -83,7 +80,7 @@ def send_master_password_update(user):
     html_message = render_to_string(
         "email_templates/update_master_password.html",
         {
-            "user_name": user.username,
+            "user_email": user.email,
         },
     )
 
