@@ -3,10 +3,6 @@
 
 {% block title %}Account{% endblock title %}
 
-{% block page_header %}
-    <h2>Your account settings.</h2>
-{% endblock page_header %}
-
 {% block content %}
     <form action="{% url 'users:account' %}" method="post" class="form">
         {% csrf_token %}
