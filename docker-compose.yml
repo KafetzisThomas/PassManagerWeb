@@ -6,6 +6,7 @@ services:
       - static_volume:/app/staticfiles
     env_file:
       - main/.env
+    restart: unless-stopped
 
   frontend-proxy:
     image: nginx:latest
@@ -16,6 +17,7 @@ services:
       - static_volume:/static:ro
     depends_on:
       - django-web
+    restart: unless-stopped
 
 volumes:
   static_volume:
