@@ -104,3 +104,11 @@ class MasterPasswordChangeForm(PasswordChangeForm):
     new_password2 = forms.CharField(
         label="Confirm New Master Password", widget=forms.PasswordInput
     )
+
+
+class PasswordConfirmationForm(forms.Form):
+    password = forms.CharField(
+        label="Confirm Master Password",
+        widget=forms.PasswordInput(),
+        required=True,
+    )

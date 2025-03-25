@@ -1,6 +1,7 @@
 import csv
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from .decorators import reauth_required
 from django.http import Http404, HttpResponse
 from django.contrib import messages
 from .models import Item
@@ -170,6 +171,7 @@ def password_generator(request):
 
 
 @login_required
+@reauth_required
 def download_csv(request):
     # Create response with csv content type & set filename for download
     response = HttpResponse(content_type="text/csv")
