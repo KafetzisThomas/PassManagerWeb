@@ -4,7 +4,7 @@
 {% block title %}Import Data{% endblock title %}
 
 {% block content %}
-    <form action="{% url 'passmanager:upload_csv' %}" method="post" class="form" enctype="multipart/form-data">
+    <form action="{% url 'passmanager:import_csv' %}" method="post" class="form" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form|crispy }}
         <button name="submit" class="btn btn-dark w-100">Import</button>

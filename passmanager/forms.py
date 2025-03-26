@@ -56,7 +56,7 @@ class PasswordGeneratorForm(forms.Form):
 class ImportPasswordsForm(forms.Form):
     csv_file = forms.FileField(
         label="Select CSV File",
-        help_text="Upload your CSV file with the following columns: name, username, password, url, notes.",
+        help_text="Import your CSV file with the following columns: name, username, password, url, notes.",
         widget=forms.ClearableFileInput(attrs={"accept": ".csv"}),
     )
 
@@ -66,6 +66,6 @@ class ImportPasswordsForm(forms.Form):
 
         # Check file extension
         if not csv_file.name.endswith(".csv"):
-            raise forms.ValidationError("Invalid file type. Please upload a CSV file.")
+            raise forms.ValidationError("Invalid file type. Please import a CSV file.")
 
         return cleaned_data

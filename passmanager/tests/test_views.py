@@ -372,9 +372,9 @@ class PasswordGeneratorViewTests(TestCase):
         self.assertEqual(response.context["password"], "")
 
 
-class DownloadCsvViewTests(TestCase):
+class ExportCsvViewTests(TestCase):
     """
-    Test case for the download_csv view.
+    Test case for the export_csv view.
     """
 
     def setUp(self):
@@ -399,19 +399,33 @@ class DownloadCsvViewTests(TestCase):
         self.item.encrypt_sensitive_fields()
         self.item.save()
 
-    def test_download_csv_view(self):
+    def test_export_csv_view(self):
         """
         Test csv file returns with properly decrypted user data.
         """
-        response = self.client.get(reverse("passmanager:download_csv"))
+        form_response = self.client.get(reverse("passmanager:export_csv"))
+
+        # Verify we got the master password re-authentication form
+        self.assertEqual(form_response.status_code, 200)
+        self.assertEqual(form_response["Content-Type"], "text/html; charset=utf-8")
+
+        csrf_token = form_response.context["csrf_token"]
+        post_response = self.client.post(
+            reverse("passmanager:export_csv"),
+            {
+                "password": "password123",
+                "csrfmiddlewaretoken": csrf_token,
+            },
+            follow=True,
+        )
 
         # Verify response status & headers
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["Content-Type"], "text/csv")
-        self.assertIn("PassManager Passwords.csv", response["Content-Disposition"])
+        self.assertEqual(post_response.status_code, 200)
+        self.assertEqual(post_response["Content-Type"], "text/csv")
+        self.assertIn("PassManager Passwords.csv", post_response["Content-Disposition"])
 
         # Decode csv content & validate header
-        content = response.content.decode("utf-8")
+        content = post_response.content.decode("utf-8")
         reader = csv.reader(content.splitlines())
         header = next(reader)
         self.assertEqual(header, ["name", "username", "password", "url", "notes"])
@@ -433,9 +447,9 @@ class DownloadCsvViewTests(TestCase):
         )
 
 
-class UploadCsvViewTests(TestCase):
+class ImportCsvViewTests(TestCase):
     """
-    Test case for the upload_csv view.
+    Test case for the import_csv view.
     """
 
     def setUp(self):
@@ -448,25 +462,25 @@ class UploadCsvViewTests(TestCase):
         )
         self.client.login(email="testuser@example.com", password="password123")
 
-    def test_upload_csv_view_status_code_and_template(self):
+    def test_import_csv_view_status_code_and_template(self):
         """
         Test if the view returns status code 200 and uses the correct template.
         """
-        response = self.client.get(reverse("passmanager:upload_csv"))
+        response = self.client.get(reverse("passmanager:import_csv"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/upload_csv.html")
+        self.assertTemplateUsed(response, "passmanager/import_csv.html")
         self.assertIsInstance(response.context["form"], ImportPasswordsForm)
 
-    def test_valid_csv_upload(self):
+    def test_valid_csv_import(self):
         """
-        Test valid csv upload saves encrypted data to the database.
+        Test valid csv import saves encrypted data to the database.
         """
         csv_content = b"name,username,password,url,notes\nTest user,test_user,test_pass,example.com,example notes"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
         response = self.client.post(
-            reverse("passmanager:upload_csv"), data={"csv_file": file}, follow=True
+            reverse("passmanager:import_csv"), data={"csv_file": file}, follow=True
         )
         self.assertRedirects(response, reverse("passmanager:vault"))
         self.assertEqual(Item.objects.count(), 1)
@@ -483,17 +497,17 @@ class UploadCsvViewTests(TestCase):
 
     def test_invalid_csv_header(self):
         """
-        Test csv upload with invalid headers.
+        Test csv import with invalid headers.
         """
         csv_content = b"wrong_header1,wrong_header2,wrong_header3\ndata1,data2,data3"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
         response = self.client.post(
-            reverse("passmanager:upload_csv"), data={"csv_file": file}, follow=True
+            reverse("passmanager:import_csv"), data={"csv_file": file}, follow=True
         )
 
-        self.assertRedirects(response, reverse("passmanager:upload_csv"))
+        self.assertRedirects(response, reverse("passmanager:import_csv"))
         self.assertEqual(Item.objects.count(), 0)
 
 

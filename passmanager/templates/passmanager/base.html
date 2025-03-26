@@ -49,7 +49,7 @@
                             <a class="nav-link {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'passmanager:password_generator' %}">Generator</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/upload_csv/' %}active{% endif %}" href="{% url 'passmanager:upload_csv' %}">Import Data</a>
+                            <a class="nav-link {% if request.path == '/import_csv/' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}">Import Data</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/password_checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}">Checkup</a>
@@ -95,7 +95,7 @@
                     <a class="nav-link text-light {% if request.path == '/password_generator/' %}active{% endif %}" href="{% url 'passmanager:password_generator' %}"><i class="bi bi-key"></i> Generator</a>
                 </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Import Data">
-                    <a class="nav-link text-light {% if request.path == '/upload_csv/' %}active{% endif %}" href="{% url 'passmanager:upload_csv' %}"><i class="bi bi-upload"></i> Import Data</a>
+                    <a class="nav-link text-light {% if request.path == '/import_csv/' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}"><i class="bi bi-upload"></i> Import Data</a>
                 </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Password Checkup">
                     <a class="nav-link text-light {% if request.path == '/password_checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}"><i class="bi bi-shield-check"></i> Checkup</a>

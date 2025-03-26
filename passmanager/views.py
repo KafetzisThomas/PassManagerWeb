@@ -172,7 +172,7 @@ def password_generator(request):
 
 @login_required
 @reauth_required
-def download_csv(request):
+def export_csv(request):
     # Create response with csv content type & set filename for download
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
@@ -192,7 +192,7 @@ def download_csv(request):
 
 
 @login_required
-def upload_csv(request):
+def import_csv(request):
     if request.method == "POST":
         form = ImportPasswordsForm(request.POST, request.FILES)
         if form.is_valid():
@@ -209,7 +209,7 @@ def upload_csv(request):
                 messages.error(
                     request, "Invalid CSV format. Please check the column names."
                 )
-                return redirect("passmanager:upload_csv")
+                return redirect("passmanager:import_csv")
 
             for row in csv_reader:
                 name, username, password, url, notes = row
@@ -230,7 +230,7 @@ def upload_csv(request):
         form = ImportPasswordsForm()
 
     context = {"form": form}
-    return render(request, "passmanager/upload_csv.html", context)
+    return render(request, "passmanager/import_csv.html", context)
 
 
 @login_required
