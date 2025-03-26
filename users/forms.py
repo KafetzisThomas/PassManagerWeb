@@ -104,3 +104,21 @@ class MasterPasswordChangeForm(PasswordChangeForm):
     new_password2 = forms.CharField(
         label="Confirm New Master Password", widget=forms.PasswordInput
     )
+
+
+class PasswordConfirmationForm(forms.Form):
+    password = forms.CharField(
+        label="Confirm Master Password",
+        widget=forms.PasswordInput(),
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        password = self.cleaned_data.get("password")
+        if not self.user.check_password(password):
+            raise forms.ValidationError("Incorrect master password.")
+        return password

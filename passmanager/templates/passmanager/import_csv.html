@@ -1,0 +1,13 @@
+{% extends "passmanager/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Import Data{% endblock title %}
+
+{% block content %}
+    <form action="{% url 'passmanager:import_csv' %}" method="post" class="form" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button name="submit" class="btn btn-dark w-100">Import</button>
+        <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
+    </form>
+{% endblock content %}

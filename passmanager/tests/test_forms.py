@@ -152,7 +152,7 @@ class ImportPasswordsFormTests(TestCase):
     Test suite for the ImportPasswordsForm.
     """
 
-    def test_valid_csv_file_upload(self):
+    def test_valid_csv_file_import(self):
         """
         Test that a valid csv file is accepted.
         """

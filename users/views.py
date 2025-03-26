@@ -71,7 +71,7 @@ def account(request):
             elif action == "update_master_password":
                 return redirect("users:update_master_password")
             elif action == "export_data":
-                return redirect("passmanager:download_csv")
+                return redirect("passmanager:export_csv")
         else:
             messages.error(request, "There was an error updating your account.")
     else:

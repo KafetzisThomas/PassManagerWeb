@@ -15,10 +15,10 @@ urlpatterns = [
     path("edit_item/<int:item_id>/delete", views.delete_item, name="delete_item"),
     # Password generator page
     path("password_generator/", views.password_generator, name="password_generator"),
-    # Download csv page
-    path("download_csv/", views.download_csv, name="download_csv"),
-    # Upload csv page
-    path("upload_csv/", views.upload_csv, name="upload_csv"),
+    # Export csv page
+    path("export_csv/", views.export_csv, name="export_csv"),
+    # Import csv page
+    path("import_csv/", views.import_csv, name="import_csv"),
     # Password checkup page
     path("password_checkup/", views.password_checkup, name="password_checkup"),
 ]
