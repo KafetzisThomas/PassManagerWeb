@@ -1,13 +1,13 @@
 import pyotp
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from unittest.mock import MagicMock
 from ..forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     TwoFactorVerificationForm,
     CustomUserChangeForm,
     MasterPasswordChangeForm,
+    PasswordConfirmationForm,
 )
 
 
@@ -283,4 +283,39 @@ class MasterPasswordChangeFormTests(TestCase):
         data.pop("new_password1")
         data.pop("new_password2")
         form = MasterPasswordChangeForm(user=self.user, data=data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+
+class PasswordConfirmationFormTests(TestCase):
+    """
+    Test suite for the PasswordConfirmationForm.
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment by creating a test user.
+        """
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword123",
+            username="testuser",
+        )
+
+    def test_form_valid_data(self):
+        """
+        Test that the form is valid when field is provided and master password is valid.
+        """
+        form = PasswordConfirmationForm(
+            user=self.user, data={"password": "testpassword123"}
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_form_invalid_master_password(self):
+        """
+        Test that the form is invalid when the master password is incorrect.
+        """
+        form = PasswordConfirmationForm(
+            user=self.user, data={"password": "wrongpassword"}
+        )
         self.assertFalse(form.is_valid(), form.errors)

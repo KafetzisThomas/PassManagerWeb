@@ -112,3 +112,13 @@ class PasswordConfirmationForm(forms.Form):
         widget=forms.PasswordInput(),
         required=True,
     )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        password = self.cleaned_data.get("password")
+        if not self.user.check_password(password):
+            raise forms.ValidationError("Incorrect master password.")
+        return password
