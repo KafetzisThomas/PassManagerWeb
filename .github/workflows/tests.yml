@@ -27,12 +27,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install uv
 
       - name: Run tests for passmanager app
         run: |
-          python3 manage.py test passmanager.tests
+          uv run manage.py test passmanager.tests
 
       - name: Run tests for users app
         run: |
-          python3 manage.py test users.tests
+          uv run manage.py test users.tests
