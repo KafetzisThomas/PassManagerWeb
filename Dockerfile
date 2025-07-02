@@ -1,5 +1,5 @@
 # Stage 1: Base build stage
-FROM python:3.10-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Create the app directory
 RUN mkdir /app
@@ -12,19 +12,18 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1 
 
 # Install dependencies first for caching benefit
-RUN pip install --upgrade pip 
-COPY requirements.txt /app/ 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install uv
+COPY pyproject.toml uv.lock /app/
 
 # Stage 2: Production stage
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 RUN useradd -m -r appuser && \
     mkdir /app && \
     chown -R appuser /app
 
-# Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+# Copy the python dependencies from the builder stage
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Set the working directory

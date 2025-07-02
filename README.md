@@ -30,28 +30,21 @@ If you find this project interesting, helpful, or inspiring, please consider giv
 
 ## Setup for Local Development
 
-### Set up Virtual Environment
+### Install uv
 
 ```bash
 ➜ cd path/to/root/directory
-$ python3 -m venv env/
-$ source env/bin/activate
+$ pip install uv
 ```
 
-### Install Dependencies
-
-```bash
-$ pip3 install -r requirements.txt
-```
-
-### Create Enviroment Variable file
+### Create Environment Variable file
 
 ```bash
 $ touch main/.env
 $ nano main/.env
 ```
 
-Add the following environment variables (modify as needed):
+Add the following (adjust as needed):
 ```bash
 # Django settings
 ➜ SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
@@ -78,12 +71,12 @@ Save changes and close the file.
 ### Migrate Database
 
 ```bash
-$ python3 manage.py migrate
+$ uv run manage.py migrate
 ```
 
 ### Run Django Server
 ```bash
-$ python3 manage.py runserver
+$ uv run manage.py runserver
 ```
 
 Now you can access the website at `http://127.0.0.1:8000/` or `http://localhost:8000/`.
@@ -91,8 +84,7 @@ Now you can access the website at `http://127.0.0.1:8000/` or `http://localhost:
 ## Run Tests
 
 ```bash
-➜ cd path/to/root/directory
-$ python3 manage.py test
+$ uv run manage.py test
 ```
 
 ## Demo Images

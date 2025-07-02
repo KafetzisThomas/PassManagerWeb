@@ -1,0 +1,34 @@
+[project]
+name = "passmanagerweb"
+version = "0.1.0"
+description = "Self-hosted password manager for secure online credentials."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asgiref==3.8.1",
+    "beautifulsoup4==4.12.3",
+    "brotli==1.1.0",
+    "cffi==1.16.0",
+    "click==8.1.7",
+    "crispy-bootstrap5==2024.2",
+    "cryptography==44.0.3",
+    "dj-database-url==2.2.0",
+    "django==4.2.23",
+    "django-appconf==1.0.6",
+    "django-bootstrap5==24.2",
+    "django-crispy-forms==2.2",
+    "django-extensions==3.2.3",
+    "future==1.0.0",
+    "gunicorn==23.0.0",
+    "h11==0.16.0",
+    "packaging==24.1",
+    "psycopg2-binary==2.9.9",
+    "pwnedpasswords==2.0.0",
+    "pycparser==2.22",
+    "pyotp==2.9.0",
+    "python-dotenv==1.0.1",
+    "soupsieve==2.5",
+    "sqlparse==0.5.0",
+    "typing-extensions==4.12.2",
+    "uvicorn==0.30.1",
+]
