@@ -12,7 +12,7 @@ dependencies = [
     "click==8.1.7",
     "crispy-bootstrap5==2024.2",
     "cryptography==44.0.3",
-    "dj-database-url==2.2.0",
+    "dj-database-url==3.0.1",
     "django==4.2.23",
     "django-appconf==1.0.6",
     "django-bootstrap5==24.2",
