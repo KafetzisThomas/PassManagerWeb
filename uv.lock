@@ -191,14 +191,14 @@ wheels = [
 
 [[package]]
 name = "django-bootstrap5"
-version = "24.2"
+version = "25.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f2/74/48395d813a39a06e36031a6f8855a24246d52a985cc52cd17bd76baa8454/django_bootstrap5-24.2.tar.gz", hash = "sha256:a3cee2b3d45745210c5b898af2917f310f44df746269fe09a93be28a0adc2a4b", size = 52683, upload-time = "2024-04-23T05:00:56.867Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/37/e3/1a52b8a5d2d85cbade624ec0de29a27b8a47df8859cb65e8425c3d4589df/django_bootstrap5-25.1.tar.gz", hash = "sha256:e81c77eb710356f94e426a51f4f469890d5720f5e7e53d650f4405d4cc94da04", size = 122024, upload-time = "2025-03-01T10:29:59.514Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/ec/be94035c59698dfdf9921ad20a7b8efba46be0b1b0f1903e7c2e71d63b81/django_bootstrap5-24.2-py3-none-any.whl", hash = "sha256:6a5d83e9ff1952f7c07c54cebcb76c85f09787b8b57eeb4ec07554cd583acc64", size = 25283, upload-time = "2024-04-23T05:00:54.914Z" },
+    { url = "https://files.pythonhosted.org/packages/49/6b/e28da7dd51d94f00975ab9db3ceda8ea7cfac6b92b2323fc4db7871534d4/django_bootstrap5-25.1-py3-none-any.whl", hash = "sha256:964ad2d970d0495b030b86f31b33033dfdfe839a67b32ea599fa02eb39988ae7", size = 26404, upload-time = "2025-03-01T10:29:57.281Z" },
 ]
 
 [[package]]
@@ -309,7 +309,7 @@ requires-dist = [
     { name = "dj-database-url", specifier = "==3.0.1" },
     { name = "django", specifier = "==4.2.23" },
     { name = "django-appconf", specifier = "==1.0.6" },
-    { name = "django-bootstrap5", specifier = "==24.2" },
+    { name = "django-bootstrap5", specifier = "==25.1" },
     { name = "django-crispy-forms", specifier = "==2.4" },
     { name = "django-extensions", specifier = "==3.2.3" },
     { name = "future", specifier = "==1.0.0" },
