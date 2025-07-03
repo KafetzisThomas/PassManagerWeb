@@ -15,7 +15,7 @@ dependencies = [
     "dj-database-url==3.0.1",
     "django==4.2.23",
     "django-appconf==1.0.6",
-    "django-bootstrap5==24.2",
+    "django-bootstrap5==25.1",
     "django-crispy-forms==2.4",
     "django-extensions==3.2.3",
     "future==1.0.0",
