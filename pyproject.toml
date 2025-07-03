@@ -16,7 +16,7 @@ dependencies = [
     "django==4.2.23",
     "django-appconf==1.0.6",
     "django-bootstrap5==24.2",
-    "django-crispy-forms==2.2",
+    "django-crispy-forms==2.4",
     "django-extensions==3.2.3",
     "future==1.0.0",
     "gunicorn==23.0.0",
