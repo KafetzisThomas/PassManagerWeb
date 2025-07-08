@@ -105,15 +105,15 @@ wheels = [
 
 [[package]]
 name = "crispy-bootstrap5"
-version = "2024.2"
+version = "2025.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-crispy-forms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/75/45/af5c7a13742650b1187a1a6db5197577b57f2b1ca3a042c3b386ddfbebfc/crispy-bootstrap5-2024.2.tar.gz", hash = "sha256:7d1fa40c6faf472e30e85c72551a3d2c9eedbf0abfff920683315e4e6f670f2b", size = 23411, upload-time = "2024-02-25T08:46:04.075Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/30/36cc4144b6dff91bb54490a3b474897b7469bcda9517bf9f54681ea91011/crispy_bootstrap5-2025.6.tar.gz", hash = "sha256:f1bde7cac074c650fc82f31777d4a4cfd0df2512c68bc4128f259c75d3daada4", size = 23950, upload-time = "2025-06-08T07:43:35.461Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/11/a1c22b4c803125901af7d2fa683f4c6eb14d511644da5fc0b45a0cb44cae/crispy_bootstrap5-2024.2-py3-none-any.whl", hash = "sha256:3867e320920a6ef156e94f9e0f06a80344c453e1b3bd96cd9dc0522ae9e9afb8", size = 24351, upload-time = "2024-02-25T08:46:02.171Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/d4/8cf1ba773a91fc17bab1fd46b75bbdef780c4cccbbb8230e617980a0362c/crispy_bootstrap5-2025.6-py3-none-any.whl", hash = "sha256:a343aa128b4383f35f00295b94de2b10862f2a4f24eda21fa6ead45234c07050", size = 24794, upload-time = "2025-06-08T07:43:34.206Z" },
 ]
 
 [[package]]
@@ -304,7 +304,7 @@ requires-dist = [
     { name = "brotli", specifier = "==1.1.0" },
     { name = "cffi", specifier = "==1.16.0" },
     { name = "click", specifier = "==8.1.7" },
-    { name = "crispy-bootstrap5", specifier = "==2024.2" },
+    { name = "crispy-bootstrap5", specifier = "==2025.6" },
     { name = "cryptography", specifier = "==45.0.5" },
     { name = "dj-database-url", specifier = "==3.0.1" },
     { name = "django", specifier = "==4.2.23" },
