@@ -9,7 +9,7 @@ dependencies = [
     "beautifulsoup4==4.13.4",
     "brotli==1.1.0",
     "cffi==1.16.0",
-    "click==8.1.7",
+    "click==8.2.1",
     "crispy-bootstrap5==2025.6",
     "cryptography==45.0.5",
     "dj-database-url==3.0.1",
