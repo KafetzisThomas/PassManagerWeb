@@ -14,7 +14,7 @@ dependencies = [
     "cryptography==45.0.5",
     "dj-database-url==3.0.1",
     "django==4.2.23",
-    "django-appconf==1.0.6",
+    "django-appconf==1.1.0",
     "django-bootstrap5==25.1",
     "django-crispy-forms==2.4",
     "django-extensions==4.1",
