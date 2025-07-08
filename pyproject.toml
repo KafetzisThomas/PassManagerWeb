@@ -28,7 +28,7 @@ dependencies = [
     "pyotp==2.9.0",
     "python-dotenv==1.0.1",
     "soupsieve==2.5",
-    "sqlparse==0.5.0",
+    "sqlparse==0.5.3",
     "typing-extensions==4.12.2",
     "uvicorn==0.30.1",
 ]
