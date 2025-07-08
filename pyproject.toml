@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "asgiref==3.8.1",
-    "beautifulsoup4==4.12.3",
+    "beautifulsoup4==4.13.4",
     "brotli==1.1.0",
     "cffi==1.16.0",
     "click==8.1.7",
