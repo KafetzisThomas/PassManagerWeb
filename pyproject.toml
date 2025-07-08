@@ -22,7 +22,7 @@ dependencies = [
     "gunicorn==23.0.0",
     "h11==0.16.0",
     "packaging==25.0",
-    "psycopg2-binary==2.9.9",
+    "psycopg2-binary==2.9.10",
     "pwnedpasswords==2.0.0",
     "pycparser==2.22",
     "pyotp==2.9.0",
