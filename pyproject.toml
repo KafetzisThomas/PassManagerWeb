@@ -10,7 +10,7 @@ dependencies = [
     "brotli==1.1.0",
     "cffi==1.16.0",
     "click==8.1.7",
-    "crispy-bootstrap5==2024.2",
+    "crispy-bootstrap5==2025.6",
     "cryptography==45.0.5",
     "dj-database-url==3.0.1",
     "django==4.2.23",
