@@ -29,6 +29,6 @@ dependencies = [
     "python-dotenv==1.0.1",
     "soupsieve==2.7",
     "sqlparse==0.5.3",
-    "typing-extensions==4.12.2",
+    "typing-extensions==4.14.1",
     "uvicorn==0.35.0",
 ]
