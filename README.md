@@ -14,6 +14,10 @@
 - [X] **Import/Export Data**: `Upload` data such as passwords from a CSV file or `download` your stored data in `CSV` format for easy backup or migration.
 - [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
 
+## Django Models
+
+![Django Models Graph](https://github.com/user-attachments/assets/d7d31518-1a7a-48a6-9ea7-04599b3097d8)
+
 ## Purpose
 
 The primary goal of this project is to **provide a self-hostable,  open-source password manager that anyone can use and learn from**.
