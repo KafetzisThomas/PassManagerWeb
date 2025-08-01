@@ -8,7 +8,7 @@ dependencies = [
     "asgiref==3.8.1",
     "beautifulsoup4==4.13.4",
     "brotli==1.1.0",
-    "cffi==1.16.0",
+    "cffi==1.17.1",
     "click==8.2.1",
     "crispy-bootstrap5==2025.6",
     "cryptography==45.0.5",
