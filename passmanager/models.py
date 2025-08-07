@@ -29,6 +29,7 @@ class Item(models.Model):
     password = models.CharField(max_length=500)
     url = models.URLField(max_length=50)
     notes = models.TextField(max_length=1500)
+    group = models.CharField(max_length=50, default="General")
     date_added = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -95,6 +96,11 @@ class Item(models.Model):
 
         key = None  # Zero out the content of the key in memory
         del key  # Securely forget the encryption key
+
+    def save(self, *args, **kwargs):
+        if self.group:
+            self.group = self.group.title()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

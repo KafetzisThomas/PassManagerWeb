@@ -12,6 +12,20 @@
         {% endfor %}
     {% endif %}
 
+    {% if items %}
+        <form method="GET" class="mb-4">
+            <div class="input-group">
+                <label class="input-group-text" for="group">Group</label>
+                <select class="form-select" name="group" id="group" onchange="this.form.submit()">
+                    <option value="">All Groups</option>
+                    {% for group in groups %}
+                        <option value="{{ group }}" {% if selected_group == group %}selected{% endif %}>{{ group }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    {% endif %}
+
     {% for item in items %}
         <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
             <article class="media border-dark rounded shadow item-section">

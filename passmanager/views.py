@@ -15,7 +15,25 @@ load_dotenv()
 @login_required
 def vault(request):
     items = Item.objects.filter(owner=request.user).order_by("name")
-    return render(request, "passmanager/vault.html", {"items": items})
+    groups = (
+        Item.objects.filter(owner=request.user)
+        .values_list("group", flat=True)
+        .distinct()
+    )
+    selected_group = request.GET.get("group")
+
+    if selected_group:
+        items = items.filter(group=selected_group)
+
+    return render(
+        request,
+        "passmanager/vault.html",
+        {
+            "items": items,
+            "groups": groups,
+            "selected_group": selected_group,
+        },
+    )
 
 
 @login_required
