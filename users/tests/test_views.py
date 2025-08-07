@@ -134,7 +134,7 @@ class AccountViewTests(TestCase):
         """
         self.client.logout()
         response = self.client.get(reverse("users:account"))
-        self.assertRedirects(response, f"/user/login/?next=/user/account/")
+        self.assertRedirects(response, "/user/login/?next=/user/account/")
 
 
 class UpdateMasterPasswordViewTests(TestCase):
@@ -245,7 +245,7 @@ class DeleteAccountViewTests(TestCase):
         self.client.logout()
         response = self.client.post(reverse("users:delete_account"))
         self.assertRedirects(
-            response, f"/user/login/?next=/user/account/delete_account/"
+            response, "/user/login/?next=/user/account/delete_account/"
         )
 
         # Ensure the user is not deleted

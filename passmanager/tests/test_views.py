@@ -484,7 +484,7 @@ class ImportCsvViewTests(TestCase):
         """
         Test valid csv import saves encrypted data to the database.
         """
-        csv_content = b"name,username,password,url,notes,group\nTest user,test_user,test_pass,example.com,example notes,General"
+        csv_content = b"name,username,password,url,notes,group\nExample Name,example_user,example_pass,example.com,example notes,General"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
@@ -497,9 +497,9 @@ class ImportCsvViewTests(TestCase):
         item = Item.objects.first()
         item.decrypt_sensitive_fields()
 
-        self.assertEqual(item.name, "Test user")
-        self.assertEqual(item.username, "test_user")
-        self.assertEqual(item.password, "test_pass")
+        self.assertEqual(item.name, "Example Name")
+        self.assertEqual(item.username, "example_user")
+        self.assertEqual(item.password, "example_pass")
         self.assertEqual(item.url, "example.com")
         self.assertEqual(item.notes, "example notes")
         self.assertEqual(item.group, "General")
