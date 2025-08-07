@@ -14,14 +14,20 @@
 
     {% if items %}
         <form method="GET" class="mb-4">
-            <div class="input-group">
-                <label class="input-group-text" for="group">Group</label>
-                <select class="form-select" name="group" id="group" onchange="this.form.submit()">
-                    <option value="">All Groups</option>
-                    {% for group in groups %}
-                        <option value="{{ group }}" {% if selected_group == group %}selected{% endif %}>{{ group }}</option>
-                    {% endfor %}
-                </select>
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <div class="d-flex w-100 w-md-50">
+                    <label class="input-group-text" for="group">Group</label>
+                    <select class="form-select" name="group" id="group" onchange="this.form.submit()">
+                        <option value="">All Groups</option>
+                        {% for group in groups %}
+                            <option value="{{ group }}" {% if selected_group == group %}selected{% endif %}>{{ group }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-flex w-100 w-md-50">
+                    <input class="form-control form-control-sm" type="search" name="search_query" placeholder="Search items" value="{{ search_query|default:'' }}">
+                    <button class="btn btn-sm btn-outline-secondary ms-2" type="submit">Search</button>
+                </div>
             </div>
         </form>
     {% endif %}

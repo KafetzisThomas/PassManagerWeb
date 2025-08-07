@@ -14,16 +14,20 @@ load_dotenv()
 
 @login_required
 def vault(request):
+    selected_group = request.GET.get("group")
+    search_query = request.GET.get("search_query")
     items = Item.objects.filter(owner=request.user).order_by("name")
     groups = (
         Item.objects.filter(owner=request.user)
         .values_list("group", flat=True)
         .distinct()
     )
-    selected_group = request.GET.get("group")
 
     if selected_group:
         items = items.filter(group=selected_group)
+
+    if search_query:
+        items = items.filter(name__icontains=search_query)
 
     return render(
         request,
@@ -32,6 +36,7 @@ def vault(request):
             "items": items,
             "groups": groups,
             "selected_group": selected_group,
+            "search_query": search_query,
         },
     )
 
