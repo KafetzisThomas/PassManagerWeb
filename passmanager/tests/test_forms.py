@@ -23,6 +23,7 @@ class ItemFormTests(TestCase):
             password="test_password",
             url="example.com",
             notes="Test notes",
+            group="General",
             owner=self.test_user,
         )
 
@@ -35,6 +36,7 @@ class ItemFormTests(TestCase):
             "username": "new_username",
             "password": "new_password",
             "url": "new-example.com",
+            "group": "General",
             "notes": "New notes",
         }
         form = ItemForm(data=form_data)
@@ -53,6 +55,7 @@ class ItemFormTests(TestCase):
             "username": "updated_username",
             "password": "updated_password",
             "url": "updated-example.com",
+            "group": "updated_group",
             "notes": "Updated notes",
         }
         form = ItemForm(instance=self.test_item, data=form_data)
@@ -67,6 +70,7 @@ class ItemFormTests(TestCase):
         """
         form_data = {
             "name": "Test Item",
+            "group": "General",
         }
         form = ItemForm(data=form_data)
         self.assertTrue(form.is_valid(), form.errors)

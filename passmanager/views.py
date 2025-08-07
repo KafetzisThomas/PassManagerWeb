@@ -197,14 +197,16 @@ def export_csv(request):
     writer = csv.writer(response)
 
     # Write csv header (column names)
-    writer.writerow(["name", "username", "password", "url", "notes"])
+    writer.writerow(["name", "username", "password", "url", "notes", "group"])
 
     # Fetch user-specific data
     data = Item.objects.filter(owner=request.user)
 
     for item in data:
         item.decrypt_sensitive_fields()
-        writer.writerow([item.name, item.username, item.password, item.url, item.notes])
+        writer.writerow(
+            [item.name, item.username, item.password, item.url, item.notes, item.group]
+        )
 
     return response
 
@@ -221,7 +223,7 @@ def import_csv(request):
 
             # Skip the header row
             header = next(csv_reader)
-            expected_header = ["name", "username", "password", "url", "notes"]
+            expected_header = ["name", "username", "password", "url", "notes", "group"]
 
             if header != expected_header:
                 messages.error(
@@ -230,13 +232,14 @@ def import_csv(request):
                 return redirect("passmanager:import_csv")
 
             for row in csv_reader:
-                name, username, password, url, notes = row
+                name, username, password, url, notes, group = row
                 item = Item(
                     name=name,
                     username=username,
                     password=password,
                     url=url,
                     notes=notes,
+                    group=group,
                     owner=request.user,
                 )
                 item.encrypt_sensitive_fields()

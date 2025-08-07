@@ -29,10 +29,10 @@ class VaultViewTests(TestCase):
         # Create test items for both users
         for i in range(5):
             Item.objects.create(
-                owner=self.user, name=f"Item {i}", date_added=f"2023-01-0{i+1}"
+                owner=self.user, name=f"Item {i}", date_added=f"2023-01-0{i + 1}"
             )
             Item.objects.create(
-                owner=self.user2, name=f"Other Item {i}", date_added=f"2023-01-0{i+1}"
+                owner=self.user2, name=f"Other Item {i}", date_added=f"2023-01-0{i + 1}"
             )
 
     def test_vault_view_redirect_if_not_logged_in(self):
@@ -103,6 +103,7 @@ class NewItemViewTests(TestCase):
             "password": "password123",
             "url": "http://example.com",
             "notes": "Test notes",
+            "group": "General",
             "action": "save",
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
@@ -119,6 +120,7 @@ class NewItemViewTests(TestCase):
         self.assertEqual(item.password, "password123")
         self.assertEqual(item.url, "http://example.com")
         self.assertEqual(item.notes, "Test notes")
+        self.assertEqual(item.group, "General")
 
     @patch("passmanager.views.generate_password")
     def test_new_item_view_post_generate_password_action(self, mock_generate_password):
@@ -132,6 +134,7 @@ class NewItemViewTests(TestCase):
             "password": "",
             "url": "http://example.com",
             "notes": "Test notes",
+            "group": "General",
             "action": "generate_password",
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
@@ -200,6 +203,7 @@ class EditItemViewTests(TestCase):
             "password": "modifiedpassword",
             "url": "http://modified-example.com",
             "notes": "Modified notes",
+            "group": "Modified Group",
             "action": "save",
         }
         response = self.client.post(
@@ -227,6 +231,7 @@ class EditItemViewTests(TestCase):
             "password": "",
             "url": "http://modified-example.com",
             "notes": "Modified notes",
+            "group": "Modified Group",
             "action": "generate_password",
         }
         response = self.client.post(
@@ -394,6 +399,7 @@ class ExportCsvViewTests(TestCase):
             password="testpassword",
             url="https://example.com",
             notes="Test notes",
+            group="General",
             owner=self.user,
         )
         self.item.encrypt_sensitive_fields()
@@ -428,7 +434,9 @@ class ExportCsvViewTests(TestCase):
         content = post_response.content.decode("utf-8")
         reader = csv.reader(content.splitlines())
         header = next(reader)
-        self.assertEqual(header, ["name", "username", "password", "url", "notes"])
+        self.assertEqual(
+            header, ["name", "username", "password", "url", "notes", "group"]
+        )
 
         # Validate decrypted csv data rows
         rows = list(reader)
@@ -443,6 +451,7 @@ class ExportCsvViewTests(TestCase):
                 "testpassword",
                 "https://example.com",
                 "Test notes",
+                "General",
             ],
         )
 
@@ -475,7 +484,7 @@ class ImportCsvViewTests(TestCase):
         """
         Test valid csv import saves encrypted data to the database.
         """
-        csv_content = b"name,username,password,url,notes\nTest user,test_user,test_pass,example.com,example notes"
+        csv_content = b"name,username,password,url,notes,group\nTest user,test_user,test_pass,example.com,example notes,General"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
@@ -493,6 +502,7 @@ class ImportCsvViewTests(TestCase):
         self.assertEqual(item.password, "test_pass")
         self.assertEqual(item.url, "example.com")
         self.assertEqual(item.notes, "example notes")
+        self.assertEqual(item.group, "General")
         self.assertEqual(item.owner, self.user)
 
     def test_invalid_csv_header(self):
@@ -533,6 +543,7 @@ class PasswordCheckupViewTests(TestCase):
             password="testpassword12",
             url="http://example.com",
             notes="Test notes",
+            group="General",
             owner=self.user,
         )
         self.item2 = Item(
@@ -541,6 +552,7 @@ class PasswordCheckupViewTests(TestCase):
             password="tEst__pA$$word",
             url="http://example.com",
             notes="Test notes",
+            group="General",
             owner=self.user,
         )
 
