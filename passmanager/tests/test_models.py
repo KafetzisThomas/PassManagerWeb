@@ -29,6 +29,7 @@ class ItemModelTests(TestCase):
             "password": "password123",
             "url": "https://example.com",
             "notes": "Some notes about the item",
+            "group": "General",
             "owner": self.user,
         }
 
@@ -52,6 +53,7 @@ class ItemModelTests(TestCase):
         self.assertEqual(item.password, self.item_data["password"])
         self.assertEqual(item.url, self.item_data["url"])
         self.assertEqual(item.notes, self.item_data["notes"])
+        self.assertEqual(item.group, self.item_data["group"])
         self.assertEqual(item.owner, self.item_data["owner"])
 
     def test_field_max_length(self):
@@ -64,6 +66,7 @@ class ItemModelTests(TestCase):
         self.assertEqual(item._meta.get_field("password").max_length, 500)
         self.assertEqual(item._meta.get_field("url").max_length, 50)
         self.assertEqual(item._meta.get_field("notes").max_length, 1500)
+        self.assertEqual(item._meta.get_field("group").max_length, 50)
 
     def test_item_deletion(self):
         """

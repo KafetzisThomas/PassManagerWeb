@@ -11,7 +11,7 @@ class ItemForm(forms.ModelForm):
 
     class Meta:
         model = Item
-        fields = ["name", "username", "password", "url", "notes"]
+        fields = ["name", "username", "password", "url", "notes", "group"]
 
     def __init__(self, *args, **kwargs):
         super(ItemForm, self).__init__(*args, **kwargs)
