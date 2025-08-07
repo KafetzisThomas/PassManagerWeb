@@ -98,6 +98,7 @@ class Item(models.Model):
         del key  # Securely forget the encryption key
 
     def save(self, *args, **kwargs):
+        self.name = self.name.title()
         if self.group:
             self.group = self.group.title()
         super().save(*args, **kwargs)
