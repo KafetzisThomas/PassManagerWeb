@@ -160,7 +160,7 @@ class ImportPasswordsFormTests(TestCase):
         """
         Test that a valid csv file is accepted.
         """
-        csv_content = b"name,username,password,url,notes\Test User,test_user,test_pass,example.com,example notes"
+        csv_content = b"name,username,password,url,notes,group\nExample name,example_user,example_pass,example.com,example notes,General"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
         form = ImportPasswordsForm(data={}, files={"csv_file": file})
         self.assertTrue(form.is_valid(), form.errors)
