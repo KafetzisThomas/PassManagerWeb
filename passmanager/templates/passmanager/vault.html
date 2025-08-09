@@ -1,5 +1,6 @@
 {% extends "passmanager/base.html" %}
 {% load django_bootstrap5 %}
+{% load url_filters %}
 
 {% block title %}My Vault{% endblock title %}
 
@@ -38,7 +39,8 @@
         <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
             <article class="media border-dark rounded shadow item-section">
                 <div class="favicon-wrapper me-md-4 me-1">
-                    <i class="bi bi-{{ item.name|lower }} text-dark fs-1"></i>
+                    <!-- favicon fetched via google's favicon service: https://www.google.com/s2/favicons -->
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain={{ item.url|urlsplit:'netloc' }}" alt="favicon" width="32" height="32">
                 </div>
                 <div class="media-body">
                     <div class="item-metadata mb-0">
