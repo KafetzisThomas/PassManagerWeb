@@ -115,6 +115,21 @@ class MasterPasswordChangeForm(PasswordChangeForm):
         label="Confirm New Master Password", widget=forms.PasswordInput
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get("new_password1")
+
+        # Validate password strength
+        if new_password1:
+            result = zxcvbn(new_password1)
+            if result["score"] < 3:  # 0 – 4 (=5 levels)
+                self.add_error(
+                    "new_password1",
+                    "Password is too weak. Try adding more characters, numbers or symbols.",
+                )
+
+        return cleaned_data
+
 
 class PasswordConfirmationForm(forms.Form):
     password = forms.CharField(
