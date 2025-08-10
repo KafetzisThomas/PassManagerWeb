@@ -31,4 +31,5 @@ dependencies = [
     "sqlparse==0.5.3",
     "typing-extensions==4.14.1",
     "uvicorn==0.35.0",
+    "zxcvbn>=4.5.0",
 ]
