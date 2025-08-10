@@ -7,6 +7,7 @@ from django.contrib.auth.forms import (
     AuthenticationForm,
     PasswordChangeForm,
 )
+from zxcvbn import zxcvbn
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -29,9 +30,18 @@ class CustomUserCreationForm(UserCreationForm):
         password1 = cleaned_data.get("password1")
         password2 = cleaned_data.get("password2")
 
+        # Validate password strength
+        if password1:
+            result = zxcvbn(password1)
+            if result["score"] < 3:  # 0 – 4 (=5 levels)
+                self.add_error(
+                    "password1",
+                    "Password is too weak. Try adding more characters, numbers or symbols.",
+                )
+
         # Validate password match
         if (password1 and password2) and (password1 != password2):
-            self.add_error("password2", "The two password fields didn’t match.")
+            self.add_error("password2", "The two password fields didn't match.")
 
         return cleaned_data
 
@@ -104,6 +114,21 @@ class MasterPasswordChangeForm(PasswordChangeForm):
     new_password2 = forms.CharField(
         label="Confirm New Master Password", widget=forms.PasswordInput
     )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get("new_password1")
+
+        # Validate password strength
+        if new_password1:
+            result = zxcvbn(new_password1)
+            if result["score"] < 3:  # 0 – 4 (=5 levels)
+                self.add_error(
+                    "new_password1",
+                    "Password is too weak. Try adding more characters, numbers or symbols.",
+                )
+
+        return cleaned_data
 
 
 class PasswordConfirmationForm(forms.Form):

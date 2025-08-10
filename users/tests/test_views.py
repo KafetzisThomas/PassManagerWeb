@@ -26,8 +26,8 @@ class RegisterViewTests(TestCase):
         self.form_data = {
             "email": "testuser@example.com",
             "username": "testuser",
-            "password1": "testpassword123",
-            "password2": "testpassword123",
+            "password1": "SecRet_p@ssword",
+            "password2": "SecRet_p@ssword",
         }
 
     def test_register_view_status_code_and_template(self):
@@ -154,8 +154,8 @@ class UpdateMasterPasswordViewTests(TestCase):
 
         self.form_data = {
             "old_password": "oldpassword",
-            "new_password1": "newpassword123",
-            "new_password2": "newpassword123",
+            "new_password1": "SecRet_p@ssword",
+            "new_password2": "SecRet_p@ssword",
         }
 
         # Some items to test encryption
@@ -191,12 +191,12 @@ class UpdateMasterPasswordViewTests(TestCase):
         )
 
         # Re-login after password update (simulating what happens after real password change)
-        self.client.login(email="testuser@example.com", password="newpassword123")
+        self.client.login(email="testuser@example.com", password="SecRet_p@ssword")
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         # Check if the user's password is updated
         self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password("newpassword123"))
+        self.assertTrue(self.user.check_password("SecRet_p@ssword"))
 
         # Verify items are re-encrypted
         for item in self.items:
