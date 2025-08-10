@@ -33,6 +33,18 @@ class CustomUserCreationFormTests(TestCase):
             "password1": "SecRet_p@ssword",
             "password2": "SecRetp@ssword",
         }
+        self.weak_password_data = {
+            "email": "testuser@example.com",
+            "username": "testuser",
+            "password1": "1234",
+            "password2": "1234",
+        }
+        self.empty_password_data = {
+            "email": "testuser@example.com",
+            "username": "testuser",
+            "password1": "",
+            "password2": "",
+        }
 
     def test_form_valid_data(self):
         """
@@ -64,6 +76,20 @@ class CustomUserCreationFormTests(TestCase):
         data = self.valid_data.copy()
         data.pop("username")
         form = CustomUserCreationForm(data=data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_weak_password(self):
+        """
+        Test that the form is invalid when a weak password is provided.
+        """
+        form = CustomUserCreationForm(data=self.weak_password_data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_empty_passwords(self):
+        """
+        Test that the form is invalid when passwords are empty.
+        """
+        form = CustomUserCreationForm(data=self.empty_password_data)
         self.assertFalse(form.is_valid(), form.errors)
 
 
@@ -227,18 +253,23 @@ class MasterPasswordChangeFormTests(TestCase):
         )
         self.form_data_valid = {
             "old_password": "oldpassword",
-            "new_password1": "newpassword123",
-            "new_password2": "newpassword123",
+            "new_password1": "SecRet_p@ssword",
+            "new_password2": "SecRet_p@ssword",
         }
         self.form_data_invalid_old_password = {
             "old_password": "wrongpassword",
-            "new_password1": "newpassword123",
-            "new_password2": "newpassword123",
+            "new_password1": "SecRet_p@ssword",
+            "new_password2": "SecRet_p@ssword",
         }
         self.form_data_mismatch_passwords = {
             "old_password": "oldpassword",
-            "new_password1": "newpassword123",
-            "new_password2": "differentpassword",
+            "new_password1": "SecRet_p@ssword",
+            "new_password2": "Differentp@ssword",
+        }
+        self.form_data_weak_password = {
+            "old_password": "oldpassword",
+            "new_password1": "1234",
+            "new_password2": "1234",
         }
 
     def test_form_valid_data(self):
@@ -283,6 +314,15 @@ class MasterPasswordChangeFormTests(TestCase):
         data.pop("new_password1")
         data.pop("new_password2")
         form = MasterPasswordChangeForm(user=self.user, data=data)
+        self.assertFalse(form.is_valid(), form.errors)
+
+    def test_form_weak_password(self):
+        """
+        Test that the form is invalid when a weak password is provided.
+        """
+        form = MasterPasswordChangeForm(
+            user=self.user, data=self.form_data_weak_password
+        )
         self.assertFalse(form.is_valid(), form.errors)
 
 
