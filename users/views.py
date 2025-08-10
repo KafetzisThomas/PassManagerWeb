@@ -7,6 +7,7 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import CustomUser
+from django.conf import settings
 from .forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -28,7 +29,7 @@ def register(request):
         form = CustomUserCreationForm(data=request.POST)
         if form.is_valid():
             new_user = form.save()
-            send_new_user_registration(new_user)
+            send_new_user_registration(new_user) if not settings.DEBUG else None
             messages.success(request, "Account successfully created!")
             return redirect("users:login")
     else:
@@ -52,7 +53,9 @@ def account(request):
                 user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
                 if user.enable_2fa:
                     user.otp_secret = pyotp.random_base32()
-                    send_2fa_verification(user, user.otp_secret)
+                    send_2fa_verification(
+                        user, user.otp_secret
+                    ) if not settings.DEBUG else None
                     messages.success(
                         request, "2FA enabled! Check your email for the OTP key."
                     )
@@ -60,7 +63,7 @@ def account(request):
                     user.otp_secret = ""
 
                 user.save()
-                send_update_account_notification(user)
+                send_update_account_notification(user) if not settings.DEBUG else None
                 update_session_auth_hash(
                     request, request.user
                 )  # Important for keeping the user logged in
@@ -118,7 +121,7 @@ def update_master_password(request):
                     item.notes = item.encrypt_field(new_key, item.notes)
                     item.save()
 
-            send_master_password_update(user)
+            send_master_password_update(user) if not settings.DEBUG else None
             messages.success(request, "Your master password was successfully updated!")
             return redirect("passmanager:vault")
     else:
@@ -132,7 +135,7 @@ def update_master_password(request):
 def delete_account(request):
     user = request.user
     user.delete()
-    send_delete_account_notification(user)
+    send_delete_account_notification(user) if not settings.DEBUG else None
     return redirect("users:register")
 
 
