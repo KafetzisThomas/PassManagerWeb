@@ -1,10 +1,28 @@
 import string
 import secrets
-import pwnedpasswords
+import hashlib
+import requests
 
 
-def check_password(password):
-    return pwnedpasswords.check(password, plain_text=True)
+def check_pwned_password(password):
+    """
+    Check if the given password has been pwned using the HIBP API.
+    """
+    # SHA1 hash of the password
+    sha1_password = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
+    prefix, suffix = sha1_password[:5], sha1_password[5:]
+
+    # Query the HIBP API
+    url = f"https://api.pwnedpasswords.com/range/{prefix}"
+    response = requests.get(url)
+    response.raise_for_status()
+
+    # Check if suffix is in the response
+    hashes = (line.split(":") for line in response.text.splitlines())
+    for hash_suffix, count in hashes:
+        if hash_suffix == suffix:
+            return int(count)
+    return 0
 
 
 def generate_password(length, include_letters, include_digits, include_special_chars):

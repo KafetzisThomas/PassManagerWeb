@@ -6,7 +6,7 @@ from django.http import Http404, HttpResponse
 from django.contrib import messages
 from .models import Item
 from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
-from .utils import check_password, generate_password
+from .utils import check_pwned_password, generate_password
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -269,7 +269,7 @@ def password_checkup(request):
     results = []
     for item in items:
         item.decrypt_sensitive_fields()
-        password_status = check_password(item.password) if item.password else None
+        password_status = check_pwned_password(item.password) if item.password else None
         if password_status:
             results.append(
                 {
