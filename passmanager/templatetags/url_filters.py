@@ -5,7 +5,7 @@ register = template.Library()
 
 
 @register.filter
-def urlsplit(value, part):
+def urlsplit(value: str, part: str) -> str:
     """
     Extract a specific part from a URL.
     """

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import models
 
 
-def derive_key_from_master_password(master_password, salt):
+def derive_key_from_master_password(master_password: str, salt: bytes) -> bytes:
     """
     Derive a 256 bit encryption key using PBKDF2HMAC.
     Based on user's master password & encryption salt.
@@ -34,7 +34,7 @@ class Item(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    def encrypt_field(self, key, value):
+    def encrypt_field(self, key: str, value: str) -> str:
         """
         Encrypt value using AES GCM with a 256 bit key.
         """
@@ -49,7 +49,7 @@ class Item(models.Model):
         combined = nonce + ciphertext + tag
         return base64.urlsafe_b64encode(combined).decode()
 
-    def decrypt_field(self, key, value):
+    def decrypt_field(self, key: str, value: str) -> str:
         """
         Decrypt AES GCM encrypted data using the given key.
         """
@@ -65,7 +65,7 @@ class Item(models.Model):
         decrypted = decryptor.update(ciphertext) + decryptor.finalize()
         return decrypted.decode()
 
-    def get_key(self):
+    def get_key(self) -> bytes:
         """
         Derive the encryption key using owner's master password,
         and their encryption salt.
@@ -73,7 +73,7 @@ class Item(models.Model):
         salt = base64.urlsafe_b64decode(self.owner.encryption_salt)
         return derive_key_from_master_password(self.owner.password, salt)
 
-    def encrypt_sensitive_fields(self):
+    def encrypt_sensitive_fields(self) -> None:
         """
         Manually encrypt sensitive fields.
         """
@@ -85,7 +85,7 @@ class Item(models.Model):
         key = None  # Zero out the content of the key in memory
         del key  # Securely forget the encryption key
 
-    def decrypt_sensitive_fields(self):
+    def decrypt_sensitive_fields(self) -> None:
         """
         Decrypt sensitive fields for display.
         """
@@ -103,5 +103,5 @@ class Item(models.Model):
             self.group = self.group.title()
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name

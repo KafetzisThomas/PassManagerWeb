@@ -41,5 +41,5 @@ class CustomUser(AbstractUser):
             self.encryption_salt = base64.urlsafe_b64encode(os.urandom(32)).decode()
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.email

@@ -4,7 +4,7 @@ import hashlib
 import requests
 
 
-def check_pwned_password(password):
+def check_pwned_password(password: str) -> int:
     """
     Check if the given password has been pwned using the HIBP API.
     """
@@ -25,7 +25,12 @@ def check_pwned_password(password):
     return 0
 
 
-def generate_password(length, include_letters, include_digits, include_special_chars):
+def generate_password(
+    length: int,
+    include_letters: bool,
+    include_digits: bool,
+    include_special_chars: bool,
+) -> str:
     """
     Return a random password string based on the provided options.
     """
