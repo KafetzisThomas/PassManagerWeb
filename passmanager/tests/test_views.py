@@ -561,12 +561,12 @@ class PasswordCheckupViewTests(TestCase):
         self.item2.encrypt_sensitive_fields()
         self.item2.save()
 
-    @patch("passmanager.views.check_password")
-    def test_password_checkup_view(self, mock_check_password):
+    @patch("passmanager.views.check_pwned_password")
+    def test_password_checkup_view(self, mock_check_pwned_password):
         """
         Test checkup verifies if password has been pwned.
         """
-        mock_check_password.side_effect = lambda password: {
+        mock_check_pwned_password.side_effect = lambda password: {
             # Fake values for testing
             "testpassword12": 4,
             "tEst__pA$$word": 0,
