@@ -151,24 +151,25 @@ class EditItemView(LoginRequiredMixin, View):
         return render(request, self.template_name, {"item": item, "form": form})
 
 
-@login_required
-def password_generator(request):
-    form = PasswordGeneratorForm()
-    password = ""  # Initialize password variable
+class PasswordGeneratorView(LoginRequiredMixin, FormView):
+    template_name = "passmanager/password_generator.html"
+    form_class = PasswordGeneratorForm
+    success_url = reverse_lazy("passmanager:password_generator")  # self-redirect to show result
 
-    if request.method == "POST":
-        form = PasswordGeneratorForm(request.POST)
-        if form.is_valid():
-            length = form.cleaned_data["length"]
-            include_letters = form.cleaned_data["letters"]
-            include_digits = form.cleaned_data["digits"]
-            include_special_chars = form.cleaned_data["special_chars"]
-            password = generate_password(
-                length, include_letters, include_digits, include_special_chars
-            )
+    def form_valid(self, form):
+        length = form.cleaned_data["length"]
+        include_letters = form.cleaned_data["letters"]
+        include_digits = form.cleaned_data["digits"]
+        include_special_chars = form.cleaned_data["special_chars"]
 
-    context = {"form": form, "password": password}
-    return render(request, "passmanager/password_generator.html", context)
+        password = generate_password(length, include_letters, include_digits, include_special_chars)
+
+        # Re-render the page with the generated password in context
+        return self.render_to_response(self.get_context_data(form=form, password=password))
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid input. Please fix the errors below.")
+        return super().form_invalid(form)
 
 @login_required
 @reauth_required
