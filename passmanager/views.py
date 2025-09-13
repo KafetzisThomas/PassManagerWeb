@@ -4,8 +4,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import TemplateView, FormView
 from dotenv import load_dotenv
 
@@ -89,31 +90,39 @@ class NewItemView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
 
-@login_required
-def edit_item(request, item_id):
-    item = Item.objects.get(id=item_id)
-    if item.owner != request.user:
-        raise Http404
+class EditItemView(LoginRequiredMixin, View):
+    template_name = "passmanager/edit_item.html"
+    form_class = ItemForm
 
-    if request.method == "POST":
+    def get_object(self):
+        item = get_object_or_404(Item, id=self.kwargs.get("item_id"))
+        if item.owner != self.request.user:
+            raise Http404
+        return item
+
+    def get(self, request, *args, **kwargs):
+        item = self.get_object()
+        item.decrypt_sensitive_fields()
+        form = self.form_class(instance=item)
+        return render(request, self.template_name, {"item": item, "form": form})
+
+    def post(self, request, *args, **kwargs):
+        item = self.get_object()
         action = request.POST.get("action")
 
         if action == "delete":
             delete_item(request, item.id)
-            messages.success(
-                request,
-                "Item deleted successfully.",
-            )
+            messages.success(request, "Item deleted successfully.")
             return redirect("passmanager:vault")
 
-        form = ItemForm(instance=item, data=request.POST)
+        form = self.form_class(instance=item, data=request.POST)
+
         if form.is_valid():
             obj = form.save(commit=False)
             username_entry = obj.username
             notes_entry = obj.notes
 
             if action == "save":
-                obj = form.save(commit=False)
                 obj.owner = request.user
                 obj.encrypt_sensitive_fields()
                 obj.save()
@@ -128,30 +137,80 @@ def edit_item(request, item_id):
                     include_special_chars=True,
                 )
 
-                form = ItemForm(instance=item)
-
-                # Update the form's initial data for rendering
+                # Re-initialize form with generated password
+                form = self.form_class(instance=item)
                 form.initial["username"] = username_entry
                 form.initial["password"] = generated_password
                 form.initial["notes"] = notes_entry
 
-                context = {"item": item, "form": form}
-                messages.success(
-                    request, "New password has been generated successfully."
-                )
+                messages.success(request, "New password has been generated successfully.")
+                return render(request, self.template_name, {"item": item, "form": form})
 
-                return render(request, "passmanager/edit_item.html", context)
-        else:
-            messages.error(
-                request,
-                "The item could not be changed because the data didn't validate.",
-            )
+        # If form is invalid
+        messages.error(request, "The item could not be changed because the data didn't validate.")
+        return render(request, self.template_name, {"item": item, "form": form})
 
-    else:
-        item.decrypt_sensitive_fields()
-        form = ItemForm(instance=item)
 
-    return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
+# @login_required
+# def edit_item(request, item_id):
+#     item = Item.objects.get(id=item_id)
+#     if item.owner != request.user:
+#         raise Http404
+#
+#     if request.method == "POST":
+#         action = request.POST.get("action")
+#
+#         if action == "delete":
+#             delete_item(request, item.id)
+#             messages.success(request,"Item deleted successfully.")
+#             return redirect("passmanager:vault")
+#
+#         form = ItemForm(instance=item, data=request.POST)
+#         if form.is_valid():
+#             obj = form.save(commit=False)
+#             username_entry = obj.username
+#             notes_entry = obj.notes
+#
+#             if action == "save":
+#                 obj = form.save(commit=False)
+#                 obj.owner = request.user
+#                 obj.encrypt_sensitive_fields()
+#                 obj.save()
+#                 messages.success(request, "Item modified successfully.")
+#                 return redirect("passmanager:vault")
+#
+#             elif action == "generate_password":
+#                 generated_password = generate_password(
+#                     length=12,
+#                     include_letters=True,
+#                     include_digits=True,
+#                     include_special_chars=True,
+#                 )
+#
+#                 form = ItemForm(instance=item)
+#
+#                 # Update the form's initial data for rendering
+#                 form.initial["username"] = username_entry
+#                 form.initial["password"] = generated_password
+#                 form.initial["notes"] = notes_entry
+#
+#                 context = {"item": item, "form": form}
+#                 messages.success(
+#                     request, "New password has been generated successfully."
+#                 )
+#
+#                 return render(request, "passmanager/edit_item.html", context)
+#         else:
+#             messages.error(
+#                 request,
+#                 "The item could not be changed because the data didn't validate.",
+#             )
+#
+#     else:
+#         item.decrypt_sensitive_fields()
+#         form = ItemForm(instance=item)
+#
+#     return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
 
 @login_required
 def delete_item(request, item_id):
