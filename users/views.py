@@ -1,4 +1,6 @@
 import pyotp
+from django.urls import reverse_lazy
+
 from passmanager.models import Item
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
@@ -14,19 +16,30 @@ from .utils import (send_new_user_registration, send_2fa_verification,
                     send_delete_account_notification, send_update_account_notification, send_master_password_update)
 
 
-def register(request):
-    if request.method == "POST":
-        form = CustomUserCreationForm(data=request.POST)
-        if form.is_valid():
-            new_user = form.save()
-            send_new_user_registration(new_user) if not settings.DEBUG else None
-            messages.success(request, "Account successfully created!")
-            return redirect("users:login")
-    else:
-        form = CustomUserCreationForm()
+# def register(request):
+#     if request.method == "POST":
+#         form = CustomUserCreationForm(data=request.POST)
+#         if form.is_valid():
+#             new_user = form.save()
+#
+#             messages.success(request, "Account successfully created!")
+#             return redirect("users:login")
+#     else:
+#         form = CustomUserCreationForm()
+#
+#     context = {"form": form}
+#     return render(request, "registration/register.html", context)
 
-    context = {"form": form}
-    return render(request, "registration/register.html", context)
+class RegisterView(FormView):
+    template_name = "registration/register.html"
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy("users:login")
+
+    def form_valid(self, form):
+        new_user = form.save()
+        send_new_user_registration(new_user) if not settings.DEBUG else None
+        messages.success(self.request, "Account successfully created!")
+        return super().form_valid(form)
 
 @login_required
 def account(request):
