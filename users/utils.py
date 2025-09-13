@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-
+from django.utils.html import strip_tags
 
 def send_new_user_registration(user):
     subject = "Admin Notification: New User Registration"
@@ -17,8 +17,8 @@ def send_new_user_registration(user):
         },
     )
 
-    send_mail(subject, None, email_from, recipient_list, html_message=html_message)
-
+    plain_message = strip_tags(html_message)
+    send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)
 
 def send_2fa_verification(user, secret_key):
     subject = "Security Notification: 2FA Verification"
@@ -33,7 +33,8 @@ def send_2fa_verification(user, secret_key):
         },
     )
 
-    send_mail(subject, None, email_from, recipient_list, html_message=html_message)
+    plain_message = strip_tags(html_message)
+    send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)
 
 
 def send_delete_account_notification(user):
@@ -48,7 +49,8 @@ def send_delete_account_notification(user):
         },
     )
 
-    send_mail(subject, None, email_from, recipient_list, html_message=html_message)
+    plain_message = strip_tags(html_message)
+    send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)
 
 
 def send_update_account_notification(user):
@@ -66,7 +68,8 @@ def send_update_account_notification(user):
         },
     )
 
-    send_mail(subject, None, email_from, recipient_list, html_message=html_message)
+    plain_message = strip_tags(html_message)
+    send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)
 
 
 def send_master_password_update(user):
@@ -84,4 +87,5 @@ def send_master_password_update(user):
         },
     )
 
-    send_mail(subject, None, email_from, recipient_list, html_message=html_message)
+    plain_message = strip_tags(html_message)
+    send_mail(subject, plain_message, email_from, recipient_list, html_message=html_message)

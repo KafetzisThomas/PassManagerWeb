@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 @login_required
 def vault(request):
     # Retrieve selected group & search query,
@@ -33,17 +32,8 @@ def vault(request):
     if search_query:
         items = items.filter(name__icontains=search_query)
 
-    return render(
-        request,
-        "passmanager/vault.html",
-        {
-            "items": items,
-            "groups": groups,
-            "selected_group": selected_group,
-            "search_query": search_query,
-        },
-    )
-
+    context = {"items": items, "groups": groups, "selected_group": selected_group, "search_query": search_query}
+    return render(request, "passmanager/vault.html", context)
 
 @login_required
 def new_item(request):
@@ -94,9 +84,7 @@ def new_item(request):
     else:
         form = ItemForm()
 
-    context = {"form": form}
-    return render(request, "passmanager/new_item.html", context)
-
+    return render(request, "passmanager/new_item.html", {"form": form})
 
 @login_required
 def edit_item(request, item_id):
@@ -160,9 +148,7 @@ def edit_item(request, item_id):
         item.decrypt_sensitive_fields()
         form = ItemForm(instance=item)
 
-    context = {"item": item, "form": form}
-    return render(request, "passmanager/edit_item.html", context)
-
+    return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
 
 @login_required
 def delete_item(request, item_id):
@@ -170,8 +156,8 @@ def delete_item(request, item_id):
     if item.owner != request.user:
         raise Http404
     item.delete()
-    return redirect("passmanager:vault")
 
+    return redirect("passmanager:vault")
 
 @login_required
 def password_generator(request):
@@ -190,12 +176,7 @@ def password_generator(request):
             )
 
     context = {"form": form, "password": password}
-    return render(
-        request,
-        "passmanager/password_generator.html",
-        context,
-    )
-
+    return render(request, "passmanager/password_generator.html", context)
 
 @login_required
 @reauth_required
@@ -218,7 +199,6 @@ def export_csv(request):
         )
 
     return response
-
 
 @login_required
 def import_csv(request):
@@ -259,9 +239,7 @@ def import_csv(request):
     else:
         form = ImportPasswordsForm()
 
-    context = {"form": form}
-    return render(request, "passmanager/import_csv.html", context)
-
+    return render(request, "passmanager/import_csv.html", {"form": form})
 
 @login_required
 def password_checkup(request):
@@ -289,5 +267,4 @@ def password_checkup(request):
                 }
             )
 
-    context = {"results": results}
-    return render(request, "passmanager/password_checkup.html", context)
+    return render(request, "passmanager/password_checkup.html", {"results": results})

@@ -8,20 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import CustomUser
 from django.conf import settings
-from .forms import (
-    CustomUserCreationForm,
-    CustomAuthenticationForm,
-    TwoFactorVerificationForm,
-    CustomUserChangeForm,
-    MasterPasswordChangeForm,
-)
-from .utils import (
-    send_new_user_registration,
-    send_2fa_verification,
-    send_delete_account_notification,
-    send_update_account_notification,
-    send_master_password_update,
-)
+from .forms import (CustomUserCreationForm, CustomAuthenticationForm,
+                    TwoFactorVerificationForm, CustomUserChangeForm, MasterPasswordChangeForm)
+from .utils import (send_new_user_registration, send_2fa_verification,
+                    send_delete_account_notification, send_update_account_notification, send_master_password_update)
 
 
 def register(request):
@@ -37,7 +27,6 @@ def register(request):
 
     context = {"form": form}
     return render(request, "registration/register.html", context)
-
 
 @login_required
 def account(request):
@@ -82,7 +71,6 @@ def account(request):
 
     context = {"form": form}
     return render(request, "users/account.html", context)
-
 
 @login_required
 def update_master_password(request):
@@ -130,7 +118,6 @@ def update_master_password(request):
     context = {"form": form}
     return render(request, "users/update_master_password.html", context)
 
-
 @login_required
 def delete_account(request):
     user = request.user
@@ -143,7 +130,7 @@ class CustomLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
 
     def form_valid(self, form):
-        user = form.cleaned_data["user"]
+        user = form.get_user()
         if user.otp_secret:
             self.request.session["user_id"] = user.id  # Store user ID in session
             return redirect("users:2fa_verification")

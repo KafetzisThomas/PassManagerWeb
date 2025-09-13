@@ -1,24 +1,14 @@
-"""Defines URL patterns for passmanager"""
-
 from django.urls import path
-from . import views
+from .views import vault, new_item, edit_item, delete_item, password_generator, export_csv, import_csv, password_checkup
 
 app_name = "passmanager"
 urlpatterns = [
-    # Vault page
-    path("", views.vault, name="vault"),
-    # Add a new item page
-    path("new_item/", views.new_item, name="new_item"),
-    # Edit item page
-    path("edit_item/<int:item_id>/", views.edit_item, name="edit_item"),
-    # Delete item page
-    path("edit_item/<int:item_id>/delete", views.delete_item, name="delete_item"),
-    # Password generator page
-    path("password_generator/", views.password_generator, name="password_generator"),
-    # Export csv page
-    path("export_csv/", views.export_csv, name="export_csv"),
-    # Import csv page
-    path("import_csv/", views.import_csv, name="import_csv"),
-    # Password checkup page
-    path("password_checkup/", views.password_checkup, name="password_checkup"),
+    path("", vault, name="vault"),
+    path("new_item/", new_item, name="new_item"),
+    path("edit_item/<int:item_id>/", edit_item, name="edit_item"),
+    path("edit_item/<int:item_id>/delete", delete_item, name="delete_item"),
+    path("password_generator/", password_generator, name="password_generator"),
+    path("export_csv/", export_csv, name="export_csv"),
+    path("import_csv/", import_csv, name="import_csv"),
+    path("password_checkup/", password_checkup, name="password_checkup"),
 ]
