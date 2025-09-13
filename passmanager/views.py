@@ -2,8 +2,10 @@ import csv
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect
+from django.views.generic import TemplateView
 from dotenv import load_dotenv
 
 from .decorators import reauth_required
@@ -13,29 +15,31 @@ from .utils import check_pwned_password, generate_password
 
 load_dotenv()
 
-@login_required
-def vault(request):
-    # Retrieve selected group & search query,
-    # from the query parameters
-    selected_group = request.GET.get("group")
-    search_query = request.GET.get("search_query")
-    items = Item.objects.filter(owner=request.user).order_by("name")
-    groups = (
-        Item.objects.filter(owner=request.user)
-        .values_list("group", flat=True)
-        .distinct()
-    )
 
-    # Filter items by group if a group is selected
-    if selected_group:
-        items = items.filter(group=selected_group)
+class VaultView(LoginRequiredMixin, TemplateView):
+    template_name = "passmanager/vault.html"
 
-    # Filter items by search query if input is provided
-    if search_query:
-        items = items.filter(name__icontains=search_query)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
 
-    context = {"items": items, "groups": groups, "selected_group": selected_group, "search_query": search_query}
-    return render(request, "passmanager/vault.html", context)
+        # Retrieve selected group & search query from the query parameters
+        selected_group = self.request.GET.get("group")
+        search_query = self.request.GET.get("search_query")
+
+        items = Item.objects.filter(owner=user).order_by("name")
+        groups = (Item.objects.filter(owner=user).values_list("group", flat=True).distinct())
+
+        if selected_group:
+            items = items.filter(group=selected_group)
+
+        if search_query:
+            items = items.filter(name__icontains=search_query)
+
+        context.update({"items": items, "groups": groups,
+                        "selected_group": selected_group, "search_query": search_query})
+
+        return context
 
 @login_required
 def new_item(request):
