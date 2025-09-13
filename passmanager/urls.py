@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import vault, new_item, edit_item, delete_item, password_generator, export_csv, import_csv, password_checkup
+
+from .views import (vault, new_item, edit_item, delete_item,
+                    password_generator, export_csv, import_csv, password_checkup)
 
 app_name = "passmanager"
 urlpatterns = [

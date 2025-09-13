@@ -49,7 +49,10 @@
                     Procceed below to delete your account and all associated data. Deleting your account is permanent. It cannot be undone.
                 </div>
                 <div class="modal-footer">
-                    <a class="btn btn-danger" href="{% url 'users:delete_account' %}" role="button">Delete account</a>
+                    <form method="post" action="{% url 'users:delete_account' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete account</button>
+                    </form>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>

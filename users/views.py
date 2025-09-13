@@ -1,19 +1,18 @@
 import pyotp
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic.edit import FormView
 
 from passmanager.models import Item
-from django.shortcuts import render, redirect
-from django.views.generic.edit import FormView
-from django.contrib.auth.views import LoginView
-from django.contrib.auth import login, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import CustomUser
-from django.conf import settings
 from .forms import (CustomUserCreationForm, CustomAuthenticationForm,
                     TwoFactorVerificationForm, CustomUserChangeForm, MasterPasswordChangeForm)
+from .models import CustomUser
 from .utils import (send_new_user_registration, send_2fa_verification,
                     send_delete_account_notification, send_update_account_notification, send_master_password_update)
 
@@ -154,9 +153,10 @@ class UpdateMasterPasswordView(LoginRequiredMixin, View):
 
         return render(request, self.template_name, {"form": form})
 
-@login_required
-def delete_account(request):
-    user = request.user
-    user.delete()
-    send_delete_account_notification(user) if not settings.DEBUG else None
-    return redirect("users:register")
+
+class DeleteAccountView(LoginRequiredMixin, View):
+    def post(self, request):
+        user = request.user
+        user.delete()
+        send_delete_account_notification(user) if not settings.DEBUG else None
+        return redirect("users:register")
