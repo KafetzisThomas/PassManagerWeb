@@ -157,6 +157,11 @@ class PasswordGeneratorView(LoginRequiredMixin, FormView):
     form_class = PasswordGeneratorForm
     success_url = reverse_lazy("passmanager:password_generator")  # self-redirect to show result
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.setdefault("password", "")  # always provide password, default empty
+        return context
+
     def form_valid(self, form):
         length = form.cleaned_data["length"]
         include_letters = form.cleaned_data["letters"]
