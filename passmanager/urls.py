@@ -1,7 +1,7 @@
 from django.urls import path
 
 from .views import (VaultView, NewItemView, EditItemView, PasswordGeneratorView,
-                    ExportCSVView, ImportCSVView, password_checkup)
+                    ExportCSVView, ImportCSVView, PasswordCheckupView)
 
 app_name = "passmanager"
 urlpatterns = [
@@ -11,5 +11,5 @@ urlpatterns = [
     path("password_generator/", PasswordGeneratorView.as_view(), name="password_generator"),
     path("export_csv/", ExportCSVView.as_view(), name="export_csv"),
     path("import_csv/", ImportCSVView.as_view(), name="import_csv"),
-    path("password_checkup/", password_checkup, name="password_checkup"),
+    path("password_checkup/", PasswordCheckupView.as_view(), name="password_checkup"),
 ]

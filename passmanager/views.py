@@ -200,47 +200,6 @@ class ExportCSVView(View):
 
         return response
 
-# @login_required
-# def import_csv(request):
-#     if request.method == "POST":
-#         form = ImportPasswordsForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             # Read the uploaded file
-#             csv_file = form.cleaned_data["csv_file"]
-#             file_data = csv_file.read().decode("utf-8").splitlines()
-#             csv_reader = csv.reader(file_data)
-#
-#             # Skip the header row
-#             header = next(csv_reader)
-#             expected_header = ["name", "username", "password", "url", "notes", "group"]
-#
-#             if header != expected_header:
-#                 messages.error(
-#                     request, "Invalid CSV format. Please check the column names."
-#                 )
-#                 return redirect("passmanager:import_csv")
-#
-#             for row in csv_reader:
-#                 name, username, password, url, notes, group = row
-#                 item = Item(
-#                     name=name,
-#                     username=username,
-#                     password=password,
-#                     url=url,
-#                     notes=notes,
-#                     group=group,
-#                     owner=request.user,
-#                 )
-#                 item.encrypt_sensitive_fields()
-#                 item.save()
-#
-#             messages.success(request, "Passwords imported successfully!")
-#             return redirect("passmanager:vault")
-#     else:
-#         form = ImportPasswordsForm()
-#
-#     return render(request, "passmanager/import_csv.html", {"form": form})
-
 
 class ImportCSVView(LoginRequiredMixin, FormView):
     template_name = "passmanager/import_csv.html"
@@ -271,30 +230,36 @@ class ImportCSVView(LoginRequiredMixin, FormView):
         messages.success(self.request, "Passwords imported successfully!")
         return super().form_valid(form)
 
-@login_required
-def password_checkup(request):
-    items = Item.objects.filter(owner=request.user)
-    results = []
-    for item in items:
-        item.decrypt_sensitive_fields()
-        password_status = check_pwned_password(item.password) if item.password else None
-        if password_status:
-            results.append(
-                {
+
+class PasswordCheckupView(LoginRequiredMixin, TemplateView):
+    template_name = "passmanager/password_checkup.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items = Item.objects.filter(owner=self.request.user)
+        results = []
+
+        for item in items:
+            item.decrypt_sensitive_fields()
+            if item.password:
+                password_status = check_pwned_password(item.password)
+            else:
+                password_status = None
+
+            if password_status:
+                results.append({
                     "name": item.name,
                     "status": f"Exposed {password_status} time(s)",
                     "recommendation": "Changing this password is recommended.",
                     "severity": "High",
-                }
-            )
-        else:
-            results.append(
-                {
+                })
+            else:
+                results.append({
                     "name": item.name,
                     "status": "No breaches found.",
                     "recommendation": "This password appears to be safe.",
                     "severity": "Low",
-                }
-            )
+                })
 
-    return render(request, "passmanager/password_checkup.html", {"results": results})
+        context["results"] = results
+        return context
