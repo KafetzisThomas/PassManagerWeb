@@ -11,13 +11,13 @@ class CustomUserCreationFormTests(TestCase):
     Test suite for the CustomUserCreationForm.
     """
     def setUp(self):
-        self.valid_data = {"email": "testuser@example.com", "username": "tester",
+        self.valid_data = {"email": "tester@example.com", "username": "tester",
                            "password1": "SecRet_p@ssword","password2": "SecRet_p@ssword"}
-        self.invalid_data = {"email": "testuser@example.com", "username": "tester",
+        self.invalid_data = {"email": "tester@example.com", "username": "tester",
                              "password1": "SecRet_p@ssword", "password2": "SecRetp@ssword"}
-        self.weak_password_data = {"email": "testuser@example.com", "username": "tester",
+        self.weak_password_data = {"email": "tester@example.com", "username": "tester",
                                    "password1": "1234", "password2": "1234"}
-        self.empty_password_data = {"email": "testuser@example.com", "username": "tester",
+        self.empty_password_data = {"email": "tester@example.com", "username": "tester",
                                     "password1": "", "password2": ""}
 
     def test_form_valid_data(self):
@@ -73,7 +73,7 @@ class CustomAuthenticationFormTests(TestCase):
     """
     def setUp(self):
         self.user_model = get_user_model()
-        self.test_email = "testuser@example.com"
+        self.test_email = "tester@example.com"
         self.test_password = "testpassword"
         self.user = self.user_model.objects.create_user(email=self.test_email, password=self.test_password)
 
@@ -102,10 +102,10 @@ class TwoFactorVerificationFormTests(TestCase):
         self.user_model = get_user_model()
         self.otp_secret = pyotp.random_base32()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", username="testuser", password="testpassword123", otp_secret=self.otp_secret
+            email="tester@example.com", username="tester", password="testpassword123", otp_secret=self.otp_secret
         )
         self.user_without_otp = self.user_model.objects.create_user(
-            username="testuser2", email="testuser2@example.com", password="testpassword456"
+            username="tester2", email="tester2@example.com", password="testpassword456"
         )
 
     def test_form_valid_with_correct_otp(self):
@@ -154,7 +154,7 @@ class CustomUserChangeFormTests(TestCase):
     def setUp(self):
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", username="tester", password="testpassword123"
+            email="tester@example.com", username="tester", password="testpassword123"
         )
         self.form_data = {"email": "updated_email@example.com", "username": "updated_username", "session_timeout": 600}
 
@@ -189,7 +189,7 @@ class MasterPasswordChangeFormTests(TestCase):
     def setUp(self):
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="oldpassword", username="tester"
+            email="tester@example.com", password="oldpassword", username="tester"
         )
         self.form_data_valid = {
             "old_password": "oldpassword", "new_password1": "SecRet_p@ssword", "new_password2": "SecRet_p@ssword"
@@ -257,7 +257,7 @@ class PasswordConfirmationFormTests(TestCase):
     def setUp(self):
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="testpassword123", username="tester"
+            email="tester@example.com", password="testpassword123", username="tester"
         )
 
     def test_form_valid_data(self):
