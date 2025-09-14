@@ -1,7 +1,6 @@
 import csv
 
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse
@@ -12,7 +11,6 @@ from django.views import View
 from django.views.generic import TemplateView, FormView
 from dotenv import load_dotenv
 
-from users.forms import PasswordConfirmationForm
 from .decorators import reauth_required
 from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from .models import Item
@@ -174,28 +172,6 @@ class PasswordGeneratorView(LoginRequiredMixin, FormView):
         messages.error(self.request, "Invalid input. Please fix the errors below.")
         return super().form_invalid(form)
 
-# @login_required
-# @reauth_required
-# def export_csv(request):
-#     # Create response with csv content type & set filename for download
-#     response = HttpResponse(content_type="text/csv")
-#     response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
-#     writer = csv.writer(response)
-#
-#     # Write csv header (column names)
-#     writer.writerow(["name", "username", "password", "url", "notes", "group"])
-#
-#     # Fetch user-specific data
-#     data = Item.objects.filter(owner=request.user)
-#
-#     for item in data:
-#         item.decrypt_sensitive_fields()
-#         writer.writerow(
-#             [item.name, item.username, item.password, item.url, item.notes, item.group]
-#         )
-#
-#     return response
-
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(reauth_required, name="dispatch")
@@ -224,46 +200,76 @@ class ExportCSVView(View):
 
         return response
 
-@login_required
-def import_csv(request):
-    if request.method == "POST":
-        form = ImportPasswordsForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Read the uploaded file
-            csv_file = form.cleaned_data["csv_file"]
-            file_data = csv_file.read().decode("utf-8").splitlines()
-            csv_reader = csv.reader(file_data)
+# @login_required
+# def import_csv(request):
+#     if request.method == "POST":
+#         form = ImportPasswordsForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             # Read the uploaded file
+#             csv_file = form.cleaned_data["csv_file"]
+#             file_data = csv_file.read().decode("utf-8").splitlines()
+#             csv_reader = csv.reader(file_data)
+#
+#             # Skip the header row
+#             header = next(csv_reader)
+#             expected_header = ["name", "username", "password", "url", "notes", "group"]
+#
+#             if header != expected_header:
+#                 messages.error(
+#                     request, "Invalid CSV format. Please check the column names."
+#                 )
+#                 return redirect("passmanager:import_csv")
+#
+#             for row in csv_reader:
+#                 name, username, password, url, notes, group = row
+#                 item = Item(
+#                     name=name,
+#                     username=username,
+#                     password=password,
+#                     url=url,
+#                     notes=notes,
+#                     group=group,
+#                     owner=request.user,
+#                 )
+#                 item.encrypt_sensitive_fields()
+#                 item.save()
+#
+#             messages.success(request, "Passwords imported successfully!")
+#             return redirect("passmanager:vault")
+#     else:
+#         form = ImportPasswordsForm()
+#
+#     return render(request, "passmanager/import_csv.html", {"form": form})
 
-            # Skip the header row
-            header = next(csv_reader)
-            expected_header = ["name", "username", "password", "url", "notes", "group"]
 
-            if header != expected_header:
-                messages.error(
-                    request, "Invalid CSV format. Please check the column names."
-                )
-                return redirect("passmanager:import_csv")
+class ImportCSVView(LoginRequiredMixin, FormView):
+    template_name = "passmanager/import_csv.html"
+    form_class = ImportPasswordsForm
+    success_url = reverse_lazy("passmanager:vault")
 
-            for row in csv_reader:
-                name, username, password, url, notes, group = row
-                item = Item(
-                    name=name,
-                    username=username,
-                    password=password,
-                    url=url,
-                    notes=notes,
-                    group=group,
-                    owner=request.user,
-                )
-                item.encrypt_sensitive_fields()
-                item.save()
+    def form_valid(self, form):
+        # Read the uploaded file
+        csv_file = form.cleaned_data["csv_file"]
+        file_data = csv_file.read().decode("utf-8").splitlines()
+        csv_reader = csv.reader(file_data)
 
-            messages.success(request, "Passwords imported successfully!")
-            return redirect("passmanager:vault")
-    else:
-        form = ImportPasswordsForm()
+        # Skip the header row
+        header = next(csv_reader)
+        expected_header = ["name", "username", "password", "url", "notes", "group"]
 
-    return render(request, "passmanager/import_csv.html", {"form": form})
+        if header != expected_header:
+            messages.error(self.request, "Invalid CSV format. Please check the column names.")
+            return redirect("passmanager:import_csv")
+
+        for row in csv_reader:
+            name, username, password, url, notes, group = row
+            item = Item(name=name, username=username, password=password, url=url,
+                        notes=notes, group=group, owner=self.request.user)
+            item.encrypt_sensitive_fields()
+            item.save()
+
+        messages.success(self.request, "Passwords imported successfully!")
+        return super().form_valid(form)
 
 @login_required
 def password_checkup(request):
