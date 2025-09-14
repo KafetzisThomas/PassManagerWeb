@@ -155,7 +155,8 @@ class UpdateMasterPasswordView(LoginRequiredMixin, View):
 
 
 class DeleteAccountView(LoginRequiredMixin, View):
-    def post(self, request):
+    @staticmethod
+    def post(request):
         user = request.user
         user.delete()
         send_delete_account_notification(user) if not settings.DEBUG else None

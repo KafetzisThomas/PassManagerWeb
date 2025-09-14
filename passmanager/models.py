@@ -81,7 +81,6 @@ class Item(models.Model):
         self.password = self.encrypt_field(key, self.password)
         self.notes = self.encrypt_field(key, self.notes)
 
-        key = None  # Zero out the content of the key in memory
         del key  # Securely forget the encryption key
 
     def decrypt_sensitive_fields(self) -> None:
@@ -93,7 +92,6 @@ class Item(models.Model):
         self.password = self.decrypt_field(key, self.password)
         self.notes = self.decrypt_field(key, self.notes)
 
-        key = None  # Zero out the content of the key in memory
         del key  # Securely forget the encryption key
 
     def save(self, *args, **kwargs):
