@@ -1,27 +1,18 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
+from django.test import TestCase
 
 
 class CustomUserModelTests(TestCase):
     """
     Test suite for the CustomUser model.
     """
-
     def setUp(self):
-        """
-        Set up the test environment by defining valid user data.
-        """
         self.user_model = get_user_model()
         self.user_data = {
-            "email": "testuser@example.com",
-            "username": "testuser",
-            "password": "password123",
-            "otp_secret": "12345678901234567890123456789012",
-            "session_timeout": 300,
-            "enable_2fa": False,
-            "allow_account_update_notifications": True,
-            "allow_master_password_update_notifications": True,
+            "email": "tester@example.com","username": "tester","password": "password123",
+            "otp_secret": "12345678901234567890123456789012", "session_timeout": 300, "enable_2fa": False,
+            "allow_account_update_notifications": True, "allow_master_password_update_notifications": True,
         }
 
     def test_valid_user_creation(self):
@@ -35,8 +26,12 @@ class CustomUserModelTests(TestCase):
         self.assertEqual(user.otp_secret, self.user_data["otp_secret"])
         self.assertEqual(user.session_timeout, self.user_data["session_timeout"])
         self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
-        self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
-        self.assertEqual(user.enable_2fa, self.user_data["enable_2fa"])
+        self.assertEqual(
+            user.allow_account_update_notifications, self.user_data["allow_account_update_notifications"]
+        )
+        self.assertEqual(
+            user.allow_master_password_update_notifications, self.user_data["allow_master_password_update_notifications"]
+        )
 
     def test_email_unique(self):
         """
