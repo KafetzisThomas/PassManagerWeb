@@ -1,7 +1,9 @@
-import os
 import base64
-from django.test import TestCase
+import os
+
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+
 from ..models import Item
 
 
@@ -9,14 +11,10 @@ class ItemModelTests(TestCase):
     """
     Test suite for the Item model.
     """
-
     def setUp(self):
-        """
-        Set up test environment by defining data and creating users.
-        """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", username="testuser", password="password123"
+            email="tester@example.com", username="tester", password="password123"
         )
 
         # Random salt for testing encryption
@@ -24,13 +22,8 @@ class ItemModelTests(TestCase):
         self.user.save()
 
         self.item_data = {
-            "name": "Test Item",
-            "username": "itemuser",
-            "password": "password123",
-            "url": "https://example.com",
-            "notes": "Some notes about the item",
-            "group": "General",
-            "owner": self.user,
+            "name": "Test Item", "username": "itemuser", "password": "password123", "url": "https://example.com",
+            "notes": "Some notes about the item", "group": "General", "owner": self.user
         }
 
     def test_create_item(self):
@@ -62,10 +55,7 @@ class ItemModelTests(TestCase):
         """
         item = Item.objects.create(**self.item_data)
         self.assertEqual(item._meta.get_field("name").max_length, 50)
-        self.assertEqual(item._meta.get_field("username").max_length, 500)
-        self.assertEqual(item._meta.get_field("password").max_length, 500)
         self.assertEqual(item._meta.get_field("url").max_length, 50)
-        self.assertEqual(item._meta.get_field("notes").max_length, 1500)
         self.assertEqual(item._meta.get_field("group").max_length, 50)
 
     def test_item_deletion(self):

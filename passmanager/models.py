@@ -29,7 +29,7 @@ class Item(models.Model):
     username = models.TextField(blank=True)
     password = models.TextField(blank=True)
     url = models.URLField(max_length=50, blank=True)
-    notes = models.TextField(max_length=1500, blank=True)
+    notes = models.TextField(blank=True)
     group = models.CharField(max_length=50, default="General")
     date_added = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
