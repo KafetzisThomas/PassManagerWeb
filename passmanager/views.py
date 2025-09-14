@@ -1,15 +1,18 @@
 import csv
 
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView, FormView
 from dotenv import load_dotenv
 
+from users.forms import PasswordConfirmationForm
 from .decorators import reauth_required
 from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from .models import Item
@@ -171,27 +174,55 @@ class PasswordGeneratorView(LoginRequiredMixin, FormView):
         messages.error(self.request, "Invalid input. Please fix the errors below.")
         return super().form_invalid(form)
 
-@login_required
-@reauth_required
-def export_csv(request):
-    # Create response with csv content type & set filename for download
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
-    writer = csv.writer(response)
+# @login_required
+# @reauth_required
+# def export_csv(request):
+#     # Create response with csv content type & set filename for download
+#     response = HttpResponse(content_type="text/csv")
+#     response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
+#     writer = csv.writer(response)
+#
+#     # Write csv header (column names)
+#     writer.writerow(["name", "username", "password", "url", "notes", "group"])
+#
+#     # Fetch user-specific data
+#     data = Item.objects.filter(owner=request.user)
+#
+#     for item in data:
+#         item.decrypt_sensitive_fields()
+#         writer.writerow(
+#             [item.name, item.username, item.password, item.url, item.notes, item.group]
+#         )
+#
+#     return response
 
-    # Write csv header (column names)
-    writer.writerow(["name", "username", "password", "url", "notes", "group"])
 
-    # Fetch user-specific data
-    data = Item.objects.filter(owner=request.user)
+@method_decorator(login_required, name="dispatch")
+@method_decorator(reauth_required, name="dispatch")
+class ExportCSVView(View):
+    def get(self, request, *args, **kwargs):
+        return self._build_csv(request)
 
-    for item in data:
-        item.decrypt_sensitive_fields()
-        writer.writerow(
-            [item.name, item.username, item.password, item.url, item.notes, item.group]
-        )
+    def post(self, request, *args, **kwargs):
+        # Once re-auth succeeds, reauth_required decorator will call this POST method
+        return self._build_csv(request)
 
-    return response
+    def _build_csv(self, request):
+        # Create response with csv content type & set filename for download
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
+        writer = csv.writer(response)
+
+        # Write csv header (column names)
+        writer.writerow(["name", "username", "password", "url", "notes", "group"])
+
+        for item in Item.objects.filter(owner=request.user):
+            item.decrypt_sensitive_fields()
+            writer.writerow(
+                [item.name, item.username, item.password, item.url, item.notes, item.group]
+            )
+
+        return response
 
 @login_required
 def import_csv(request):
