@@ -10,11 +10,11 @@ from django.views import View
 from django.views.generic.edit import FormView
 
 from passmanager.models import Item
-from .forms import (CustomUserCreationForm, CustomAuthenticationForm,
-                    TwoFactorVerificationForm, CustomUserChangeForm, MasterPasswordChangeForm)
+from .forms import (CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
+                    CustomUserChangeForm, MasterPasswordChangeForm)
 from .models import CustomUser
-from .utils import (send_new_user_registration, send_2fa_verification,
-                    send_delete_account_notification, send_update_account_notification, send_master_password_update)
+from .utils import (send_new_user_registration, send_2fa_verification, send_delete_account_notification,
+                    send_update_account_notification, send_master_password_update)
 
 
 class RegisterView(FormView):

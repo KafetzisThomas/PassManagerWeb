@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext as _
 
+
 SESSION_TIMEOUT_CHOICES = (
     ("5 minutes", 300),
     ("10 minutes", 600),

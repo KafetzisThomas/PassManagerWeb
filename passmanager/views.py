@@ -180,10 +180,11 @@ class ExportCSVView(View):
         return self._build_csv(request)
 
     def post(self, request, *args, **kwargs):
-        # Once re-auth succeeds, reauth_required decorator will call this POST method
+        # Once re-auth succeeds, re-auth_required decorator will call this POST method
         return self._build_csv(request)
 
-    def _build_csv(self, request):
+    @staticmethod
+    def _build_csv(request):
         # Create response with csv content type & set filename for download
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'

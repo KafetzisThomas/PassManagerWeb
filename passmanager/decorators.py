@@ -8,7 +8,6 @@ def reauth_required(view_func):
     """
     Force master password re-authentication before accessing the view.
     """
-
     def wrapper(request, *args, **kwargs):
         form = PasswordConfirmationForm(user=request.user, data=request.POST or None)
         if request.method == "POST" and form.is_valid():
