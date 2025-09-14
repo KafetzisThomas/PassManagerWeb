@@ -1,128 +1,129 @@
 import csv
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .decorators import reauth_required
-from django.http import Http404, HttpResponse
+
 from django.contrib import messages
-from .models import Item
-from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
-from .utils import check_pwned_password, generate_password
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import TemplateView, FormView
 from dotenv import load_dotenv
+
+from .decorators import reauth_required
+from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from .models import Item
+from .utils import check_pwned_password, generate_password
 
 load_dotenv()
 
 
-@login_required
-def vault(request):
-    # Retrieve selected group & search query,
-    # from the query parameters
-    selected_group = request.GET.get("group")
-    search_query = request.GET.get("search_query")
-    items = Item.objects.filter(owner=request.user).order_by("name")
-    groups = (
-        Item.objects.filter(owner=request.user)
-        .values_list("group", flat=True)
-        .distinct()
-    )
+class VaultView(LoginRequiredMixin, TemplateView):
+    template_name = "passmanager/vault.html"
 
-    # Filter items by group if a group is selected
-    if selected_group:
-        items = items.filter(group=selected_group)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
 
-    # Filter items by search query if input is provided
-    if search_query:
-        items = items.filter(name__icontains=search_query)
+        # Retrieve selected group & search query from the query parameters
+        selected_group = self.request.GET.get("group")
+        search_query = self.request.GET.get("search_query")
 
-    return render(
-        request,
-        "passmanager/vault.html",
-        {
-            "items": items,
-            "groups": groups,
-            "selected_group": selected_group,
-            "search_query": search_query,
-        },
-    )
+        items = Item.objects.filter(owner=user).order_by("name")
+        groups = (Item.objects.filter(owner=user).values_list("group", flat=True).distinct())
+
+        if selected_group:
+            items = items.filter(group=selected_group)
+
+        if search_query:
+            items = items.filter(name__icontains=search_query)
+
+        context.update({"items": items, "groups": groups,
+                        "selected_group": selected_group, "search_query": search_query})
+
+        return context
 
 
-@login_required
-def new_item(request):
-    if request.method == "POST":
-        # Create a mutable copy of request.POST
-        mutable_post_data = request.POST.copy()
-        form = ItemForm(data=request.POST)
-        obj = form.save(commit=False)
+class NewItemView(LoginRequiredMixin, FormView):
+    template_name = "passmanager/new_item.html"
+    form_class = ItemForm
+    success_url = reverse_lazy("passmanager:vault")
 
-        username_entry = obj.username
-        notes_entry = obj.notes
+    def form_valid(self, form):
+        action = self.request.POST.get("action", "value")
+        user = self.request.user
 
-        if form.is_valid():
-            action = request.POST.get("action", "value")
-            if action == "save":
-                obj = form.save(commit=False)
-                obj.owner = request.user
-                obj.encrypt_sensitive_fields()
-                obj.save()
-                messages.success(request, "Item created successfully.")
-                return redirect("passmanager:vault")
+        if action == "save":
+            obj = form.save(commit=False)
+            obj.owner = user
+            obj.encrypt_sensitive_fields()
+            obj.save()
+            messages.success(self.request, "Item created successfully.")
+            return super().form_valid(form)
 
-            elif action == "generate_password":
-                generated_password = generate_password(
-                    length=12,
-                    include_letters=True,
-                    include_digits=True,
-                    include_special_chars=True,
-                )
+        elif action == "generate_password":
+            generated_password = generate_password(length=12, include_letters=True,
+                                                   include_digits=True, include_special_chars=True)
 
-                # Update the mutable copy of POST data
-                mutable_post_data["password"] = generated_password
+            # Create a mutable copy of POST data to update password
+            mutable_post_data = self.request.POST.copy()
+            mutable_post_data["password"] = generated_password
 
-                # Use the updated mutable_post_data to instantiate the form
-                form = ItemForm(data=mutable_post_data)
+            # Create a new form with updated data
+            form = self.form_class(data=mutable_post_data)
 
-                # Update the form's initial data for rendering
-                form.initial["username"] = username_entry
-                form.initial["password"] = generated_password
-                form.initial["notes"] = notes_entry
+            # Update the form's initial data for rendering
+            form.initial["username"] = form.data.get("username", "")
+            form.initial["password"] = generated_password
+            form.initial["notes"] = form.data.get("notes", "")
 
-                context = {"form": form}
-                messages.success(
-                    request, "New password has been generated successfully."
-                )
+            messages.success(self.request, "New password has been generated successfully.")
 
-                return render(request, "passmanager/new_item.html", context)
-    else:
-        form = ItemForm()
+            # Instead of redirecting, re-render the form with updated password
+            return self.render_to_response(self.get_context_data(form=form))
 
-    context = {"form": form}
-    return render(request, "passmanager/new_item.html", context)
+        # Fallback, just render form again
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors below.")
+        return super().form_invalid(form)
 
 
-@login_required
-def edit_item(request, item_id):
-    item = Item.objects.get(id=item_id)
-    if item.owner != request.user:
-        raise Http404
+class EditItemView(LoginRequiredMixin, View):
+    template_name = "passmanager/edit_item.html"
+    form_class = ItemForm
 
-    if request.method == "POST":
+    def get_object(self):
+        item = get_object_or_404(Item, id=self.kwargs.get("item_id"))
+        if item.owner != self.request.user:
+            raise Http404
+        return item
+
+    def get(self, request, *args, **kwargs):
+        item = self.get_object()
+        item.decrypt_sensitive_fields()
+        form = self.form_class(instance=item)
+        return render(request, self.template_name, {"item": item, "form": form})
+
+    def post(self, request, *args, **kwargs):
+        item = self.get_object()
         action = request.POST.get("action")
 
         if action == "delete":
-            delete_item(request, item.id)
-            messages.success(
-                request,
-                "Item deleted successfully.",
-            )
+            item.delete()
+            messages.success(request, "Item deleted successfully.")
             return redirect("passmanager:vault")
 
-        form = ItemForm(instance=item, data=request.POST)
+        form = self.form_class(instance=item, data=request.POST)
+
         if form.is_valid():
             obj = form.save(commit=False)
             username_entry = obj.username
             notes_entry = obj.notes
 
             if action == "save":
-                obj = form.save(commit=False)
                 obj.owner = request.user
                 obj.encrypt_sensitive_fields()
                 obj.save()
@@ -137,157 +138,134 @@ def edit_item(request, item_id):
                     include_special_chars=True,
                 )
 
-                form = ItemForm(instance=item)
-
-                # Update the form's initial data for rendering
+                # Re-initialize form with generated password
+                form = self.form_class(instance=item)
                 form.initial["username"] = username_entry
                 form.initial["password"] = generated_password
                 form.initial["notes"] = notes_entry
 
-                context = {"item": item, "form": form}
-                messages.success(
-                    request, "New password has been generated successfully."
-                )
+                messages.success(request, "New password has been generated successfully.")
+                return render(request, self.template_name, {"item": item, "form": form})
 
-                return render(request, "passmanager/edit_item.html", context)
-        else:
-            messages.error(
-                request,
-                "The item could not be changed because the data didn't validate.",
+        # If form is invalid
+        messages.error(request, "The item could not be changed because the data didn't validate.")
+        return render(request, self.template_name, {"item": item, "form": form})
+
+
+class PasswordGeneratorView(LoginRequiredMixin, FormView):
+    template_name = "passmanager/password_generator.html"
+    form_class = PasswordGeneratorForm
+    success_url = reverse_lazy("passmanager:password_generator")  # self-redirect to show result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.setdefault("password", "")  # always provide password, default empty
+        return context
+
+    def form_valid(self, form):
+        length = form.cleaned_data["length"]
+        include_letters = form.cleaned_data["letters"]
+        include_digits = form.cleaned_data["digits"]
+        include_special_chars = form.cleaned_data["special_chars"]
+
+        password = generate_password(length, include_letters, include_digits, include_special_chars)
+
+        # Re-render the page with the generated password in context
+        return self.render_to_response(self.get_context_data(form=form, password=password))
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid input. Please fix the errors below.")
+        return super().form_invalid(form)
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(reauth_required, name="dispatch")
+class ExportCSVView(View):
+    def get(self, request, *args, **kwargs):
+        return self._build_csv(request)
+
+    def post(self, request, *args, **kwargs):
+        # Once re-auth succeeds, re-auth_required decorator will call this POST method
+        return self._build_csv(request)
+
+    @staticmethod
+    def _build_csv(request):
+        # Create response with csv content type & set filename for download
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
+        writer = csv.writer(response)
+
+        # Write csv header (column names)
+        writer.writerow(["name", "username", "password", "url", "notes", "group"])
+
+        for item in Item.objects.filter(owner=request.user):
+            item.decrypt_sensitive_fields()
+            writer.writerow(
+                [item.name, item.username, item.password, item.url, item.notes, item.group]
             )
 
-    else:
-        item.decrypt_sensitive_fields()
-        form = ItemForm(instance=item)
-
-    context = {"item": item, "form": form}
-    return render(request, "passmanager/edit_item.html", context)
+        return response
 
 
-@login_required
-def delete_item(request, item_id):
-    item = Item.objects.get(id=item_id)
-    if item.owner != request.user:
-        raise Http404
-    item.delete()
-    return redirect("passmanager:vault")
+class ImportCSVView(LoginRequiredMixin, FormView):
+    template_name = "passmanager/import_csv.html"
+    form_class = ImportPasswordsForm
+    success_url = reverse_lazy("passmanager:vault")
+
+    def form_valid(self, form):
+        # Read the uploaded file
+        csv_file = form.cleaned_data["csv_file"]
+        file_data = csv_file.read().decode("utf-8").splitlines()
+        csv_reader = csv.reader(file_data)
+
+        # Skip the header row
+        header = next(csv_reader)
+        expected_header = ["name", "username", "password", "url", "notes", "group"]
+
+        if header != expected_header:
+            messages.error(self.request, "Invalid CSV format. Please check the column names.")
+            return redirect("passmanager:import_csv")
+
+        for row in csv_reader:
+            name, username, password, url, notes, group = row
+            item = Item(name=name, username=username, password=password, url=url,
+                        notes=notes, group=group, owner=self.request.user)
+            item.encrypt_sensitive_fields()
+            item.save()
+
+        messages.success(self.request, "Passwords imported successfully!")
+        return super().form_valid(form)
 
 
-@login_required
-def password_generator(request):
-    form = PasswordGeneratorForm()
-    password = ""  # Initialize password variable
+class PasswordCheckupView(LoginRequiredMixin, TemplateView):
+    template_name = "passmanager/password_checkup.html"
 
-    if request.method == "POST":
-        form = PasswordGeneratorForm(request.POST)
-        if form.is_valid():
-            length = form.cleaned_data["length"]
-            include_letters = form.cleaned_data["letters"]
-            include_digits = form.cleaned_data["digits"]
-            include_special_chars = form.cleaned_data["special_chars"]
-            password = generate_password(
-                length, include_letters, include_digits, include_special_chars
-            )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items = Item.objects.filter(owner=self.request.user)
+        results = []
 
-    context = {"form": form, "password": password}
-    return render(
-        request,
-        "passmanager/password_generator.html",
-        context,
-    )
+        for item in items:
+            item.decrypt_sensitive_fields()
+            if item.password:
+                password_status = check_pwned_password(item.password)
+            else:
+                password_status = None
 
-
-@login_required
-@reauth_required
-def export_csv(request):
-    # Create response with csv content type & set filename for download
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
-    writer = csv.writer(response)
-
-    # Write csv header (column names)
-    writer.writerow(["name", "username", "password", "url", "notes", "group"])
-
-    # Fetch user-specific data
-    data = Item.objects.filter(owner=request.user)
-
-    for item in data:
-        item.decrypt_sensitive_fields()
-        writer.writerow(
-            [item.name, item.username, item.password, item.url, item.notes, item.group]
-        )
-
-    return response
-
-
-@login_required
-def import_csv(request):
-    if request.method == "POST":
-        form = ImportPasswordsForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Read the uploaded file
-            csv_file = form.cleaned_data["csv_file"]
-            file_data = csv_file.read().decode("utf-8").splitlines()
-            csv_reader = csv.reader(file_data)
-
-            # Skip the header row
-            header = next(csv_reader)
-            expected_header = ["name", "username", "password", "url", "notes", "group"]
-
-            if header != expected_header:
-                messages.error(
-                    request, "Invalid CSV format. Please check the column names."
-                )
-                return redirect("passmanager:import_csv")
-
-            for row in csv_reader:
-                name, username, password, url, notes, group = row
-                item = Item(
-                    name=name,
-                    username=username,
-                    password=password,
-                    url=url,
-                    notes=notes,
-                    group=group,
-                    owner=request.user,
-                )
-                item.encrypt_sensitive_fields()
-                item.save()
-
-            messages.success(request, "Passwords imported successfully!")
-            return redirect("passmanager:vault")
-    else:
-        form = ImportPasswordsForm()
-
-    context = {"form": form}
-    return render(request, "passmanager/import_csv.html", context)
-
-
-@login_required
-def password_checkup(request):
-    items = Item.objects.filter(owner=request.user)
-    results = []
-    for item in items:
-        item.decrypt_sensitive_fields()
-        password_status = check_pwned_password(item.password) if item.password else None
-        if password_status:
-            results.append(
-                {
+            if password_status:
+                results.append({
                     "name": item.name,
                     "status": f"Exposed {password_status} time(s)",
                     "recommendation": "Changing this password is recommended.",
                     "severity": "High",
-                }
-            )
-        else:
-            results.append(
-                {
+                })
+            else:
+                results.append({
                     "name": item.name,
                     "status": "No breaches found.",
                     "recommendation": "This password appears to be safe.",
                     "severity": "Low",
-                }
-            )
+                })
 
-    context = {"results": results}
-    return render(request, "passmanager/password_checkup.html", context)
+        context["results"] = results
+        return context

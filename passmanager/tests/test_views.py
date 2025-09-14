@@ -1,39 +1,40 @@
 import csv
-from django.test import TestCase
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.auth import get_user_model
 from unittest.mock import patch
+
+from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from django.urls import reverse
+
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from ..models import Item
 
 
-class VaultViewTests(TestCase):
+class BaseUserTestCase(TestCase):
+    """
+    Setup users for reuse in multiple test classes.
+    """
+    def setUp(self):
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(
+            email="tester@example.com", password="password123", username="tester"
+        )
+        self.user2 = self.user_model.objects.create_user(
+            email="tester2@example.com", password="password456", username="tester2"
+        )
+        self.client.login(email="tester@example.com", password="password123")
+
+
+class VaultViewTests(BaseUserTestCase):
     """
     Test case for the vault view.
     """
-
     def setUp(self):
-        """
-        Set up test environment by defining data and creating users.
-        """
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
-        )
-        self.user2 = self.user_model.objects.create_user(
-            email="otheruser@example.com", password="password456", username="otheruser"
-        )
-        self.client.login(email="testuser@example.com", password="password123")
-
+        super().setUp()
         # Create test items for both users
         for i in range(5):
-            Item.objects.create(
-                owner=self.user, name=f"Item {i}", date_added=f"2023-01-0{i + 1}"
-            )
-            Item.objects.create(
-                owner=self.user2, name=f"Other Item {i}", date_added=f"2023-01-0{i + 1}"
-            )
+            Item.objects.create(owner=self.user, name=f"Item {i}", date_added=f"2023-01-0{i + 1}")
+            Item.objects.create(owner=self.user2, name=f"Other Item {i}", date_added=f"2023-01-0{i + 1}")
 
     def test_vault_view_redirect_if_not_logged_in(self):
         """
@@ -65,16 +66,12 @@ class NewItemViewTests(TestCase):
     """
     Test case for the new_item view.
     """
-
     def setUp(self):
-        """
-        Set up the test environment by creating a test user.
-        """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
+            email="tester@example.com", password="password123", username="tester"
         )
-        self.client.login(email="testuser@example.com", password="password123")
+        self.client.login(email="tester@example.com", password="password123")
 
     def test_new_item_view_redirect_if_not_logged_in(self):
         """
@@ -97,28 +94,22 @@ class NewItemViewTests(TestCase):
         """
         Test if the new_item view correctly encrypts & saves item.
         """
-        data = {
-            "name": "Test Item",
-            "username": "testuser",
-            "password": "password123",
-            "url": "http://example.com",
-            "notes": "Test notes",
-            "group": "General",
-            "action": "save",
+        data = {"name": "Test Item", "username": "tester", "password": "password123",
+                "url": "https://example.com", "notes": "Test notes", "group": "General", "action": "save"
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         item = Item.objects.get(name="Test Item")
-        self.assertNotEqual(item.username, "testuser")
+        self.assertNotEqual(item.username, "tester")
         self.assertNotEqual(item.password, "password123")
         self.assertNotEqual(item.notes, "Test notes")
 
         item.decrypt_sensitive_fields()
         self.assertEqual(item.name, "Test Item")
-        self.assertEqual(item.username, "testuser")
+        self.assertEqual(item.username, "tester")
         self.assertEqual(item.password, "password123")
-        self.assertEqual(item.url, "http://example.com")
+        self.assertEqual(item.url, "https://example.com")
         self.assertEqual(item.notes, "Test notes")
         self.assertEqual(item.group, "General")
 
@@ -128,47 +119,22 @@ class NewItemViewTests(TestCase):
         Test if the new_item view correctly generates a password and updates the form.
         """
         mock_generate_password.return_value = "generatedpassword123"
-        data = {
-            "name": "Test Item",
-            "username": "testuser",
-            "password": "",
-            "url": "http://example.com",
-            "notes": "Test notes",
-            "group": "General",
-            "action": "generate_password",
+        data = {"name": "Test Item", "username": "tester", "password": "", "url": "https://example.com",
+                "notes": "Test notes", "group": "General", "action": "generate_password"
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
-        self.assertEqual(
-            response.context["form"].initial["password"], "generatedpassword123"
-        )
+        self.assertEqual(response.context["form"].initial["password"], "generatedpassword123")
 
 
-class EditItemViewTests(TestCase):
+class EditItemViewTests(BaseUserTestCase):
     """
     Test case for the edit_item view.
     """
-
     def setUp(self):
-        """
-        Set up test environment by defining data and creating users.
-        """
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
-        )
-        self.other_user = self.user_model.objects.create_user(
-            email="otheruser@example.com", password="password456", username="otheruser"
-        )
-        self.client.login(email="testuser@example.com", password="password123")
-
-        # Create test item
+        super().setUp()
         self.item = Item.objects.create(
-            name="Test Item",
-            username="testuser",
-            password="testpassword",
-            url="http://example.com",
-            notes="Test notes",
-            owner=self.user,
+            name="Test Item", username="tester", password="testpassword",
+            url="https://example.com", notes="Test notes", owner=self.user
         )
 
     def test_edit_item_view_redirect_if_not_logged_in(self):
@@ -176,21 +142,15 @@ class EditItemViewTests(TestCase):
         Test if the edit_item view redirects to the login page if not logged in.
         """
         self.client.logout()
-        response = self.client.get(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
-        )
-        self.assertRedirects(
-            response, "/user/login/?next=/edit_item/{}/".format(self.item.id)
-        )
+        response = self.client.get(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}))
+        self.assertRedirects(response, "/user/login/?next=/edit_item/{}/".format(self.item.id))
 
-    def test_edit_item_view_permission_denied_for_other_user(self):
+    def test_edit_item_view_permission_denied_for_tester2(self):
         """
         Test that other users cannot access items they don't own.
         """
-        self.client.login(email="otheruser@example.com", password="password456")
-        response = self.client.get(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
-        )
+        self.client.login(email="tester2@example.com", password="password456")
+        response = self.client.get(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_edit_item_view_save_action(self):
@@ -198,17 +158,10 @@ class EditItemViewTests(TestCase):
         Test that item's attributes are correctly updated after a save action.
         """
         data = {
-            "name": "Modified Item",
-            "username": "modifieduser",
-            "password": "modifiedpassword",
-            "url": "http://modified-example.com",
-            "notes": "Modified notes",
-            "group": "Modified Group",
-            "action": "save",
+            "name": "Modified Item", "username": "modifieduser", "password": "modifiedpassword",
+            "url": "https://modified-example.com", "notes": "Modified notes", "group": "Modified Group", "action": "save"
         }
-        response = self.client.post(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
-        )
+        response = self.client.post(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
 
         self.item.refresh_from_db()
@@ -216,7 +169,7 @@ class EditItemViewTests(TestCase):
         self.assertEqual(self.item.name, "Modified Item")
         self.assertEqual(self.item.username, "modifieduser")
         self.assertEqual(self.item.password, "modifiedpassword")
-        self.assertEqual(self.item.url, "http://modified-example.com")
+        self.assertEqual(self.item.url, "https://modified-example.com")
         self.assertEqual(self.item.notes, "Modified notes")
 
     @patch("passmanager.views.generate_password")
@@ -226,121 +179,34 @@ class EditItemViewTests(TestCase):
         """
         mock_generate_password.return_value = "generatedpassword123"
         data = {
-            "name": "Modified Item",
-            "username": "modifieduser",
-            "password": "",
-            "url": "http://modified-example.com",
-            "notes": "Modified notes",
-            "group": "Modified Group",
-            "action": "generate_password",
+            "name": "Modified Item", "username": "modifieduser", "password": "", "url": "https://modified-example.com",
+            "notes": "Modified notes", "group": "Modified Group", "action": "generate_password"
         }
-        response = self.client.post(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
-        )
-        self.assertEqual(
-            response.context["form"].initial["password"], "generatedpassword123"
-        )
+        response = self.client.post(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data)
+        self.assertEqual(response.context["form"].initial["password"], "generatedpassword123")
 
     def test_edit_item_view_delete_action(self):
         """
         Test item is correctly deleted when the delete action is triggered.
         """
-        data = {
-            "name": "Modified Item",
-            "username": "modifieduser",
-            "password": "modifiedpassword",
-            "url": "http://modified-example.com",
-            "notes": "Modified notes",
-            "action": "delete",
-        }
-        response = self.client.post(
-            reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data
-        )
+        data = {"name": "Modified Item", "username": "modifieduser", "password": "modifiedpassword",
+                "url": "https://modified-example.com", "notes": "Modified notes", "action": "delete"}
+        response = self.client.post(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
-
-
-class DeleteItemViewTests(TestCase):
-    """
-    Test case for the delete_item view.
-    """
-
-    def setUp(self):
-        """
-        Set up test environment by defining data and creating a user.
-        """
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
-        )
-        self.other_user = self.user_model.objects.create_user(
-            email="otheruser@example.com", password="password456", username="otheruser"
-        )
-        self.client.login(email="testuser@example.com", password="password123")
-
-        # Create test item
-        self.item = Item.objects.create(
-            name="Test Item",
-            username="testuser",
-            password="testpassword",
-            url="http://example.com",
-            notes="Test notes",
-            owner=self.user,
-        )
-
-    def test_delete_item_view_logged_in_owner(self):
-        """
-        Test that owner can successfully delete their own items.
-        """
-        response = self.client.post(
-            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
-        )
-        self.assertRedirects(response, reverse("passmanager:vault"))
-        with self.assertRaises(Item.DoesNotExist):
-            Item.objects.get(id=self.item.id)  # Ensure item is deleted
-
-    def test_delete_item_view_other_user(self):
-        """
-        Test that another user cannot delete someone else's item.
-        """
-        self.client.login(email="otheruser@example.com", password="password456")
-        response = self.client.post(
-            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
-        )
-        self.assertEqual(response.status_code, 404)
-
-        # Ensure the item still exists
-        item = Item.objects.get(id=self.item.id)
-        self.assertEqual(item.name, "Test Item")
-
-    def test_delete_item_view_not_logged_in(self):
-        """
-        Test that a not logged-in user is redirected to the login page.
-        """
-        self.client.logout()
-        response = self.client.post(
-            reverse("passmanager:delete_item", kwargs={"item_id": self.item.id})
-        )
-        self.assertRedirects(
-            response, "/user/login/?next=/edit_item/{}/delete".format(self.item.id)
-        )
 
 
 class PasswordGeneratorViewTests(TestCase):
     """
     Test case for the password_generator view.
     """
-
     def setUp(self):
-        """
-        Set up the test environment by creating a user.
-        """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
+            email="tester@example.com", password="password123", username="tester"
         )
-        self.client.login(email="testuser@example.com", password="password123")
+        self.client.login(email="tester@example.com", password="password123")
 
     def test_password_generator_view_status_code_and_template(self):
         """
@@ -360,12 +226,7 @@ class PasswordGeneratorViewTests(TestCase):
         Test if view generates a password with valid data.
         """
         mock_generate_password.return_value = "GeneratedPassword123"
-        data = {
-            "length": 12,
-            "letters": True,
-            "digits": True,
-            "special_chars": False,
-        }
+        data = {"length": 12, "letters": True, "digits": True, "special_chars": False}
         response = self.client.post(reverse("passmanager:password_generator"), data)
         self.assertEqual(response.context["password"], "GeneratedPassword123")
 
@@ -381,27 +242,14 @@ class ExportCsvViewTests(TestCase):
     """
     Test case for the export_csv view.
     """
-
     def setUp(self):
-        """
-        Set up test environment by defining data and creating a user.
-        """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
+            email="tester@example.com", password="password123", username="tester"
         )
-        self.client.login(email="testuser@example.com", password="password123")
-
-        # Create test item
-        self.item = Item(
-            name="Test Item",
-            username="testuser",
-            password="testpassword",
-            url="https://example.com",
-            notes="Test notes",
-            group="General",
-            owner=self.user,
-        )
+        self.client.login(email="tester@example.com", password="password123")
+        self.item = Item(name="Test Item", username="tester", password="testpassword", url="https://example.com",
+                         notes="Test notes", group="General", owner=self.user)
         self.item.encrypt_sensitive_fields()
         self.item.save()
 
@@ -418,10 +266,7 @@ class ExportCsvViewTests(TestCase):
         csrf_token = form_response.context["csrf_token"]
         post_response = self.client.post(
             reverse("passmanager:export_csv"),
-            {
-                "password": "password123",
-                "csrfmiddlewaretoken": csrf_token,
-            },
+            data={"password": "password123", "csrfmiddlewaretoken": csrf_token},
             follow=True,
         )
 
@@ -434,25 +279,15 @@ class ExportCsvViewTests(TestCase):
         content = post_response.content.decode("utf-8")
         reader = csv.reader(content.splitlines())
         header = next(reader)
-        self.assertEqual(
-            header, ["name", "username", "password", "url", "notes", "group"]
-        )
+        self.assertEqual(header, ["name", "username", "password", "url", "notes", "group"])
 
         # Validate decrypted csv data rows
         rows = list(reader)
         self.assertEqual(len(rows), 1)  # Only 1 row of data
 
         self.item.decrypt_sensitive_fields()
-        self.assertEqual(
-            rows[0],
-            [
-                "Test Item",
-                "testuser",
-                "testpassword",
-                "https://example.com",
-                "Test notes",
-                "General",
-            ],
+        self.assertEqual(rows[0], second=[
+            "Test Item", "tester", "testpassword", "https://example.com", "Test notes", "General"],
         )
 
 
@@ -460,16 +295,12 @@ class ImportCsvViewTests(TestCase):
     """
     Test case for the import_csv view.
     """
-
     def setUp(self):
-        """
-        Set up the test environment by creating a user.
-        """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
+            email="tester@example.com", password="password123", username="tester"
         )
-        self.client.login(email="testuser@example.com", password="password123")
+        self.client.login(email="tester@example.com", password="password123")
 
     def test_import_csv_view_status_code_and_template(self):
         """
@@ -488,9 +319,7 @@ class ImportCsvViewTests(TestCase):
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
-        response = self.client.post(
-            reverse("passmanager:import_csv"), data={"csv_file": file}, follow=True
-        )
+        response = self.client.post(reverse("passmanager:import_csv"), data={"csv_file": file}, follow=True)
         self.assertRedirects(response, reverse("passmanager:vault"))
         self.assertEqual(Item.objects.count(), 1)
 
@@ -513,10 +342,7 @@ class ImportCsvViewTests(TestCase):
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
-        response = self.client.post(
-            reverse("passmanager:import_csv"), data={"csv_file": file}, follow=True
-        )
-
+        response = self.client.post(reverse("passmanager:import_csv"), data={"csv_file": file}, follow=True)
         self.assertRedirects(response, reverse("passmanager:import_csv"))
         self.assertEqual(Item.objects.count(), 0)
 
@@ -525,37 +351,16 @@ class PasswordCheckupViewTests(TestCase):
     """
     Test case for the password_checkup view.
     """
-
     def setUp(self):
-        """
-        Set up test environment by defining data and creating a user.
-        """
         self.user_model = get_user_model()
         self.user = self.user_model.objects.create_user(
-            email="testuser@example.com", password="password123", username="testuser"
+            email="tester@example.com", password="password123", username="tester"
         )
-        self.client.login(email="testuser@example.com", password="password123")
-
-        # Create test items
-        self.item1 = Item(
-            name="Test Item 1",
-            username="testuser1",
-            password="testpassword12",
-            url="http://example.com",
-            notes="Test notes",
-            group="General",
-            owner=self.user,
-        )
-        self.item2 = Item(
-            name="Test Item 2",
-            username="testuser2",
-            password="tEst__pA$$word",
-            url="http://example.com",
-            notes="Test notes",
-            group="General",
-            owner=self.user,
-        )
-
+        self.client.login(email="tester@example.com", password="password123")
+        self.item1 = Item(name="Test Item 1",username="tester1", password="testpassword12",
+                          url="https://example.com",notes="Test notes", group="General", owner=self.user)
+        self.item2 = Item(name="Test Item 2", username="tester2", password="tEst__pA$$word",
+                          url="https://example.com", notes="Test notes", group="General", owner=self.user)
         self.item1.encrypt_sensitive_fields()
         self.item1.save()
         self.item2.encrypt_sensitive_fields()
@@ -567,10 +372,7 @@ class PasswordCheckupViewTests(TestCase):
         Test checkup verifies if password has been pwned.
         """
         mock_check_pwned_password.side_effect = lambda password: {
-            # Fake values for testing
-            "testpassword12": 4,
-            "tEst__pA$$word": 0,
-        }.get(password, 0)
+            "testpassword12": 4, "tEst__pA$$word": 0}.get(password, 0)
 
         response = self.client.get(reverse("passmanager:password_checkup"))
         results = response.context["results"]

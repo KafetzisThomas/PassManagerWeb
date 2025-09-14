@@ -146,18 +146,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Update session on every request
 SESSION_SAVE_EVERY_REQUEST = True
-
-# Custom user model
 AUTH_USER_MODEL = "users.CustomUser"
-
-# Custom email authentication backend
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-    "users.backends.EmailBackend",
-]
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
 # Login and logout settings
 LOGIN_URL = "users:login"

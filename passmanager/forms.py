@@ -1,24 +1,21 @@
 from django import forms
+
 from .models import Item
 
 
 class ItemForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(
-            render_value=True,
-        )
-    )
+    username = forms.CharField(widget=forms.TextInput())
+    password = forms.CharField(widget=forms.PasswordInput(render_value=True))
 
     class Meta:
         model = Item
         fields = ["name", "username", "password", "url", "notes", "group"]
 
     def __init__(self, *args, **kwargs):
-        super(ItemForm, self).__init__(*args, **kwargs)
-        self.fields["username"].required = False
-        self.fields["password"].required = False
-        self.fields["url"].required = False
-        self.fields["notes"].required = False
+        super().__init__(*args, **kwargs)
+        opt_fields = ["username", "password", "url", "notes"]
+        for field in opt_fields:
+            self.fields[field].required = False
 
 
 class PasswordGeneratorForm(forms.Form):
@@ -60,12 +57,9 @@ class ImportPasswordsForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={"accept": ".csv"}),
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        csv_file = cleaned_data.get("csv_file")
-
-        # Check file extension
-        if not csv_file.name.endswith(".csv"):
+    def clean_csv_file(self):
+        file = self.cleaned_data["csv_file"]
+        if not file.name.lower().endswith(".csv"):  # Check file extension
             raise forms.ValidationError("Invalid file type. Please import a CSV file.")
 
-        return cleaned_data
+        return file

@@ -1,6 +1,7 @@
-import string
-import secrets
 import hashlib
+import secrets
+import string
+
 import requests
 
 
@@ -25,21 +26,11 @@ def check_pwned_password(password: str) -> int:
     return 0
 
 
-def generate_password(
-    length: int,
-    include_letters: bool,
-    include_digits: bool,
-    include_special_chars: bool,
-) -> str:
+def generate_password(length: int, include_letters: bool, include_digits: bool, include_special_chars: bool) -> str:
     """
     Return a random password string based on the provided options.
     """
-    letters, digits, special_chars = (
-        string.ascii_letters,
-        string.digits,
-        string.punctuation,
-    )
-
+    letters, digits, special_chars = (string.ascii_letters, string.digits, string.punctuation)
     selected_chars = []
     if include_letters:
         selected_chars.append(letters)
