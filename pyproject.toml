@@ -5,7 +5,7 @@ description = "Self-hosted password manager for secure online credentials."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "asgiref==3.9.1",
+    "asgiref==3.10.0",
     "beautifulsoup4==4.14.2",
     "brotli==1.1.0",
     "cffi==2.0.0",
