@@ -19,7 +19,7 @@
                 <div class="d-flex w-100 w-md-50">
                     <label class="input-group-text" for="group">Group</label>
                     <!-- group filter dropdown -->
-                    <select class="form-select" name="group" id="group" onchange="this.form.submit()">
+                    <select class="form-select ms-1" name="group" id="group" onchange="this.form.submit()">
                         <option value="">All Groups</option>
                         {% for group in groups %}
                             <option value="{{ group }}" {% if selected_group == group %}selected{% endif %}>{{ group }}</option>
