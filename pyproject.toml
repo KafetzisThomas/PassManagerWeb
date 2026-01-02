@@ -29,6 +29,6 @@ dependencies = [
     "soupsieve==2.8",
     "sqlparse==0.5.5",
     "typing-extensions==4.15.0",
-    "uvicorn==0.38.0",
+    "uvicorn==0.40.0",
     "zxcvbn>=4.5.0",
 ]
