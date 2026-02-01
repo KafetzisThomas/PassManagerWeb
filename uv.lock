@@ -429,7 +429,7 @@ requires-dist = [
     { name = "pyotp", specifier = "==2.9.0" },
     { name = "python-dotenv", specifier = "==1.2.1" },
     { name = "requests", specifier = ">=2.32.5" },
-    { name = "soupsieve", specifier = "==2.8.1" },
+    { name = "soupsieve", specifier = "==2.8.3" },
     { name = "sqlparse", specifier = "==0.5.5" },
     { name = "typing-extensions", specifier = "==4.15.0" },
     { name = "uvicorn", specifier = "==0.40.0" },
@@ -521,11 +521,11 @@ wheels = [
 
 [[package]]
 name = "soupsieve"
-version = "2.8.1"
+version = "2.8.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/89/23/adf3796d740536d63a6fbda113d07e60c734b6ed5d3058d1e47fc0495e47/soupsieve-2.8.1.tar.gz", hash = "sha256:4cf733bc50fa805f5df4b8ef4740fc0e0fa6218cf3006269afd3f9d6d80fd350", size = 117856, upload-time = "2025-12-18T13:50:34.655Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/ae/2d9c981590ed9999a0d91755b47fc74f74de286b0f5cee14c9269041e6c4/soupsieve-2.8.3.tar.gz", hash = "sha256:3267f1eeea4251fb42728b6dfb746edc9acaffc4a45b27e19450b676586e8349", size = 118627, upload-time = "2026-01-20T04:27:02.457Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/f3/b67d6ea49ca9154453b6d70b34ea22f3996b9fa55da105a79d8732227adc/soupsieve-2.8.1-py3-none-any.whl", hash = "sha256:a11fe2a6f3d76ab3cf2de04eb339c1be5b506a8a47f2ceb6d139803177f85434", size = 36710, upload-time = "2025-12-18T13:50:33.267Z" },
+    { url = "https://files.pythonhosted.org/packages/46/2c/1462b1d0a634697ae9e55b3cecdcb64788e8b7d63f54d923fcd0bb140aed/soupsieve-2.8.3-py3-none-any.whl", hash = "sha256:ed64f2ba4eebeab06cc4962affce381647455978ffc1e36bb79a545b91f45a95", size = 37016, upload-time = "2026-01-20T04:27:01.012Z" },
 ]
 
 [[package]]
