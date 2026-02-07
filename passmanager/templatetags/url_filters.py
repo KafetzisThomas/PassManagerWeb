@@ -3,6 +3,7 @@ from django import template
 
 register = template.Library()
 
+
 @register.filter
 def urlsplit(value: str, part: str) -> str:
     """

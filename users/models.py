@@ -1,8 +1,7 @@
-import base64
 import os
-
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+import base64
 from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext as _
 
 

@@ -1,6 +1,5 @@
 from django.contrib.auth import login
 from django.shortcuts import render
-
 from users.forms import PasswordConfirmationForm
 
 

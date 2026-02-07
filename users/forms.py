@@ -1,9 +1,8 @@
 import pyotp
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
-from zxcvbn import zxcvbn
-
 from .models import CustomUser
+from zxcvbn import zxcvbn
 
 
 class CustomUserCreationForm(UserCreationForm):

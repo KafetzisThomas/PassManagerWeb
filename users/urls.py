@@ -1,8 +1,8 @@
-from django.contrib.auth import views as auth_views
 from django.urls import path
-
-from .views import (CustomLoginView, TwoFactorVerificationView, RegisterView,
-                    AccountView, UpdateMasterPasswordView, DeleteAccountView)
+from django.contrib.auth import views as auth_views
+from .views import (
+    CustomLoginView, TwoFactorVerificationView, RegisterView, AccountView, UpdateMasterPasswordView, DeleteAccountView
+)
 
 app_name = "users"
 urlpatterns = [

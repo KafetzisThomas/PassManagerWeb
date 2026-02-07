@@ -5,6 +5,10 @@
     <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker" alt="Docker Enabled"/>
 </div>
 
+> [!IMPORTANT]
+> **This project has evolved into [LockBox](https://github.com/KafetzisThomas/LockBox).**
+> LockBox represents the next generation of this application featuring a **zero-knowledge architecture**, **client side encryption** and a high performance **FastAPI** backend. Active development continues there.
+
 ## Features
 
 - [X] **AES-256 GCM Encryption**: Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.

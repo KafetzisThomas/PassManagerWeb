@@ -1,11 +1,9 @@
 import csv
-from unittest.mock import patch
-
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from unittest.mock import patch
 from django.urls import reverse
-
 from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from ..models import Item
 

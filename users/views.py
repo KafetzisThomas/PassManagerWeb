@@ -1,20 +1,23 @@
 import pyotp
-from django.conf import settings
-from django.contrib import messages
+from django.views import View
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic.edit import FormView
-
-from passmanager.models import Item
-from .forms import (CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
-                    CustomUserChangeForm, MasterPasswordChangeForm)
+from django.contrib import messages
+from django.conf import settings
+from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
 from .models import CustomUser
-from .utils import (send_new_user_registration, send_2fa_verification, send_delete_account_notification,
-                    send_update_account_notification, send_master_password_update)
+from passmanager.models import Item
+from .forms import (
+    CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
+    CustomUserChangeForm, MasterPasswordChangeForm
+)
+from .utils import (
+    send_new_user_registration, send_2fa_verification, send_delete_account_notification,
+    send_update_account_notification, send_master_password_update
+)
 
 
 class RegisterView(FormView):
