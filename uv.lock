@@ -297,14 +297,14 @@ wheels = [
 
 [[package]]
 name = "django-bootstrap5"
-version = "26.1"
+version = "26.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c8/cf/9d0578a045d27672ec2b213f21ec1275b399d7ed7590709b9347db655950/django_bootstrap5-26.1.tar.gz", hash = "sha256:cd4565143403e097a553a0418d036113e1e9bba35ca8e7c1830ad78c0f1be849", size = 50572, upload-time = "2026-01-03T11:20:37.675Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/31/bd9e6acdf959d5e19757026c206a6bdfceec3001ee85bb1f9799ce304f87/django_bootstrap5-26.2.tar.gz", hash = "sha256:12331059c8230ba372ffaad990a706151e1ad8f721a870aa2e862cf6746f0d33", size = 51468, upload-time = "2026-02-08T11:47:19.067Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/b0/d1309d425b726ddaaacae2220832b0e876f5eabf3ef7817b1c3a7a198682/django_bootstrap5-26.1-py3-none-any.whl", hash = "sha256:c6aa8aa8f6577996985c2b2dd9058984ad3a22cb363f3f185a65fdca40c3ace5", size = 26766, upload-time = "2026-01-03T11:20:38.486Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/79/d4b547849a86f450b1f1fb77f306da5d7844aba45f4aa10450d375fc26f5/django_bootstrap5-26.2-py3-none-any.whl", hash = "sha256:179af37c59f4e9b1070fc650f30961c5d903c2c0ad60280ad5b63ed394f68658", size = 26851, upload-time = "2026-02-08T11:47:20.198Z" },
 ]
 
 [[package]]
@@ -415,7 +415,7 @@ requires-dist = [
     { name = "dj-database-url", specifier = "==3.0.1" },
     { name = "django", specifier = "==6.0.2" },
     { name = "django-appconf", specifier = "==1.1.0" },
-    { name = "django-bootstrap5", specifier = "==26.1" },
+    { name = "django-bootstrap5", specifier = "==26.2" },
     { name = "django-crispy-forms", specifier = "==2.5" },
     { name = "django-extensions", specifier = "==4.1" },
     { name = "gunicorn", specifier = "==25.0.0" },
