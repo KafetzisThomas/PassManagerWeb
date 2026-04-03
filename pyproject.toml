@@ -20,7 +20,7 @@ dependencies = [
     "django-extensions==4.1",
     "gunicorn==25.3.0",
     "h11==0.16.0",
-    "packaging==25.0",
+    "packaging==26.0",
     "psycopg2-binary==2.9.11",
     "pycparser==3.0",
     "pyotp==2.9.0",
