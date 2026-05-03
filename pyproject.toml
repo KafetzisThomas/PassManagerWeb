@@ -21,7 +21,7 @@ dependencies = [
     "gunicorn==25.3.0",
     "h11==0.16.0",
     "packaging==26.2",
-    "psycopg2-binary==2.9.11",
+    "psycopg2-binary==2.9.12",
     "pycparser==3.0",
     "pyotp==2.9.0",
     "python-dotenv==1.2.2",
