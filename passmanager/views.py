@@ -132,31 +132,20 @@ def edit_item(request, item_id):
 
     return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
 
-class PasswordGeneratorView(LoginRequiredMixin, FormView):
-    template_name = "passmanager/password_generator.html"
-    form_class = PasswordGeneratorForm
-    success_url = reverse_lazy("passmanager:password_generator")  # self-redirect to show result
+@login_required
+def password_generator(request):
+    form = PasswordGeneratorForm()
+    password = ""
+    if request.method == "POST":
+        form = PasswordGeneratorForm(request.POST)
+        if form.is_valid():
+            length = form.cleaned_data["length"]
+            include_letters = form.cleaned_data["letters"]
+            include_digits = form.cleaned_data["digits"]
+            include_special_chars = form.cleaned_data["special_chars"]
+            password = generate_password(length, include_letters, include_digits, include_special_chars)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.setdefault("password", "")  # always provide password, default empty
-        return context
-
-    def form_valid(self, form):
-        length = form.cleaned_data["length"]
-        include_letters = form.cleaned_data["letters"]
-        include_digits = form.cleaned_data["digits"]
-        include_special_chars = form.cleaned_data["special_chars"]
-
-        password = generate_password(length, include_letters, include_digits, include_special_chars)
-
-        # Re-render the page with the generated password in context
-        return self.render_to_response(self.get_context_data(form=form, password=password))
-
-    def form_invalid(self, form):
-        messages.error(self.request, "Invalid input. Please fix the errors below.")
-        return super().form_invalid(form)
-
+    return render(request, "passmanager/password_generator.html", {"form": form, "password": password})
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(reauth_required, name="dispatch")
