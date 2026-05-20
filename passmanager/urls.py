@@ -1,7 +1,4 @@
 from django.urls import path
-from .views import (
-    PasswordCheckupView
-)
 from . import views
 
 app_name = "passmanager"
@@ -12,5 +9,5 @@ urlpatterns = [
     path("password_generator/", views.password_generator, name="password_generator"),
     path("export_csv/", views.export_csv, name="export_csv"),
     path("import_csv/", views.import_csv, name="import_csv"),
-    path("password_checkup/", PasswordCheckupView.as_view(), name="password_checkup"),
+    path("password_checkup/", views.password_checkup, name="password_checkup"),
 ]

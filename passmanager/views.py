@@ -200,35 +200,30 @@ def import_csv(request):
 
     return render(request, "passmanager/import_csv.html", {"form": form})
 
-class PasswordCheckupView(LoginRequiredMixin, TemplateView):
-    template_name = "passmanager/password_checkup.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        items = Item.objects.filter(owner=self.request.user)
-        results = []
-
-        for item in items:
-            item.decrypt_sensitive_fields()
-            if item.password:
-                password_status = check_pwned_password(item.password)
-            else:
-                password_status = None
-
-            if password_status:
-                results.append({
+@login_required
+def password_checkup(request):
+    results = []
+    items = Item.objects.filter(owner=request.user)
+    for item in items:
+        item.decrypt_sensitive_fields()
+        password_status = check_pwned_password(item.password) if item.password else None
+        if password_status:
+            results.append(
+                {
                     "name": item.name,
                     "status": f"Exposed {password_status} time(s)",
                     "recommendation": "Changing this password is recommended.",
                     "severity": "High",
-                })
-            else:
-                results.append({
+                }
+            )
+        else:
+            results.append(
+                {
                     "name": item.name,
                     "status": "No breaches found.",
                     "recommendation": "This password appears to be safe.",
                     "severity": "Low",
-                })
+                }
+            )
 
-        context["results"] = results
-        return context
+    return render(request, "passmanager/password_checkup.html", {"results": results})
