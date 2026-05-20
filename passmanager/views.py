@@ -32,51 +32,52 @@ def vault(request):
     context = {"items": items, "groups": groups, "selected_group": selected_group, "search_query": search_query}
     return render(request, "passmanager/vault.html", context)
 
-class NewItemView(LoginRequiredMixin, FormView):
-    template_name = "passmanager/new_item.html"
-    form_class = ItemForm
-    success_url = reverse_lazy("passmanager:vault")
+@login_required
+def new_item(request):
+    if request.method == "POST":
+        # create a mutable copy
+        mutable_post_data = request.POST.copy()
+        form = ItemForm(data=request.POST)
+        obj = form.save(commit=False)
 
-    def form_valid(self, form):
-        action = self.request.POST.get("action", "value")
-        user = self.request.user
+        username_entry = obj.username
+        notes_entry = obj.notes
 
-        if action == "save":
-            obj = form.save(commit=False)
-            obj.owner = user
-            obj.encrypt_sensitive_fields()
-            obj.save()
-            messages.success(self.request, "Item created successfully.")
-            return super().form_valid(form)
+        if form.is_valid():
+            action = request.POST.get("action", "value")
+            if action == "save":
+                obj = form.save(commit=False)
+                obj.owner = request.user
+                obj.encrypt_sensitive_fields()
+                obj.save()
+                messages.success(request, "Item created successfully.")
+                return redirect("passmanager:vault")
 
-        elif action == "generate_password":
-            generated_password = generate_password(length=12, include_letters=True,
-                                                   include_digits=True, include_special_chars=True)
+            elif action == "generate_password":
+                generated_password = generate_password(
+                    length=12,
+                    include_letters=True,
+                    include_digits=True,
+                    include_special_chars=True,
+                )
 
-            # Create a mutable copy of POST data to update password
-            mutable_post_data = self.request.POST.copy()
-            mutable_post_data["password"] = generated_password
+                # update mutable copy
+                mutable_post_data["password"] = generated_password
 
-            # Create a new form with updated data
-            form = self.form_class(data=mutable_post_data)
+                # use updated mutable_post_data to instantiate the form
+                form = ItemForm(data=mutable_post_data)
 
-            # Update the form's initial data for rendering
-            form.initial["username"] = form.data.get("username", "")
-            form.initial["password"] = generated_password
-            form.initial["notes"] = form.data.get("notes", "")
+                # update forms initial data
+                form.initial["username"] = username_entry
+                form.initial["password"] = generated_password
+                form.initial["notes"] = notes_entry
 
-            messages.success(self.request, "New password has been generated successfully.")
+                messages.success(request, "New password has been generated successfully.")
+                return render(request, "passmanager/new_item.html", {"form": form})
+    else:
+        form = ItemForm()
 
-            # Instead of redirecting, re-render the form with updated password
-            return self.render_to_response(self.get_context_data(form=form))
-
-        # Fallback, just render form again
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def form_invalid(self, form):
-        messages.error(self.request, "Please correct the errors below.")
-        return super().form_invalid(form)
-
+    return render(request, "passmanager/new_item.html", {"form": form})
 
 class EditItemView(LoginRequiredMixin, View):
     template_name = "passmanager/edit_item.html"
