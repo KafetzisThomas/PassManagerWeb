@@ -1,17 +1,18 @@
 import pyotp
-from django.views import View
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, update_session_auth_hash
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.views.generic.edit import FormView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render, redirect
 from .models import CustomUser
 from passmanager.models import Item
 from .forms import (
-    CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
-    CustomUserChangeForm, MasterPasswordChangeForm
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    TwoFactorVerificationForm,
+    CustomUserChangeForm,
+    MasterPasswordChangeForm,
 )
 
 def register(request):
@@ -24,36 +25,6 @@ def register(request):
     else:
         form = CustomUserCreationForm()
     return render(request, "users/register.html", {"form": form})
-
-class CustomLoginView(LoginView):
-    authentication_form = CustomAuthenticationForm
-
-    def form_valid(self, form):
-        user = form.get_user()
-        if user.otp_secret:
-            self.request.session["user_id"] = user.id  # Store user ID in session
-            return redirect("users:2fa_verification")
-        return super().form_valid(form)
-
-
-class TwoFactorVerificationView(FormView):
-    template_name = "users/2fa_verification.html"
-    form_class = TwoFactorVerificationForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        user_id = self.request.session.get("user_id")
-        kwargs["user"] = CustomUser.objects.get(id=user_id)
-        return kwargs
-
-    def form_valid(self, form):
-        user = form.user
-        backend_path = "django.contrib.auth.backends.ModelBackend"
-        login(self.request, user, backend=backend_path)
-
-        # Remove user from session data
-        self.request.session.pop("user_id", None)
-        return redirect("passmanager:vault")
 
 @login_required
 def account(request):
@@ -131,10 +102,37 @@ def update_master_password(request):
 
     return render(request, "users/update_master_password.html", {"form": form})
 
-class DeleteAccountView(LoginRequiredMixin, View):
-    @staticmethod
-    def post(request):
-        user = request.user
-        user.delete()
-        # send_delete_account_notification(user) if not settings.DEBUG else None
-        return redirect("users:register")
+@login_required
+def delete_account(request):
+    user = request.user
+    user.delete()
+    return redirect("users:register")
+
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
+    def form_valid(self, form):
+        user = form.get_user()
+        if user.otp_secret:
+            self.request.session["user_id"] = user.id
+            return redirect("users:2fa_verification")
+        return super().form_valid(form)
+
+
+class TwoFactorVerificationView(FormView):
+    template_name = "users/2fa_verification.html"
+    form_class = TwoFactorVerificationForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        user_id = self.request.session.get("user_id")
+        kwargs["user"] = CustomUser.objects.get(id=user_id)
+        return kwargs
+
+    def form_valid(self, form):
+        user = form.user
+        backend_path = "django.contrib.auth.backends.ModelBackend"
+        login(self.request, user, backend=backend_path)
+
+        self.request.session.pop("user_id", None)
+        return redirect("passmanager:vault")
