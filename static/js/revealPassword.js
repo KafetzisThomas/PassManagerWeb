@@ -7,7 +7,6 @@ function RevealPassword() {
     });
 }
 
-// Initialize based on the page type
 document.addEventListener("DOMContentLoaded", function () {
     RevealPassword();
 });

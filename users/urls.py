@@ -1,12 +1,13 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from .views import (
-    CustomLoginView, TwoFactorVerificationView, RegisterView, AccountView, UpdateMasterPasswordView, DeleteAccountView
+    CustomLoginView, TwoFactorVerificationView, register, AccountView, UpdateMasterPasswordView, DeleteAccountView
 )
+from . import views
 
 app_name = "users"
 urlpatterns = [
-    path("register/", RegisterView.as_view(), name="register"),
+    path("register/", views.register, name="register"),
     path("login/", CustomLoginView.as_view(template_name="users/login.html"), name="login"),
     path("login/2fa_verification/", TwoFactorVerificationView.as_view(), name="2fa_verification"),
     path("account/", AccountView.as_view(), name="account"),

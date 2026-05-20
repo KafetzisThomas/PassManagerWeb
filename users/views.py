@@ -5,8 +5,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.views.generic.edit import FormView
 from django.contrib import messages
-from django.conf import settings
-from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
 from .models import CustomUser
 from passmanager.models import Item
@@ -15,18 +13,16 @@ from .forms import (
     CustomUserChangeForm, MasterPasswordChangeForm
 )
 
-
-class RegisterView(FormView):
-    template_name = "users/register.html"
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy("users:login")
-
-    def form_valid(self, form):
-        new_user = form.save()
-        # send_new_user_registration(new_user) if not settings.DEBUG else None
-        messages.success(self.request, "Account successfully created!")
-        return super().form_valid(form)
-
+def register(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Account successfully created!")
+            return redirect("users:login")
+    else:
+        form = CustomUserCreationForm()
+    return render(request, "users/register.html", {"form": form})
 
 class CustomLoginView(LoginView):
     authentication_form = CustomAuthenticationForm
