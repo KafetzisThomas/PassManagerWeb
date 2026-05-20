@@ -1,9 +1,9 @@
 import pyotp
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.views.generic.edit import FormView
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import CustomUser
 from passmanager.models import Item

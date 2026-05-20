@@ -58,7 +58,7 @@ class ImportPasswordsForm(forms.Form):
 
     def clean_csv_file(self):
         file = self.cleaned_data["csv_file"]
-        if not file.name.lower().endswith(".csv"):  # Check file extension
+        if not file.name.lower().endswith(".csv"):
             raise forms.ValidationError("Invalid file type. Please import a CSV file.")
 
         return file

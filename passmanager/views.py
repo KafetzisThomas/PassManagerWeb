@@ -1,20 +1,12 @@
 import csv
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.views.generic import TemplateView, FormView
 from django.http import Http404, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from dotenv import load_dotenv
 from .decorators import reauth_required
-from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
 from .models import Item
-from .utils import check_pwned_password, generate_password
-
-load_dotenv()
+from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from .utils import generate_password, check_pwned_password
 
 @login_required
 def vault(request):

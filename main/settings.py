@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "users",
     # third party apps
     "django_extensions",
-    "django_bootstrap5",
     "crispy_forms",
     "crispy_bootstrap5",
     # default django apps

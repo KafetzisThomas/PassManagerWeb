@@ -11,12 +11,12 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email", "username")  # only fields user fills
+        fields = ("email", "username")
 
     def clean_password1(self):
         password = self.cleaned_data.get("password1")
         if password:
-            result = zxcvbn(password)  # Validate password strength
+            result = zxcvbn(password)
             if result["score"] < 3:  # 0 – 4 (=5 levels)
                 raise forms.ValidationError("Password is too weak. Try adding more characters, numbers or symbols.")
 
@@ -49,8 +49,14 @@ class TwoFactorVerificationForm(forms.Form):
 class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ("email", "username", "session_timeout", "enable_2fa",
-                  "allow_account_update_notifications", "allow_master_password_update_notifications")
+        fields = (
+            "email",
+            "username",
+            "session_timeout",
+            "enable_2fa",
+            "allow_account_update_notifications",
+            "allow_master_password_update_notifications"
+        )
 
 
 class MasterPasswordChangeForm(PasswordChangeForm):
@@ -61,7 +67,7 @@ class MasterPasswordChangeForm(PasswordChangeForm):
     def clean_new_password1(self):
         password = self.cleaned_data.get("new_password1")
         if password:
-            result = zxcvbn(password)  # Validate password strength
+            result = zxcvbn(password)
             if result["score"] < 3:  # 0 – 4 (=5 levels)
                 raise forms.ValidationError("Password is too weak. Try adding more characters, numbers or symbols.")
 
