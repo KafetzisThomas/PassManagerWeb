@@ -1,8 +1,8 @@
 <div align="center">
-    <img src="passmanager/static/images/logo.png" width="400" alt="Logo Icon"/><br><br>
+    <img src="assets/logo.png" width="400"/><br><br>
     <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
-    <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt="Run Tests"/>
-    <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker" alt="Docker Enabled"/>
+    <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg"/>
+    <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker"/>
 </div>
 
 > [!IMPORTANT]
@@ -18,9 +18,9 @@
 - [X] **Import/Export Data**: `Upload` data such as passwords from a CSV file or `download` your stored data in `CSV` format for easy backup or migration.
 - [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
 
-## Django Models
+## Database Schema
 
-![Django Models Graph](https://github.com/user-attachments/assets/d7d31518-1a7a-48a6-9ea7-04599b3097d8)
+![Database Schema](assets/db_schema.png)
 
 ## Purpose
 
@@ -94,19 +94,19 @@ uv run manage.py test
 
 ## Demo Images
 
-![Vault](passmanager/static/images/vault_page.png)
+![Vault](assets/vault_page.png)
 
-![Password Generator](passmanager/static/images/password_generator_page.png)
+![New Item](assets/new_item_page.png)
 
-![Import Data](passmanager/static/images/import_data_page.png)
+![Edit Item](assets/edit_item_page.png)
 
-![Password Checkup](passmanager/static/images/password_checkup_page.png)
+![Password Generator](assets/password_generator_page.png)
 
-![Account Settings](passmanager/static/images/account_page.png)
+![Import Data](assets/import_data_page.png)
 
-![New Item](passmanager/static/images/new_item_page.png)
+![Password Checkup](assets/password_checkup_page.png)
 
-![Edit Item](passmanager/static/images/edit_item_page.png)
+![Account Settings](assets/account_page.png)
 
 ## Contributing Guidelines
 
