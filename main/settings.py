@@ -143,6 +143,21 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+if not DEBUG:
+    # prod: use S3 for static files
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+    }
+    AWS_ACCESS_KEY_ID = os.getenv("STORAGE_ACCESS_KEY")
+    AWS_SECRET_ACCESS_KEY = os.getenv("STORAGE_SECRET_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("STORAGE_BUCKET_NAME")
+    AWS_S3_ENDPOINT_URL = os.getenv("STORAGE_ENDPOINT_URL")
+    AWS_S3_REGION_NAME = os.getenv("STORAGE_REGION_NAME")
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
