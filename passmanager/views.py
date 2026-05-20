@@ -79,39 +79,27 @@ def new_item(request):
 
     return render(request, "passmanager/new_item.html", {"form": form})
 
-class EditItemView(LoginRequiredMixin, View):
-    template_name = "passmanager/edit_item.html"
-    form_class = ItemForm
+@login_required
+def edit_item(request, item_id):
+    item = Item.objects.get(id=item_id)
+    if item.owner != request.user:
+        raise Http404
 
-    def get_object(self):
-        item = get_object_or_404(Item, id=self.kwargs.get("item_id"))
-        if item.owner != self.request.user:
-            raise Http404
-        return item
-
-    def get(self, request, *args, **kwargs):
-        item = self.get_object()
-        item.decrypt_sensitive_fields()
-        form = self.form_class(instance=item)
-        return render(request, self.template_name, {"item": item, "form": form})
-
-    def post(self, request, *args, **kwargs):
-        item = self.get_object()
+    if request.method == "POST":
         action = request.POST.get("action")
-
         if action == "delete":
-            item.delete()
+            # delete_item(request, item.id)
             messages.success(request, "Item deleted successfully.")
             return redirect("passmanager:vault")
 
-        form = self.form_class(instance=item, data=request.POST)
-
+        form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
             username_entry = obj.username
             notes_entry = obj.notes
 
             if action == "save":
+                obj = form.save(commit=False)
                 obj.owner = request.user
                 obj.encrypt_sensitive_fields()
                 obj.save()
@@ -126,19 +114,23 @@ class EditItemView(LoginRequiredMixin, View):
                     include_special_chars=True,
                 )
 
-                # Re-initialize form with generated password
-                form = self.form_class(instance=item)
+                form = ItemForm(instance=item)
+
+                # update forms initial data
                 form.initial["username"] = username_entry
                 form.initial["password"] = generated_password
                 form.initial["notes"] = notes_entry
 
                 messages.success(request, "New password has been generated successfully.")
-                return render(request, self.template_name, {"item": item, "form": form})
+                return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
+        else:
+            messages.error(request, "The item could not be changed because the data didn't validate.")
 
-        # If form is invalid
-        messages.error(request, "The item could not be changed because the data didn't validate.")
-        return render(request, self.template_name, {"item": item, "form": form})
+    else:
+        item.decrypt_sensitive_fields()
+        form = ItemForm(instance=item)
 
+    return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
 
 class PasswordGeneratorView(LoginRequiredMixin, FormView):
     template_name = "passmanager/password_generator.html"
