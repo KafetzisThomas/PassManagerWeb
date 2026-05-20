@@ -77,7 +77,7 @@ class NewItemViewTests(TestCase):
         """
         self.client.logout()
         response = self.client.get(reverse("passmanager:new_item"))
-        self.assertRedirects(response, "/user/login/?next=/new_item/")
+        self.assertRedirects(response, "/user/login/?next=/item/new/")
 
     def test_new_item_view_status_code_and_template(self):
         """
@@ -141,7 +141,7 @@ class EditItemViewTests(BaseUserTestCase):
         """
         self.client.logout()
         response = self.client.get(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}))
-        self.assertRedirects(response, "/user/login/?next=/edit_item/{}/".format(self.item.id))
+        self.assertRedirects(response, "/user/login/?next=/item/{}/edit".format(self.item.id))
 
     def test_edit_item_view_permission_denied_for_tester2(self):
         """
