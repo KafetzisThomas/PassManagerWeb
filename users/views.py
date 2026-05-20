@@ -91,22 +91,14 @@ def account(request):
 
     return render(request, "users/account.html", {"form": form})
 
-class UpdateMasterPasswordView(LoginRequiredMixin, View):
-    template_name = "users/update_master_password.html"
-    form_class = MasterPasswordChangeForm
-
-    def get(self, request):
-        form = self.form_class(user=request.user)
-        return render(request, self.template_name, {"form": form})
-
-    def post(self, request):
-        form = self.form_class(user=request.user, data=request.POST)
-
+@login_required
+def update_master_password(request):
+    if request.method == "POST":
+        form = MasterPasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             old_password = form.cleaned_data["old_password"]
             new_password = form.cleaned_data["new_password1"]
 
-            # Validate old master password
             if not request.user.check_password(old_password):
                 messages.error(request, "Old master password is incorrect.")
                 return redirect("users:update_master_password")
@@ -114,7 +106,6 @@ class UpdateMasterPasswordView(LoginRequiredMixin, View):
             user = request.user
             items = Item.objects.filter(owner=user)
 
-            # Decrypt existing items using the old key
             if items.exists():
                 old_key = items.first().get_key()
                 for item in items:
@@ -122,11 +113,9 @@ class UpdateMasterPasswordView(LoginRequiredMixin, View):
                     item.password = item.decrypt_field(old_key, item.password)
                     item.notes = item.decrypt_field(old_key, item.notes)
 
-            # Set new password
             user.set_password(new_password)
             user.save()
 
-            # Re-encrypt items using the new key
             if items.exists():
                 for item in items:
                     new_key = item.get_key()
@@ -135,12 +124,12 @@ class UpdateMasterPasswordView(LoginRequiredMixin, View):
                     item.notes = item.encrypt_field(new_key, item.notes)
                     item.save()
 
-            # send_master_password_update(user) if not settings.DEBUG else None
             messages.success(request, "Your master password was successfully updated!")
             return redirect("passmanager:vault")
+    else:
+        form = MasterPasswordChangeForm(user=request.user)
 
-        return render(request, self.template_name, {"form": form})
-
+    return render(request, "users/update_master_password.html", {"form": form})
 
 class DeleteAccountView(LoginRequiredMixin, View):
     @staticmethod
