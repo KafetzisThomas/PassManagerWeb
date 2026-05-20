@@ -162,35 +162,43 @@ def export_csv(request):
 
     return response
 
-class ImportCSVView(LoginRequiredMixin, FormView):
-    template_name = "passmanager/import_csv.html"
-    form_class = ImportPasswordsForm
-    success_url = reverse_lazy("passmanager:vault")
+@login_required
+def import_csv(request):
+    if request.method == "POST":
+        form = ImportPasswordsForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data["csv_file"]
+            file_data = csv_file.read().decode("utf-8").splitlines()
+            csv_reader = csv.reader(file_data)
 
-    def form_valid(self, form):
-        # Read the uploaded file
-        csv_file = form.cleaned_data["csv_file"]
-        file_data = csv_file.read().decode("utf-8").splitlines()
-        csv_reader = csv.reader(file_data)
+            # skip header row
+            header = next(csv_reader)
+            expected_header = ["name", "username", "password", "url", "notes", "group"]
 
-        # Skip the header row
-        header = next(csv_reader)
-        expected_header = ["name", "username", "password", "url", "notes", "group"]
+            if header != expected_header:
+                messages.error(request, "Invalid CSV format. Please check the column names.")
+                return redirect("passmanager:import_csv")
 
-        if header != expected_header:
-            messages.error(self.request, "Invalid CSV format. Please check the column names.")
-            return redirect("passmanager:import_csv")
+            for row in csv_reader:
+                name, username, password, url, notes, group = row
+                item = Item(
+                    name=name,
+                    username=username,
+                    password=password,
+                    url=url,
+                    notes=notes,
+                    group=group,
+                    owner=request.user,
+                )
+                item.encrypt_sensitive_fields()
+                item.save()
 
-        for row in csv_reader:
-            name, username, password, url, notes, group = row
-            item = Item(name=name, username=username, password=password, url=url,
-                        notes=notes, group=group, owner=self.request.user)
-            item.encrypt_sensitive_fields()
-            item.save()
+            messages.success(request, "Passwords imported successfully!")
+            return redirect("passmanager:vault")
+    else:
+        form = ImportPasswordsForm()
 
-        messages.success(self.request, "Passwords imported successfully!")
-        return super().form_valid(form)
-
+    return render(request, "passmanager/import_csv.html", {"form": form})
 
 class PasswordCheckupView(LoginRequiredMixin, TemplateView):
     template_name = "passmanager/password_checkup.html"
