@@ -17,7 +17,7 @@ from .forms import (
 
 
 class RegisterView(FormView):
-    template_name = "registration/register.html"
+    template_name = "users/register.html"
     form_class = CustomUserCreationForm
     success_url = reverse_lazy("users:login")
 
@@ -40,7 +40,7 @@ class CustomLoginView(LoginView):
 
 
 class TwoFactorVerificationView(FormView):
-    template_name = "registration/2fa_verification.html"
+    template_name = "users/2fa_verification.html"
     form_class = TwoFactorVerificationForm
 
     def get_form_kwargs(self):

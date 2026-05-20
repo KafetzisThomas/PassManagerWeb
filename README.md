@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="assets/logo.png" width="400"/><br><br>
+    <img src="static/logo.png" width="400"/><br><br>
     <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
     <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg"/>
     <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker"/>

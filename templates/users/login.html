@@ -1,7 +1,7 @@
-{% extends "passmanager/base.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}2FA Verification{% endblock title %}
+{% block title %}Login{% endblock title %}
 
 {% block content %}
     {% if messages %}
@@ -10,10 +10,10 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'users:2fa_verification' %}" method="post" class="form">
+    <form action="{% url 'users:login' %}" method="post" class="form">
         {% csrf_token %}
         {{ form|crispy }}
-        <button name="submit" class="btn btn-dark w-100">Verify</button>
+        <button name="submit" class="btn btn-dark w-100">Log In</button>
         <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 {% endblock content %}
