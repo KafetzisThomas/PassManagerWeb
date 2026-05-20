@@ -30,54 +30,45 @@ Instead, I aim to offer a self-host option for those who prefer full control ove
 
 If you find this project interesting, helpful, or inspiring, please consider giving a `star`, `following`, or even `donating` to support further development.
 
-## Setup for Local Development
+## Usage
 
-### Install uv
+### Local Development
+
+First install `uv` and sync the project dependencies:
 
 ```bash
 cd path/to/root/directory
 pip install uv
+uv sync
 ```
 
-### Create Environment Variable file
-
-```bash
-touch main/.env
-nano main/.env
-```
-
-Add the following (adjust as needed):
-
-```ini
-# Django settings
-SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
-ALLOWED_HOSTS="localhost,127.0.0.1"
-CSRF_TRUSTED_ORIGINS="http://localhost:8001"
-DEBUG=True  # For development
-
-# OPTIONAL: PostgreSQL Configuration (remote production)
-DATABASE_URL="postgres://[username]:[password]@[host]:[port]/[db_name]"
-```
-
-Save changes and close the file.
-
-> **Note:** You can deploy the application using Docker:  
-> **NGINX + Gunicorn + External DB**  
->
-> ```bash
-> docker compose up
-> ```
-
-### Migrate Database
+Migrate database:
 
 ```bash
 uv run manage.py migrate
 ```
 
-### Run Django Server
+Run Django server:
 
 ```bash
 uv run manage.py runserver
+```
+
+Access web application at `http://127.0.0.1:8000` or `http://localhost:8000`.
+
+### Production Deployment (Docker)
+
+Set up your environment variables:
+
+```bash
+cp .env.prod .env
+nano .env  # modify file, instructions inside
+```
+
+Build and start the container in the background:
+
+```bash
+docker compose up -d --build
 ```
 
 Access web application at `http://127.0.0.1:8000` or `http://localhost:8000`.
