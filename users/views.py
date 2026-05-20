@@ -29,31 +29,21 @@ def register(request):
 @login_required
 def account(request):
     if request.method == "POST":
-        action = request.POST.get("action")
         form = CustomUserChangeForm(request.POST, instance=request.user)
-
         if form.is_valid():
-            if action == "save":
-                user = form.save(commit=False)
-                user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+            user = form.save(commit=False)
+            user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
 
-                if user.enable_2fa:
-                    user.otp_secret = pyotp.random_base32()
-                    messages.success(request, "2FA enabled! Check your email for the OTP key.")
-                else:
-                    user.otp_secret = ""
+            if user.enable_2fa:
+                user.otp_secret = pyotp.random_base32()
+                messages.success(request, "2FA enabled! Check your email for the OTP key.")
+            else:
+                user.otp_secret = ""
 
-                user.save()
-                update_session_auth_hash(request, request.user)  # keep user logged in
-                messages.success(request, "Your account credentials were successfully updated!")
-                return redirect("passmanager:vault")
-
-            elif action == "update_master_password":
-                return redirect("users:update_master_password")
-
-            elif action == "export_data":
-                return redirect("passmanager:export_csv")
-
+            user.save()
+            update_session_auth_hash(request, request.user)  # keep user logged in
+            messages.success(request, "Your account credentials were successfully updated!")
+            return redirect("passmanager:vault")
         else:
             messages.error(request, "There was an error updating your account.")
 
