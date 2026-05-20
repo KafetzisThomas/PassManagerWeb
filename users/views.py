@@ -14,10 +14,6 @@ from .forms import (
     CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
     CustomUserChangeForm, MasterPasswordChangeForm
 )
-from .utils import (
-    send_new_user_registration, send_2fa_verification, send_delete_account_notification,
-    send_update_account_notification, send_master_password_update
-)
 
 
 class RegisterView(FormView):
@@ -27,7 +23,7 @@ class RegisterView(FormView):
 
     def form_valid(self, form):
         new_user = form.save()
-        send_new_user_registration(new_user) if not settings.DEBUG else None
+        # send_new_user_registration(new_user) if not settings.DEBUG else None
         messages.success(self.request, "Account successfully created!")
         return super().form_valid(form)
 
@@ -83,13 +79,13 @@ class AccountView(LoginRequiredMixin, View):
                 user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
                 if user.enable_2fa:
                     user.otp_secret = pyotp.random_base32()
-                    send_2fa_verification(user, user.otp_secret) if not settings.DEBUG else None
+                    # send_2fa_verification(user, user.otp_secret) if not settings.DEBUG else None
                     messages.success(request, "2FA enabled! Check your email for the OTP key.")
                 else:
                     user.otp_secret = ""
 
                 user.save()
-                send_update_account_notification(user) if not settings.DEBUG else None
+                # send_update_account_notification(user) if not settings.DEBUG else None
                 update_session_auth_hash(request, request.user)
                 messages.success(request, "Your account credentials were successfully updated!")
                 return redirect("passmanager:vault")
@@ -150,7 +146,7 @@ class UpdateMasterPasswordView(LoginRequiredMixin, View):
                     item.notes = item.encrypt_field(new_key, item.notes)
                     item.save()
 
-            send_master_password_update(user) if not settings.DEBUG else None
+            # send_master_password_update(user) if not settings.DEBUG else None
             messages.success(request, "Your master password was successfully updated!")
             return redirect("passmanager:vault")
 
@@ -162,5 +158,5 @@ class DeleteAccountView(LoginRequiredMixin, View):
     def post(request):
         user = request.user
         user.delete()
-        send_delete_account_notification(user) if not settings.DEBUG else None
+        # send_delete_account_notification(user) if not settings.DEBUG else None
         return redirect("users:register")

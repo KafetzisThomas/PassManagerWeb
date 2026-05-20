@@ -57,10 +57,6 @@ DEBUG=True  # For development
 
 # OPTIONAL: PostgreSQL Configuration (remote production)
 DATABASE_URL="postgres://[username]:[password]@[host]:[port]/[db_name]"
-
-# Email settings
-EMAIL_HOST_USER="example_email_host"
-EMAIL_HOST_PASSWORD="example_email_password"
 ```
 
 Save changes and close the file.
