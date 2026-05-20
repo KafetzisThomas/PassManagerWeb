@@ -147,34 +147,20 @@ def password_generator(request):
 
     return render(request, "passmanager/password_generator.html", {"form": form, "password": password})
 
-@method_decorator(login_required, name="dispatch")
-@method_decorator(reauth_required, name="dispatch")
-class ExportCSVView(View):
-    def get(self, request, *args, **kwargs):
-        return self._build_csv(request)
+@login_required
+@reauth_required
+def export_csv(request):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="passmanagerweb_passwords.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["name", "username", "password", "url", "notes", "group"])
 
-    def post(self, request, *args, **kwargs):
-        # Once re-auth succeeds, re-auth_required decorator will call this POST method
-        return self._build_csv(request)
+    data = Item.objects.filter(owner=request.user)
+    for item in data:
+        item.decrypt_sensitive_fields()
+        writer.writerow([item.name, item.username, item.password, item.url, item.notes, item.group])
 
-    @staticmethod
-    def _build_csv(request):
-        # Create response with csv content type & set filename for download
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = 'attachment; filename="PassManager Passwords.csv"'
-        writer = csv.writer(response)
-
-        # Write csv header (column names)
-        writer.writerow(["name", "username", "password", "url", "notes", "group"])
-
-        for item in Item.objects.filter(owner=request.user):
-            item.decrypt_sensitive_fields()
-            writer.writerow(
-                [item.name, item.username, item.password, item.url, item.notes, item.group]
-            )
-
-        return response
-
+    return response
 
 class ImportCSVView(LoginRequiredMixin, FormView):
     template_name = "passmanager/import_csv.html"
