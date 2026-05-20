@@ -24,7 +24,7 @@ class RegisterViewTests(TestCase):
         """
         response = self.client.get(reverse("users:register"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/register.html")
+        self.assertTemplateUsed(response, "users/register.html")
         self.assertIsInstance(response.context["form"], CustomUserCreationForm)
 
     def test_register_view_valid(self):
@@ -68,7 +68,7 @@ class CustomLoginViewTests(TestCase):
         """
         response = self.client.get(reverse("users:login"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/login.html")
+        self.assertTemplateUsed(response, "users/login.html")
         self.assertIsInstance(response.context["form"], CustomAuthenticationForm)
 
     def test_login_view_valid_credentials(self):
@@ -127,7 +127,7 @@ class TwoFactorVerificationViewTests(TestCase):
         """
         response = self.client.get(reverse("users:2fa_verification"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "registration/2fa_verification.html")
+        self.assertTemplateUsed(response, "users/2fa_verification.html")
         self.assertIsInstance(response.context["form"], TwoFactorVerificationForm)
 
     def test_valid_otp_submission(self):

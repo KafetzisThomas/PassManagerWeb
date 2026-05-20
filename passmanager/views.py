@@ -88,7 +88,7 @@ def edit_item(request, item_id):
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "delete":
-            # delete_item(request, item.id)
+            delete_item(request, item.id)
             messages.success(request, "Item deleted successfully.")
             return redirect("passmanager:vault")
 
@@ -131,6 +131,14 @@ def edit_item(request, item_id):
         form = ItemForm(instance=item)
 
     return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
+
+@login_required
+def delete_item(request, item_id):
+    item = Item.objects.get(id=item_id)
+    if item.owner != request.user:
+        raise Http404
+    item.delete()
+    return redirect("passmanager:vault")
 
 @login_required
 def password_generator(request):

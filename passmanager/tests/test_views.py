@@ -271,7 +271,7 @@ class ExportCsvViewTests(TestCase):
         # Verify response status & headers
         self.assertEqual(post_response.status_code, 200)
         self.assertEqual(post_response["Content-Type"], "text/csv")
-        self.assertIn("PassManager Passwords.csv", post_response["Content-Disposition"])
+        self.assertIn("passmanagerweb_passwords.csv", post_response["Content-Disposition"])
 
         # Decode csv content & validate header
         content = post_response.content.decode("utf-8")
