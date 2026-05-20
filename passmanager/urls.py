@@ -1,11 +1,12 @@
 from django.urls import path
 from .views import (
-    VaultView, NewItemView, EditItemView, PasswordGeneratorView, ExportCSVView, ImportCSVView, PasswordCheckupView
+    NewItemView, EditItemView, PasswordGeneratorView, ExportCSVView, ImportCSVView, PasswordCheckupView
 )
+from . import views
 
 app_name = "passmanager"
 urlpatterns = [
-    path("", VaultView.as_view(), name="vault"),
+    path("", views.vault, name="vault"),
     path("new_item/", NewItemView.as_view(), name="new_item"),
     path("edit_item/<int:item_id>/", EditItemView.as_view(), name="edit_item"),
     path("password_generator/", PasswordGeneratorView.as_view(), name="password_generator"),

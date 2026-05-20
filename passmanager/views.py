@@ -16,32 +16,21 @@ from .utils import check_pwned_password, generate_password
 
 load_dotenv()
 
+@login_required
+def vault(request):
+    selected_group = request.GET.get("group")
+    search_query = request.GET.get("search_query")
+    items = Item.objects.filter(owner=request.user).order_by("name")
+    groups = (Item.objects.filter(owner=request.user).values_list("group", flat=True).distinct())
 
-class VaultView(LoginRequiredMixin, TemplateView):
-    template_name = "passmanager/vault.html"
+    if selected_group:
+        items = items.filter(group=selected_group)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
+    if search_query:
+        items = items.filter(name__icontains=search_query)
 
-        # Retrieve selected group & search query from the query parameters
-        selected_group = self.request.GET.get("group")
-        search_query = self.request.GET.get("search_query")
-
-        items = Item.objects.filter(owner=user).order_by("name")
-        groups = (Item.objects.filter(owner=user).values_list("group", flat=True).distinct())
-
-        if selected_group:
-            items = items.filter(group=selected_group)
-
-        if search_query:
-            items = items.filter(name__icontains=search_query)
-
-        context.update({"items": items, "groups": groups,
-                        "selected_group": selected_group, "search_query": search_query})
-
-        return context
-
+    context = {"items": items, "groups": groups, "selected_group": selected_group, "search_query": search_query}
+    return render(request, "passmanager/vault.html", context)
 
 class NewItemView(LoginRequiredMixin, FormView):
     template_name = "passmanager/new_item.html"
