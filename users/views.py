@@ -4,6 +4,7 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.views.generic.edit import FormView
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from .models import CustomUser
@@ -54,35 +55,25 @@ class TwoFactorVerificationView(FormView):
         self.request.session.pop("user_id", None)
         return redirect("passmanager:vault")
 
-
-class AccountView(LoginRequiredMixin, View):
-    template_name = "users/account.html"
-    form_class = CustomUserChangeForm
-
-    def get(self, request):
-        form = self.form_class(instance=request.user)
-        return render(request, self.template_name, {"form": form})
-
-    def post(self, request):
+@login_required
+def account(request):
+    if request.method == "POST":
         action = request.POST.get("action")
-        form = self.form_class(instance=request.user, data=request.POST)
+        form = CustomUserChangeForm(request.POST, instance=request.user)
 
         if form.is_valid():
             if action == "save":
                 user = form.save(commit=False)
-
-                # Handle 2FA enable/disable & OTP secret generation
                 user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+
                 if user.enable_2fa:
                     user.otp_secret = pyotp.random_base32()
-                    # send_2fa_verification(user, user.otp_secret) if not settings.DEBUG else None
                     messages.success(request, "2FA enabled! Check your email for the OTP key.")
                 else:
                     user.otp_secret = ""
 
                 user.save()
-                # send_update_account_notification(user) if not settings.DEBUG else None
-                update_session_auth_hash(request, request.user)
+                update_session_auth_hash(request, request.user)  # keep user logged in
                 messages.success(request, "Your account credentials were successfully updated!")
                 return redirect("passmanager:vault")
 
@@ -95,8 +86,10 @@ class AccountView(LoginRequiredMixin, View):
         else:
             messages.error(request, "There was an error updating your account.")
 
-        return render(request, self.template_name, {"form": form})
+    else:
+        form = CustomUserChangeForm(instance=request.user)
 
+    return render(request, "users/account.html", {"form": form})
 
 class UpdateMasterPasswordView(LoginRequiredMixin, View):
     template_name = "users/update_master_password.html"
