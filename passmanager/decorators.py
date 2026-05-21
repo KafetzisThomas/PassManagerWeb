@@ -2,7 +2,6 @@ from django.contrib.auth import login
 from django.shortcuts import render
 from users.forms import PasswordConfirmationForm
 
-
 def reauth_required(view_func):
     """
     Force master password re-authentication before accessing the view.

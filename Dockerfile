@@ -1,52 +1,36 @@
-# Stage 1: Base build stage
+# BUILD STAGE
 FROM python:3.12-slim AS builder
 
-# Create the app directory
-RUN mkdir /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set the working directory
 WORKDIR /app
 
-# Set environment variables to optimize Python
+# optimization configs
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
+ENV PYTHONUNBUFFERED=1
 
-# Install dependencies first for caching benefit
-RUN pip install --upgrade pip && pip install uv
-COPY pyproject.toml uv.lock /app/
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen
 
-# Stage 2: Production stage
+COPY . .
+
+
+# PRODUCTION STAGE
 FROM python:3.12-slim
 
-RUN useradd -m -r appuser && \
-    mkdir /app && \
-    chown -R appuser /app
-
-# Copy the python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
-
-# Set the working directory
 WORKDIR /app
 
-# Copy application code
-COPY --chown=appuser:appuser . .
-
-# Set environment variables to optimize Python
+# optimization configs
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
+ENV PYTHONUNBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH"
 
-# Create the staticfiles directory
-RUN mkdir -p /app/staticfiles && chown appuser:appuser /app/staticfiles
+COPY --from=builder /app /app
 
-# Switch to non-root user
-USER appuser
+EXPOSE 8000
 
-# Expose the application port
-EXPOSE 8000 
+COPY entrypoint.prod.sh /app/entrypoint.prod.sh
 
-# Make entry file executable
-RUN chmod +x  /app/entrypoint.prod.sh
+RUN chmod +x /app/entrypoint.prod.sh
 
-# Start the application using Gunicorn
 CMD ["/app/entrypoint.prod.sh"]

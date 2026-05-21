@@ -7,11 +7,10 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from django.conf import settings
 from django.db import models
 
-
 def derive_key_from_master_password(master_password: str, salt: bytes) -> bytes:
     """
-    Derive a 256-bit encryption key using PBKDF2HMAC.
-    Based on user's master password & encryption salt.
+    Derive a 256 bit encryption key using PBKDF2HMAC.
+    Based on user's master password and encryption salt.
     """
     kdf = PBKDF2HMAC(
         algorithm=SHA256(),
@@ -37,10 +36,10 @@ class Item(models.Model):
     @staticmethod
     def encrypt_field(key: bytes, value: str) -> str:
         """
-        Encrypt value using AES GCM with a 256-bit key.
+        Encrypt value using AES GCM with a 256 bit key.
         """
         key_bytes = base64.urlsafe_b64decode(key)
-        nonce = os.urandom(12)  # 12-bytes nonce for GCM
+        nonce = os.urandom(12)  # 12 bytes nonce for GCM
         cipher = Cipher(algorithms.AES(key_bytes), modes.GCM(nonce), backend=default_backend())
         encryptor = cipher.encryptor()
         ciphertext = encryptor.update(value.encode()) + encryptor.finalize()
@@ -65,8 +64,7 @@ class Item(models.Model):
 
     def get_key(self) -> bytes:
         """
-        Derive the encryption key using owner's master password,
-        and their encryption salt.
+        Derive the encryption key using owner's master password and their encryption salt.
         """
         salt = base64.urlsafe_b64decode(self.owner.encryption_salt)
         return derive_key_from_master_password(self.owner.password, salt)
@@ -79,8 +77,7 @@ class Item(models.Model):
         self.username = self.encrypt_field(key, self.username)
         self.password = self.encrypt_field(key, self.password)
         self.notes = self.encrypt_field(key, self.notes)
-
-        del key  # Securely forget the encryption key
+        del key
 
     def decrypt_sensitive_fields(self) -> None:
         """
@@ -90,17 +87,13 @@ class Item(models.Model):
         self.username = self.decrypt_field(key, self.username)
         self.password = self.decrypt_field(key, self.password)
         self.notes = self.decrypt_field(key, self.notes)
-
-        del key  # Securely forget the encryption key
+        del key
 
     def save(self, *args, **kwargs):
-        """
-        Title-case name and group before saving.
-        """
         self.name = self.name.title()
         if self.group:
             self.group = self.group.title()
         super().save(*args, **kwargs)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name

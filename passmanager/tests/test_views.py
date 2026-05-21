@@ -77,7 +77,7 @@ class NewItemViewTests(TestCase):
         """
         self.client.logout()
         response = self.client.get(reverse("passmanager:new_item"))
-        self.assertRedirects(response, "/user/login/?next=/new_item/")
+        self.assertRedirects(response, "/user/login/?next=/item/new/")
 
     def test_new_item_view_status_code_and_template(self):
         """
@@ -141,7 +141,7 @@ class EditItemViewTests(BaseUserTestCase):
         """
         self.client.logout()
         response = self.client.get(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}))
-        self.assertRedirects(response, "/user/login/?next=/edit_item/{}/".format(self.item.id))
+        self.assertRedirects(response, "/user/login/?next=/item/{}/edit".format(self.item.id))
 
     def test_edit_item_view_permission_denied_for_tester2(self):
         """
@@ -271,7 +271,7 @@ class ExportCsvViewTests(TestCase):
         # Verify response status & headers
         self.assertEqual(post_response.status_code, 200)
         self.assertEqual(post_response["Content-Type"], "text/csv")
-        self.assertIn("PassManager Passwords.csv", post_response["Content-Disposition"])
+        self.assertIn("passmanagerweb_passwords.csv", post_response["Content-Disposition"])
 
         # Decode csv content & validate header
         content = post_response.content.decode("utf-8")

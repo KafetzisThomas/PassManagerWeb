@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
 
-# Exit on error
-set -o errexit
+python manage.py collectstatic --noinput
 
-# Collect static files
-uv run manage.py collectstatic --noinput
+python manage.py migrate --noinput
 
-# Change ownership of static files
-chown -R appuser:appuser /app/staticfiles
-
-# Apply database migrations
-uv run manage.py migrate --noinput
-
-# Start gunicorn
-uv run -m gunicorn --bind 0.0.0.0:8000 --workers 3 main.wsgi:application
+exec gunicorn --bind 0.0.0.0:8000 --workers 3 main.wsgi:application

@@ -14,7 +14,6 @@ function CopyPassword() {
     });
 }
 
-// Initialize based on the page type
 document.addEventListener("DOMContentLoaded", function () {
     CopyPassword();
 });

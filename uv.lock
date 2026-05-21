@@ -296,18 +296,6 @@ wheels = [
 ]
 
 [[package]]
-name = "django-bootstrap5"
-version = "26.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/31/bd9e6acdf959d5e19757026c206a6bdfceec3001ee85bb1f9799ce304f87/django_bootstrap5-26.2.tar.gz", hash = "sha256:12331059c8230ba372ffaad990a706151e1ad8f721a870aa2e862cf6746f0d33", size = 51468, upload-time = "2026-02-08T11:47:19.067Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/79/d4b547849a86f450b1f1fb77f306da5d7844aba45f4aa10450d375fc26f5/django_bootstrap5-26.2-py3-none-any.whl", hash = "sha256:179af37c59f4e9b1070fc650f30961c5d903c2c0ad60280ad5b63ed394f68658", size = 26851, upload-time = "2026-02-08T11:47:20.198Z" },
-]
-
-[[package]]
 name = "django-crispy-forms"
 version = "2.6"
 source = { registry = "https://pypi.org/simple" }
@@ -385,9 +373,7 @@ dependencies = [
     { name = "dj-database-url" },
     { name = "django" },
     { name = "django-appconf" },
-    { name = "django-bootstrap5" },
     { name = "django-crispy-forms" },
-    { name = "django-extensions" },
     { name = "gunicorn" },
     { name = "h11" },
     { name = "packaging" },
@@ -403,6 +389,12 @@ dependencies = [
     { name = "zxcvbn" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "django-extensions" },
+    { name = "pydotplus" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "asgiref", specifier = "==3.11.1" },
@@ -415,9 +407,7 @@ requires-dist = [
     { name = "dj-database-url", specifier = "==3.1.2" },
     { name = "django", specifier = "==6.0.5" },
     { name = "django-appconf", specifier = "==1.2.0" },
-    { name = "django-bootstrap5", specifier = "==26.2" },
     { name = "django-crispy-forms", specifier = "==2.6" },
-    { name = "django-extensions", specifier = "==4.1" },
     { name = "gunicorn", specifier = "==25.3.0" },
     { name = "h11", specifier = "==0.16.0" },
     { name = "packaging", specifier = "==26.2" },
@@ -431,6 +421,12 @@ requires-dist = [
     { name = "typing-extensions", specifier = "==4.15.0" },
     { name = "uvicorn", specifier = "==0.46.0" },
     { name = "zxcvbn", specifier = ">=4.5.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "django-extensions", specifier = ">=4.1" },
+    { name = "pydotplus", specifier = ">=2.0.2" },
 ]
 
 [[package]]
@@ -484,12 +480,30 @@ wheels = [
 ]
 
 [[package]]
+name = "pydotplus"
+version = "2.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyparsing" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/60/bf/62567830b700d9f6930e9ab6831d6ba256f7b0b730acb37278b0ccdffacf/pydotplus-2.0.2.tar.gz", hash = "sha256:91e85e9ee9b85d2391ead7d635e3d9c7f5f44fd60a60e59b13e2403fa66505c4", size = 278677, upload-time = "2014-12-09T00:53:49.515Z" }
+
+[[package]]
 name = "pyotp"
 version = "2.9.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f3/b2/1d5994ba2acde054a443bd5e2d384175449c7d2b6d1a0614dbca3a63abfc/pyotp-2.9.0.tar.gz", hash = "sha256:346b6642e0dbdde3b4ff5a930b664ca82abfa116356ed48cc42c7d6590d36f63", size = 17763, upload-time = "2023-07-27T23:41:03.295Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c3/c0/c33c8792c3e50193ef55adb95c1c3c2786fe281123291c2dbf0eaab95a6f/pyotp-2.9.0-py3-none-any.whl", hash = "sha256:81c2e5865b8ac55e825b0358e496e1d9387c811e85bb40e71a3b29b288963612", size = 13376, upload-time = "2023-07-27T23:41:01.685Z" },
+]
+
+[[package]]
+name = "pyparsing"
+version = "3.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz", hash = "sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc", size = 6851574, upload-time = "2026-01-21T03:57:59.36Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/bd/c038d7cc38edc1aa5bf91ab8068b63d4308c66c4c8bb3cbba7dfbc049f9c/pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d", size = 122781, upload-time = "2026-01-21T03:57:55.912Z" },
 ]
 
 [[package]]

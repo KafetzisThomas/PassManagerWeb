@@ -1,8 +1,8 @@
 <div align="center">
-    <img src="passmanager/static/images/logo.png" width="400" alt="Logo Icon"/><br><br>
+    <img src="static/logo.png" width="400"/><br><br>
     <p>Self-hosted password manager for secure online credentials.<br>Written in Python/Django</p>
-    <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg" alt="Run Tests"/>
-    <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker" alt="Docker Enabled"/>
+    <img src="https://github.com/KafetzisThomas/PassManagerWeb/actions/workflows/tests.yml/badge.svg"/>
+    <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker"/>
 </div>
 
 > [!IMPORTANT]
@@ -18,9 +18,9 @@
 - [X] **Import/Export Data**: `Upload` data such as passwords from a CSV file or `download` your stored data in `CSV` format for easy backup or migration.
 - [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
 
-## Django Models
+## Database Schema
 
-![Django Models Graph](https://github.com/user-attachments/assets/d7d31518-1a7a-48a6-9ea7-04599b3097d8)
+![Database Schema](assets/db_schema.png)
 
 ## Purpose
 
@@ -30,58 +30,45 @@ Instead, I aim to offer a self-host option for those who prefer full control ove
 
 If you find this project interesting, helpful, or inspiring, please consider giving a `star`, `following`, or even `donating` to support further development.
 
-## Setup for Local Development
+## Usage
 
-### Install uv
+### Local Development
+
+First install `uv` and sync the project dependencies:
 
 ```bash
 cd path/to/root/directory
 pip install uv
+uv sync
 ```
 
-### Create Environment Variable file
-
-```bash
-touch main/.env
-nano main/.env
-```
-
-Add the following (adjust as needed):
-
-```ini
-# Django settings
-SECRET_KEY="example_secret_key"  # https://stackoverflow.com/a/57678930
-ALLOWED_HOSTS="localhost,127.0.0.1"
-CSRF_TRUSTED_ORIGINS="http://localhost:8001"
-DEBUG=True  # For development
-
-# OPTIONAL: PostgreSQL Configuration (remote production)
-DATABASE_URL="postgres://[username]:[password]@[host]:[port]/[db_name]"
-
-# Email settings
-EMAIL_HOST_USER="example_email_host"
-EMAIL_HOST_PASSWORD="example_email_password"
-```
-
-Save changes and close the file.
-
-> **Note:** You can deploy the application using Docker:  
-> **NGINX + Gunicorn + External DB**  
->
-> ```bash
-> docker compose up
-> ```
-
-### Migrate Database
+Migrate database:
 
 ```bash
 uv run manage.py migrate
 ```
 
-### Run Django Server
+Run Django server:
 
 ```bash
 uv run manage.py runserver
+```
+
+Access web application at `http://127.0.0.1:8000` or `http://localhost:8000`.
+
+### Production Deployment (Docker)
+
+Set up your environment variables:
+
+```bash
+cp .env.prod .env
+nano .env  # modify file, instructions inside
+```
+
+Build and start the container in the background:
+
+```bash
+docker compose up -d --build
 ```
 
 Access web application at `http://127.0.0.1:8000` or `http://localhost:8000`.
@@ -94,19 +81,19 @@ uv run manage.py test
 
 ## Demo Images
 
-![Vault](passmanager/static/images/vault_page.png)
+![Vault](assets/vault_page.png)
 
-![Password Generator](passmanager/static/images/password_generator_page.png)
+![New Item](assets/new_item_page.png)
 
-![Import Data](passmanager/static/images/import_data_page.png)
+![Edit Item](assets/edit_item_page.png)
 
-![Password Checkup](passmanager/static/images/password_checkup_page.png)
+![Password Generator](assets/password_generator_page.png)
 
-![Account Settings](passmanager/static/images/account_page.png)
+![Import Data](assets/import_data_page.png)
 
-![New Item](passmanager/static/images/new_item_page.png)
+![Password Checkup](assets/password_checkup_page.png)
 
-![Edit Item](passmanager/static/images/edit_item_page.png)
+![Account Settings](assets/account_page.png)
 
 ## Contributing Guidelines
 

@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext as _
 
-
 SESSION_TIMEOUT_CHOICES = (
     ("5 minutes", 300),
     ("10 minutes", 600),
@@ -16,9 +15,6 @@ SESSION_TIMEOUT_CHOICES = (
 
 
 class CustomUserManager(BaseUserManager):
-    """
-    Custom user model manager where email is the unique identifier for authentication instead of usernames.
-    """
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError(_("Users must have an email address"))
@@ -60,5 +56,5 @@ class CustomUser(AbstractUser):
             self.encryption_salt = base64.urlsafe_b64encode(os.urandom(32)).decode()
         super().save(*args, **kwargs)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.email

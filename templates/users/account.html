@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Account{% endblock title %}
+
+{% block content %}
+    <h3>Account Settings</h3>
+    <form action="{% url 'users:account' %}" method="post">    
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-dark w-100 mt-3">Save Changes</button>
+    </form>
+
+    <h3 class="mt-5 mb-3">Security Settings</h3>
+    <div class="d-flex flex-column gap-2">
+        <a href="{% url 'users:update_master_password' %}" class="btn btn-outline-dark w-100">
+            Update Master Password
+        </a>
+        <a href="{% url 'passmanager:export_csv' %}" class="btn btn-outline-dark w-100">
+            Export Data
+        </a>
+    </div>
+
+    <h3 class="mt-5 mb-3">Danger Zone</h3>
+    <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+        Delete Account
+    </button>
+
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title text-danger" id="deleteAccountModalLabel">Delete Account?</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">Deleting your account is permanent. It cannot be undone.</div>
+                <div class="modal-footer d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" flex-fill data-bs-dismiss="modal">Close</button>
+                    <form method="post" action="{% url 'users:delete_account' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

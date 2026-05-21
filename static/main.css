@@ -1,4 +1,3 @@
-/* Google font - Open Sans */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 body {
@@ -7,7 +6,6 @@ body {
   font-style: normal;
 }
 
-/* Sidebar styles */
 .sidebar {
   position: fixed;
   height: 100vh;
@@ -18,7 +16,6 @@ body {
   z-index: 1030;
 }
 
-/* Item styles */
 .item-section {
   display: flex;
   align-items: center;
@@ -30,13 +27,11 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover state styles for item box */
 .item-section:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Favicon styles */
 .favicon-wrapper {
   width: 40px;
   height: 40px;
@@ -45,7 +40,6 @@ body {
   align-items: center;
 }
 
-/* Item name styles */
 .item-name {
   color: #333333;
   font-size: 25px;
@@ -53,21 +47,18 @@ body {
   text-decoration: none;
 }
 
-/* Styles for each item's metadata */
 .item-metadata {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 2px dashed #cccccc;
 }
 
-/* Styles for each item's metadata a tag */
 .item-metadata a {
   color: inherit;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-/* Styles for each feature card */
 .card {
   text-align: center;
   display: flex;
@@ -78,23 +69,19 @@ body {
   transition: transform 0.3s ease;
 }
 
-/* Hover state styles for feature card */
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Styles for length of generated password field */
 .lengthfield-size {
   max-width: 100px;
 }
 
-/* List results styles */
 .list-results {
   transition: transform 0.3s ease;
 }
 
-/* Hover state styles for list results */
 .list-results:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);

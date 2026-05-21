@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-
 def send_new_user_registration(user):
     subject = "Admin Notification: New User Registration"
     email_from = settings.EMAIL_HOST_USER
