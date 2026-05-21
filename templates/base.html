@@ -35,9 +35,6 @@
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">Vault</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/generator/' %}active{% endif %}" href="{% url 'passmanager:password_generator' %}">Generator</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}">Import Data</a>
                         </li>
                         <li class="nav-item">
@@ -57,10 +54,10 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">LOGIN</a>
+                            <a class="nav-link {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">SIGN UP</a>
+                            <a class="nav-link {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">Sign Up</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -77,24 +74,33 @@
         <hr class="border-light">
         <ul class="nav nav-pills flex-column mb-auto">
             {% if user.is_authenticated %}
-                <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Vault">
-                    <a class="nav-link text-light {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-safe"></i> Vault</a>
+                <li class="nav-item">
+                    <a class="nav-link text-light {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-safe me-2"></i> Vault</a>
                 </li>
-                <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Password Generator">
-                    <a class="nav-link text-light {% if request.path == '/generator/' %}active{% endif %}" href="{% url 'passmanager:password_generator' %}"><i class="bi bi-key"></i> Generator</a>
+                <li class="nav-item">
+                    <a class="nav-link text-light {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}"><i class="bi bi-upload me-2"></i> Import Data</a>
                 </li>
-                <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Import Data">
-                    <a class="nav-link text-light {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}"><i class="bi bi-upload"></i> Import Data</a>
+                <li class="nav-item">
+                    <a class="nav-link text-light {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}"><i class="bi bi-shield-check me-2"></i> Checkup</a>
                 </li>
-                <li class="nav-item" data-toggle="tooltip" data-placement="bottom" title="Password Checkup">
-                    <a class="nav-link text-light {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}"><i class="bi bi-shield-check"></i> Checkup</a>
+                <li class="nav-item"><hr class="border-light my-2"></li>
+                <li class="nav-item">
+                    <a class="nav-link text-light {% if request.path == '/user/account/' %}active{% endif %}" href="{% url 'users:account' %}"><i class="bi bi-person me-2"></i> Account</a>
+                </li>
+                <li class="nav-item">
+                    <form action="{% url 'users:logout' %}" method="POST" class="w-100">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link text-light text-start w-100 bg-transparent border-0">
+                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        </button>
+                    </form>
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link text-light {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-door-open"></i> LOGIN</a>
+                    <a class="nav-link text-light {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-door-open"></i> Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-light {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}"><i class="bi bi-person-plus"></i> SIGN UP</a>
+                    <a class="nav-link text-light {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
                 </li>
             {% endif %}
         </ul>
@@ -103,22 +109,6 @@
                 <strong><i class="bi bi-person-circle"></i> {{ request.user.username }}</strong>
             </a>
             <hr class="border-light">
-            <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-                {% if user.is_authenticated %}
-                    {% if request.user.is_superuser == 1 %}
-                        <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
-                    {% endif %}
-                    <li><a class="dropdown-item" href="{% url 'passmanager:new_item' %}">New Item</a></li>
-                    <li><a class="dropdown-item" href="{% url 'users:account' %}">Account</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form action="{% url 'users:logout' %}" method="POST" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="dropdown-item me-5">Logout</button>
-                        </form>
-                    </li>
-                {% endif %}
-            </ul>
             <div class="text-light small mt-2">
                 <strong>&copy; <script>document.write(new Date().getFullYear());</script> KafetzisThomas</strong>
             </div>

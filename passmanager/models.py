@@ -28,7 +28,6 @@ class Item(models.Model):
     password = models.TextField(blank=True)
     url = models.URLField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
-    group = models.CharField(max_length=50, default="General")
     date_added = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="items")
@@ -91,8 +90,6 @@ class Item(models.Model):
 
     def save(self, *args, **kwargs):
         self.name = self.name.title()
-        if self.group:
-            self.group = self.group.title()
         super().save(*args, **kwargs)
 
     def __str__(self):

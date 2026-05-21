@@ -1,71 +1,36 @@
 import csv
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib import messages
 from .decorators import reauth_required
 from .models import Item
-from .forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from .forms import ItemForm, ImportPasswordsForm
 from .utils import generate_password, check_pwned_password
 
 @login_required
 def vault(request):
-    selected_group = request.GET.get("group")
     search_query = request.GET.get("search_query")
-    items = Item.objects.filter(owner=request.user).order_by("name")
-    groups = (Item.objects.filter(owner=request.user).values_list("group", flat=True).distinct())
-
-    if selected_group:
-        items = items.filter(group=selected_group)
+    items = Item.objects.filter(owner=request.user).order_by("-date_added")
 
     if search_query:
         items = items.filter(name__icontains=search_query)
 
-    context = {"items": items, "groups": groups, "selected_group": selected_group, "search_query": search_query}
+    context = {"items": items, "search_query": search_query}
     return render(request, "passmanager/vault.html", context)
 
 @login_required
 def new_item(request):
     if request.method == "POST":
-        # create a mutable copy
-        mutable_post_data = request.POST.copy()
         form = ItemForm(data=request.POST)
-        obj = form.save(commit=False)
-
-        username_entry = obj.username
-        notes_entry = obj.notes
-
         if form.is_valid():
-            action = request.POST.get("action", "value")
-            if action == "save":
-                obj = form.save(commit=False)
-                obj.owner = request.user
-                obj.encrypt_sensitive_fields()
-                obj.save()
-                messages.success(request, "Item created successfully.")
-                return redirect("passmanager:vault")
-
-            elif action == "generate_password":
-                generated_password = generate_password(
-                    length=12,
-                    include_letters=True,
-                    include_digits=True,
-                    include_special_chars=True,
-                )
-
-                # update mutable copy
-                mutable_post_data["password"] = generated_password
-
-                # use updated mutable_post_data to instantiate the form
-                form = ItemForm(data=mutable_post_data)
-
-                # update forms initial data
-                form.initial["username"] = username_entry
-                form.initial["password"] = generated_password
-                form.initial["notes"] = notes_entry
-
-                messages.success(request, "New password has been generated successfully.")
-                return render(request, "passmanager/new_item.html", {"form": form})
+            obj = form.save(commit=False)
+            obj.owner = request.user
+            obj.encrypt_sensitive_fields()
+            obj.save()
+            
+            messages.success(request, "Item created successfully.")
+            return redirect("passmanager:vault")
     else:
         form = ItemForm()
 
@@ -73,51 +38,21 @@ def new_item(request):
 
 @login_required
 def edit_item(request, item_id):
-    item = Item.objects.get(id=item_id)
-    if item.owner != request.user:
-        raise Http404
-
+    item = get_object_or_404(Item, id=item_id, owner=request.user)
     if request.method == "POST":
-        action = request.POST.get("action")
-        if action == "delete":
-            delete_item(request, item.id)
+        if request.POST.get("action") == "delete":
+            item.delete()
             messages.success(request, "Item deleted successfully.")
             return redirect("passmanager:vault")
 
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
-            username_entry = obj.username
-            notes_entry = obj.notes
-
-            if action == "save":
-                obj = form.save(commit=False)
-                obj.owner = request.user
-                obj.encrypt_sensitive_fields()
-                obj.save()
-                messages.success(request, "Item modified successfully.")
-                return redirect("passmanager:vault")
-
-            elif action == "generate_password":
-                generated_password = generate_password(
-                    length=12,
-                    include_letters=True,
-                    include_digits=True,
-                    include_special_chars=True,
-                )
-
-                form = ItemForm(instance=item)
-
-                # update forms initial data
-                form.initial["username"] = username_entry
-                form.initial["password"] = generated_password
-                form.initial["notes"] = notes_entry
-
-                messages.success(request, "New password has been generated successfully.")
-                return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
-        else:
-            messages.error(request, "The item could not be changed because the data didn't validate.")
-
+            obj.owner = request.user
+            obj.encrypt_sensitive_fields()
+            obj.save()
+            messages.success(request, "Item modified successfully.")
+            return redirect("passmanager:vault")
     else:
         item.decrypt_sensitive_fields()
         form = ItemForm(instance=item)
@@ -125,40 +60,17 @@ def edit_item(request, item_id):
     return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
 
 @login_required
-def delete_item(request, item_id):
-    item = Item.objects.get(id=item_id)
-    if item.owner != request.user:
-        raise Http404
-    item.delete()
-    return redirect("passmanager:vault")
-
-@login_required
-def password_generator(request):
-    form = PasswordGeneratorForm()
-    password = ""
-    if request.method == "POST":
-        form = PasswordGeneratorForm(request.POST)
-        if form.is_valid():
-            length = form.cleaned_data["length"]
-            include_letters = form.cleaned_data["letters"]
-            include_digits = form.cleaned_data["digits"]
-            include_special_chars = form.cleaned_data["special_chars"]
-            password = generate_password(length, include_letters, include_digits, include_special_chars)
-
-    return render(request, "passmanager/password_generator.html", {"form": form, "password": password})
-
-@login_required
 @reauth_required
 def export_csv(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="passmanagerweb_passwords.csv"'
     writer = csv.writer(response)
-    writer.writerow(["name", "username", "password", "url", "notes", "group"])
+    writer.writerow(["name", "username", "password", "url", "notes"])
 
     data = Item.objects.filter(owner=request.user)
     for item in data:
         item.decrypt_sensitive_fields()
-        writer.writerow([item.name, item.username, item.password, item.url, item.notes, item.group])
+        writer.writerow([item.name, item.username, item.password, item.url, item.notes])
 
     return response
 
@@ -173,21 +85,20 @@ def import_csv(request):
 
             # skip header row
             header = next(csv_reader)
-            expected_header = ["name", "username", "password", "url", "notes", "group"]
+            expected_header = ["name", "username", "password", "url", "notes"]
 
             if header != expected_header:
                 messages.error(request, "Invalid CSV format. Please check the column names.")
                 return redirect("passmanager:import_csv")
 
             for row in csv_reader:
-                name, username, password, url, notes, group = row
+                name, username, password, url, notes = row
                 item = Item(
                     name=name,
                     username=username,
                     password=password,
                     url=url,
                     notes=notes,
-                    group=group,
                     owner=request.user,
                 )
                 item.encrypt_sensitive_fields()

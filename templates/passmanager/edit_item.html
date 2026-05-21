@@ -14,72 +14,60 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'passmanager:edit_item' item.id %}" method='POST' class="form">
+    <form action="{% url 'passmanager:edit_item' item.id %}" method='POST'>
         {% csrf_token %}
-        {{ form|crispy }}
-        <p class="text-muted mb-4">Created: {{ item.date_added }}<br>Last Modified: {{ item.last_modified }}</p>
-        <div class="btn-group w-100">
-            <button type="submit" name="submit" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-list"></i> Action
-            </button>
-            <ul class="dropdown-menu w-100">
-                <li>
-                    <button class="dropdown-item" type="submit" name="action" value="save">
-                        <i class="bi bi-floppy"></i> Save Changes
-                    </button>
-                </li>
-                <li>
-                    <button id="copy-password-btn" class="dropdown-item" type="button" onclick="CopyText()">
-                        <i class="bi bi-clipboard"></i> Copy Password
-                    </button>
-                </li>
-                <li>
-                    <button class="dropdown-item" type="submit" name="action" value="generate_password">
-                        <i class="bi bi-arrow-clockwise"></i> Generate Password
-                    </button>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <!-- Button trigger modal -->
-                    <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#delete_item_modal">
-                        <i class="bi bi-trash"></i> Delete Item
-                    </button>
-                </li>
-                <li>
-                    <a class="dropdown-item">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="btncheck"/>
-                            <label class="form-check-label" for="btncheck">Show Password</label>
-                        </div>
-                    </a>
-                </li>
-            </ul>
+        {{ form.name|as_crispy_field }}
+        {{ form.username|as_crispy_field }}
+
+        <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">
+                {{ form.password.label }}
+            </label>
+            <div class="input-group">
+                {{ form.password }}
+                <button class="btn btn-outline-secondary" type="button" id="copyPasswordBtn" title="copy to clipboard" onclick="copyPassword()">
+                    <i class="bi bi-clipboard"></i>
+                </button>
+                <button class="btn btn-outline-secondary" type="button" id="generatePasswordBtn" title="generate password" onclick="generatePassword()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+
+        {{ form.url|as_crispy_field }}
+        {{ form.notes|as_crispy_field }}
+
+        <p class="text-muted mt-3 mb-4 small d-flex justify-content-between w-100">
+            <span>Created: {{ item.date_added }}</span>
+            <span>Last Modified: {{ item.last_modified }}</span>
+        </p>
+
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-success w-100" type="submit">Update</button>
+            <button class="btn btn-danger w-100" type="button" data-bs-toggle="modal" data-bs-target="#deleteItemModal">Delete</button>
         </div>
     </form>
 
-    <!-- Delete item modal start -->
-    <div class="modal fade" id="delete_item_modal" tabindex="-1" aria-labelledby="delete_item_modal_label" aria-hidden="true">
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="delete_item_modal_label">Delete Item?</h1>
+                    <h5 class="modal-title text-danger" id="deleteItemModalLabel">Delete Item?</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete this item?
                 </div>
                 <div class="modal-footer">
-                    <form method="post" action="{% url 'passmanager:edit_item' item.id %}">
+                    <form method="post" action="{% url 'passmanager:edit_item' item.id %}" class="d-flex gap-2 w-100">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger" name="action" value="delete">Yes</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger flex-fill" name="action" value="delete">Delete Item</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Delete item modal end -->
 
-    <script src="{% static 'js/copyPassword.js' %}"></script>
-    <script src="{% static 'js/revealPassword.js' %}"></script>
+    <script src="{% static 'js/utils.js' %}"></script>
 {% endblock content %}

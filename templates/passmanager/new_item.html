@@ -14,36 +14,30 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'passmanager:new_item' %}" method='POST' class="form">
+    <form action="{% url 'passmanager:new_item' %}" method='POST'>
         {% csrf_token %}
-        {{ form|crispy }}
-        <div class="btn-group w-100">
-            <button type="submit" name="submit" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-list"></i> Action
-            </button>
-            <ul class="dropdown-menu w-100">
-                <li>
-                    <button class="dropdown-item" type="submit" name="action" value="save">
-                        <i class="bi bi-floppy"></i> Save Item
-                    </button>
-                </li>
-                <li>
-                    <button class="dropdown-item" type="submit" name="action" value="generate_password">
-                        <i class="bi bi-arrow-clockwise"></i> Generate Password
-                    </button>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="btncheck"/>
-                            <label class="form-check-label" for="btncheck">Show Password</label>
-                        </div>
-                    </a>
-                </li>
-            </ul>
+        {{ form.name|as_crispy_field }}
+        {{ form.username|as_crispy_field }}
+
+        <div class="mb-3">
+            <label for="{{ form.password.id_for_label }}" class="form-label">
+                {{ form.password.label }}
+            </label>
+            <div class="input-group">
+                {{ form.password }}
+                <button class="btn btn-outline-secondary" type="button" id="generatePasswordBtn" title="generate password" onclick="generatePassword()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+
+        {{ form.url|as_crispy_field }}
+        {{ form.notes|as_crispy_field }}
+
+        <div class="mt-4">
+            <button class="btn btn-success w-100" type="submit">Save</button>
         </div>
     </form>
 
-    <script src="{% static 'js/revealPassword.js' %}"></script>
+    <script src="{% static 'js/utils.js' %}"></script>
 {% endblock content %}

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from unittest.mock import patch
 from django.urls import reverse
-from ..forms import ItemForm, PasswordGeneratorForm, ImportPasswordsForm
+from ..forms import ItemForm, ImportPasswordsForm
 from ..models import Item
 
 
@@ -93,7 +93,7 @@ class NewItemViewTests(TestCase):
         Test if the new_item view correctly encrypts & saves item.
         """
         data = {"name": "Test Item", "username": "tester", "password": "password123",
-                "url": "https://example.com", "notes": "Test notes", "group": "General", "action": "save"
+                "url": "https://example.com", "notes": "Test notes", "action": "save"
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
@@ -109,7 +109,6 @@ class NewItemViewTests(TestCase):
         self.assertEqual(item.password, "password123")
         self.assertEqual(item.url, "https://example.com")
         self.assertEqual(item.notes, "Test notes")
-        self.assertEqual(item.group, "General")
 
     @patch("passmanager.views.generate_password")
     def test_new_item_view_post_generate_password_action(self, mock_generate_password):
@@ -118,7 +117,7 @@ class NewItemViewTests(TestCase):
         """
         mock_generate_password.return_value = "generatedpassword123"
         data = {"name": "Test Item", "username": "tester", "password": "", "url": "https://example.com",
-                "notes": "Test notes", "group": "General", "action": "generate_password"
+                "notes": "Test notes", "action": "generate_password"
         }
         response = self.client.post(reverse("passmanager:new_item"), data)
         self.assertEqual(response.context["form"].initial["password"], "generatedpassword123")
@@ -157,7 +156,7 @@ class EditItemViewTests(BaseUserTestCase):
         """
         data = {
             "name": "Modified Item", "username": "modifieduser", "password": "modifiedpassword",
-            "url": "https://modified-example.com", "notes": "Modified notes", "group": "Modified Group", "action": "save"
+            "url": "https://modified-example.com", "notes": "Modified notes", "action": "save"
         }
         response = self.client.post(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data)
         self.assertRedirects(response, reverse("passmanager:vault"))
@@ -178,7 +177,7 @@ class EditItemViewTests(BaseUserTestCase):
         mock_generate_password.return_value = "generatedpassword123"
         data = {
             "name": "Modified Item", "username": "modifieduser", "password": "", "url": "https://modified-example.com",
-            "notes": "Modified notes", "group": "Modified Group", "action": "generate_password"
+            "notes": "Modified notes", "action": "generate_password"
         }
         response = self.client.post(reverse("passmanager:edit_item", kwargs={"item_id": self.item.id}), data)
         self.assertEqual(response.context["form"].initial["password"], "generatedpassword123")
@@ -195,47 +194,6 @@ class EditItemViewTests(BaseUserTestCase):
             Item.objects.get(id=self.item.id)  # Ensure item is deleted
 
 
-class PasswordGeneratorViewTests(TestCase):
-    """
-    Test case for the password_generator view.
-    """
-    def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", password="password123", username="tester"
-        )
-        self.client.login(email="tester@example.com", password="password123")
-
-    def test_password_generator_view_status_code_and_template(self):
-        """
-        Test if the view returns status code 200 and uses the correct template.
-        """
-        response = self.client.get(reverse("passmanager:password_generator"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "passmanager/password_generator.html")
-        self.assertIsInstance(response.context["form"], PasswordGeneratorForm)
-
-        # Ensure password is empty initially
-        self.assertEqual(response.context["password"], "")
-
-    @patch("passmanager.views.generate_password")
-    def test_password_generator_view_valid_data(self, mock_generate_password):
-        """
-        Test if view generates a password with valid data.
-        """
-        mock_generate_password.return_value = "GeneratedPassword123"
-        data = {"length": 12, "letters": True, "digits": True, "special_chars": False}
-        response = self.client.post(reverse("passmanager:password_generator"), data)
-        self.assertEqual(response.context["password"], "GeneratedPassword123")
-
-    def test_password_generator_view_empty_data(self):
-        """
-        Test that view returns empty values with no input.
-        """
-        response = self.client.post(reverse("passmanager:password_generator"), {})
-        self.assertEqual(response.context["password"], "")
-
-
 class ExportCsvViewTests(TestCase):
     """
     Test case for the export_csv view.
@@ -246,8 +204,14 @@ class ExportCsvViewTests(TestCase):
             email="tester@example.com", password="password123", username="tester"
         )
         self.client.login(email="tester@example.com", password="password123")
-        self.item = Item(name="Test Item", username="tester", password="testpassword", url="https://example.com",
-                         notes="Test notes", group="General", owner=self.user)
+        self.item = Item(
+            name="Test Item",
+            username="tester",
+            password="testpassword",
+            url="https://example.com",
+            notes="Test notes",
+            owner=self.user,
+        )
         self.item.encrypt_sensitive_fields()
         self.item.save()
 
@@ -277,7 +241,7 @@ class ExportCsvViewTests(TestCase):
         content = post_response.content.decode("utf-8")
         reader = csv.reader(content.splitlines())
         header = next(reader)
-        self.assertEqual(header, ["name", "username", "password", "url", "notes", "group"])
+        self.assertEqual(header, ["name", "username", "password", "url", "notes"])
 
         # Validate decrypted csv data rows
         rows = list(reader)
@@ -313,7 +277,7 @@ class ImportCsvViewTests(TestCase):
         """
         Test valid csv import saves encrypted data to the database.
         """
-        csv_content = b"name,username,password,url,notes,group\nExample Name,example_user,example_pass,example.com,example notes,General"
+        csv_content = b"name,username,password,url,notes\nExample Name,example_user,example_pass,example.com,example notes"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         # Post csv file to the view
@@ -329,7 +293,6 @@ class ImportCsvViewTests(TestCase):
         self.assertEqual(item.password, "example_pass")
         self.assertEqual(item.url, "example.com")
         self.assertEqual(item.notes, "example notes")
-        self.assertEqual(item.group, "General")
         self.assertEqual(item.owner, self.user)
 
     def test_invalid_csv_header(self):
@@ -356,9 +319,9 @@ class PasswordCheckupViewTests(TestCase):
         )
         self.client.login(email="tester@example.com", password="password123")
         self.item1 = Item(name="Test Item 1",username="tester1", password="testpassword12",
-                          url="https://example.com",notes="Test notes", group="General", owner=self.user)
+                          url="https://example.com",notes="Test notes", owner=self.user)
         self.item2 = Item(name="Test Item 2", username="tester2", password="tEst__pA$$word",
-                          url="https://example.com", notes="Test notes", group="General", owner=self.user)
+                          url="https://example.com", notes="Test notes", owner=self.user)
         self.item1.encrypt_sensitive_fields()
         self.item1.save()
         self.item2.encrypt_sensitive_fields()

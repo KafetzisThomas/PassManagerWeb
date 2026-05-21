@@ -13,7 +13,6 @@
 
 - [X] **AES-256 GCM Encryption**: Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.
 - [X] **Multi-Factor Authentication**: Protect your account with your favorite authenticator app.
-- [X] **Password Generator Tool**: Built-in tool to generate `strong`, `random` passwords, with `customizable` options (length, character types).
 - [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
 - [X] **Import/Export Data**: `Upload` data such as passwords from a CSV file or `download` your stored data in `CSV` format for easy backup or migration.
 - [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
@@ -86,8 +85,6 @@ uv run manage.py test
 ![New Item](assets/new_item_page.png)
 
 ![Edit Item](assets/edit_item_page.png)
-
-![Password Generator](assets/password_generator_page.png)
 
 ![Import Data](assets/import_data_page.png)
 
