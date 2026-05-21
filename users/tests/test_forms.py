@@ -2,13 +2,13 @@ import pyotp
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..forms import (CustomUserCreationForm, CustomAuthenticationForm, TwoFactorVerificationForm,
+from ..forms import (RegistrationForm, LoginForm, TwoFactorVerificationForm,
                      CustomUserChangeForm, MasterPasswordChangeForm, PasswordConfirmationForm)
 
 
-class CustomUserCreationFormTests(TestCase):
+class RegistrationFormTests(TestCase):
     """
-    Test suite for the CustomUserCreationForm.
+    Test suite for the RegistrationForm.
     """
     def setUp(self):
         self.valid_data = {"email": "tester@example.com", "username": "tester",
@@ -24,14 +24,14 @@ class CustomUserCreationFormTests(TestCase):
         """
         Test that the form is valid when all fields are provided and passwords match.
         """
-        form = CustomUserCreationForm(data=self.valid_data)
+        form = RegistrationForm(data=self.valid_data)
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_data(self):
         """
         Test that the form is invalid when passwords do not match.
         """
-        form = CustomUserCreationForm(data=self.invalid_data)
+        form = RegistrationForm(data=self.invalid_data)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_email(self):
@@ -40,7 +40,7 @@ class CustomUserCreationFormTests(TestCase):
         """
         data = self.valid_data.copy()
         data.pop("email")
-        form = CustomUserCreationForm(data=data)
+        form = RegistrationForm(data=data)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_missing_username(self):
@@ -49,27 +49,27 @@ class CustomUserCreationFormTests(TestCase):
         """
         data = self.valid_data.copy()
         data.pop("username")
-        form = CustomUserCreationForm(data=data)
+        form = RegistrationForm(data=data)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_weak_password(self):
         """
         Test that the form is invalid when a weak password is provided.
         """
-        form = CustomUserCreationForm(data=self.weak_password_data)
+        form = RegistrationForm(data=self.weak_password_data)
         self.assertFalse(form.is_valid(), form.errors)
 
     def test_form_empty_passwords(self):
         """
         Test that the form is invalid when passwords are empty.
         """
-        form = CustomUserCreationForm(data=self.empty_password_data)
+        form = RegistrationForm(data=self.empty_password_data)
         self.assertFalse(form.is_valid(), form.errors)
 
 
-class CustomAuthenticationFormTests(TestCase):
+class LoginFormTests(TestCase):
     """
-    Test suite for the CustomAuthenticationForm.
+    Test suite for the LoginForm.
     """
     def setUp(self):
         self.user_model = get_user_model()
@@ -82,7 +82,7 @@ class CustomAuthenticationFormTests(TestCase):
         Test that the form is valid when correct email and password are provided.
         """
         form_data = {"username": self.test_email, "password": self.test_password}
-        form = CustomAuthenticationForm(data=form_data)
+        form = LoginForm(data=form_data)
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_form_invalid_email(self):
@@ -90,7 +90,7 @@ class CustomAuthenticationFormTests(TestCase):
         Test that the form is invalid when an incorrect email is provided.
         """
         form_data = {"username": "wrongemail@example.com", "password": self.test_password}
-        form = CustomAuthenticationForm(data=form_data)
+        form = LoginForm(data=form_data)
         self.assertFalse(form.is_valid(), form.errors)
 
 

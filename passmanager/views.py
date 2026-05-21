@@ -6,7 +6,7 @@ from django.contrib import messages
 from .decorators import reauth_required
 from .models import Item
 from .forms import ItemForm, ImportPasswordsForm
-from .utils import generate_password, check_pwned_password
+from .utils import check_pwned_password
 
 @login_required
 def vault(request):
@@ -93,14 +93,7 @@ def import_csv(request):
 
             for row in csv_reader:
                 name, username, password, url, notes = row
-                item = Item(
-                    name=name,
-                    username=username,
-                    password=password,
-                    url=url,
-                    notes=notes,
-                    owner=request.user,
-                )
+                item = Item(name=name, username=username, password=password, url=url, notes=notes, owner=request.user)
                 item.encrypt_sensitive_fields()
                 item.save()
 

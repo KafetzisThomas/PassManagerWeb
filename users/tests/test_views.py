@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from passmanager.models import Item
-from ..forms import (CustomUserCreationForm, CustomAuthenticationForm,
+from ..forms import (RegistrationForm, LoginForm,
                      CustomUserChangeForm, MasterPasswordChangeForm, TwoFactorVerificationForm)
 
 
@@ -25,7 +25,7 @@ class RegisterViewTests(TestCase):
         response = self.client.get(reverse("users:register"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/register.html")
-        self.assertIsInstance(response.context["form"], CustomUserCreationForm)
+        self.assertIsInstance(response.context["form"], RegistrationForm)
 
     def test_register_view_valid(self):
         """
@@ -69,7 +69,7 @@ class CustomLoginViewTests(TestCase):
         response = self.client.get(reverse("users:login"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "users/login.html")
-        self.assertIsInstance(response.context["form"], CustomAuthenticationForm)
+        self.assertIsInstance(response.context["form"], LoginForm)
 
     def test_login_view_valid_credentials(self):
         """

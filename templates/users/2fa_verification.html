@@ -6,7 +6,7 @@
 {% block content %}
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
+            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
         {% endfor %}
     {% endif %}
 

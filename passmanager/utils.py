@@ -1,6 +1,4 @@
 import hashlib
-import secrets
-import string
 import requests
 
 def check_pwned_password(password: str) -> int:
@@ -19,23 +17,3 @@ def check_pwned_password(password: str) -> int:
         if hash_suffix == suffix:
             return int(count)
     return 0
-
-def generate_password(length: int, include_letters: bool, include_digits: bool, include_special_chars: bool) -> str:
-    """
-    Return a random password string based on the provided options.
-    """
-    selected_chars = []
-    letters, digits, special_chars = (string.ascii_letters, string.digits, string.punctuation)
-    if include_letters:
-        selected_chars.append(letters)
-    if include_digits:
-        selected_chars.append(digits)
-    if include_special_chars:
-        selected_chars.append(special_chars)
-    alphabet = "".join(selected_chars)
-
-    password = ""
-    for _ in range(int(length)):
-        password += "".join(secrets.choice(alphabet))
-
-    return password

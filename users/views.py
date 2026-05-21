@@ -1,6 +1,6 @@
 import pyotp
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.views.generic.edit import FormView
@@ -8,49 +8,78 @@ from django.contrib import messages
 from .models import CustomUser
 from passmanager.models import Item
 from .forms import (
-    CustomUserCreationForm,
-    CustomAuthenticationForm,
-    TwoFactorVerificationForm,
-    CustomUserChangeForm,
+    RegistrationForm,
+    LoginForm,
+    EmailUpdateForm,
+    UsernameUpdateForm,
     MasterPasswordChangeForm,
+    TwoFactorToggleForm,
+    TwoFactorVerificationForm,
+    SessionTimeoutUpdateForm,
 )
 
 def register(request):
     if request.method == "POST":
-        form = CustomUserCreationForm(request.POST)
+        form = RegistrationForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Account successfully created!")
             return redirect("users:login")
     else:
-        form = CustomUserCreationForm()
+        form = RegistrationForm()
     return render(request, "users/register.html", {"form": form})
 
 @login_required
 def account(request):
+    email_form = EmailUpdateForm(instance=request.user)
+    username_form = UsernameUpdateForm(instance=request.user)
+    session_form = SessionTimeoutUpdateForm(instance=request.user)
+    tfa_form = TwoFactorToggleForm(instance=request.user)
+
     if request.method == "POST":
-        form = CustomUserChangeForm(request.POST, instance=request.user)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.enable_2fa = form.cleaned_data.get("enable_2fa", False)
+        action = request.POST.get("action")
+        if action == "update_email":
+            email_form = EmailUpdateForm(request.POST, instance=request.user)
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(request, "Email updated successfully.")
+                return redirect("users:account")
 
-            if user.enable_2fa:
-                user.otp_secret = pyotp.random_base32()
-                messages.success(request, "2FA enabled! Check your email for the OTP key.")
-            else:
-                user.otp_secret = ""
+        elif action == "update_username":
+            username_form = UsernameUpdateForm(request.POST, instance=request.user)
+            if username_form.is_valid():
+                username_form.save()
+                messages.success(request, "Username updated successfully.")
+                return redirect("users:account")
 
-            user.save()
-            update_session_auth_hash(request, request.user)  # keep user logged in
-            messages.success(request, "Your account credentials were successfully updated!")
-            return redirect("passmanager:vault")
-        else:
-            messages.error(request, "There was an error updating your account.")
+        elif action == "update_session":
+            session_form = SessionTimeoutUpdateForm(request.POST, instance=request.user)
+            if session_form.is_valid():
+                session_form.save()
+                messages.success(request, "Session timeout updated successfully.")
+                return redirect("users:account")
 
-    else:
-        form = CustomUserChangeForm(instance=request.user)
+        elif action == "toggle_2fa":
+            tfa_form = TwoFactorToggleForm(request.POST, instance=request.user)
+            if tfa_form.is_valid():
+                user = tfa_form.save(commit=False)
+                if user.enable_2fa:
+                    user.otp_secret = pyotp.random_base32()
+                    messages.success(request, "2FA enabled!")
+                else:
+                    user.otp_secret = ""
+                    messages.success(request, "2FA disabled.")
 
-    return render(request, "users/account.html", {"form": form})
+                user.save()
+                return redirect("users:account")
+
+    context = {
+        "email_form": email_form,
+        "username_form": username_form,
+        "session_form": session_form,
+        "tfa_form": tfa_form,
+    }
+    return render(request, "users/account.html", context)
 
 @login_required
 def update_master_password(request):
@@ -100,7 +129,7 @@ def delete_account(request):
 
 
 class CustomLoginView(LoginView):
-    authentication_form = CustomAuthenticationForm
+    authentication_form = LoginForm
     def form_valid(self, form):
         user = form.get_user()
         if user.otp_secret:

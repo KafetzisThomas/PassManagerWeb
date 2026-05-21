@@ -7,10 +7,7 @@
 {% block content %}
     {% if messages %}
         {% for message in messages %}
-            <div class="alert {% if 'error' in message.tags %}alert-danger{% endif %}
-                {% if 'success' in message.tags %}alert-success{% endif %}" role="alert">
-                {{ message }}
-            </div>
+            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
@@ -55,9 +52,7 @@
                     <h5 class="modal-title text-danger" id="deleteItemModalLabel">Delete Item?</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this item?
-                </div>
+                <div class="modal-body">Are you sure you want to delete this item?</div>
                 <div class="modal-footer">
                     <form method="post" action="{% url 'passmanager:edit_item' item.id %}" class="d-flex gap-2 w-100">
                         {% csrf_token %}
@@ -69,5 +64,5 @@
         </div>
     </div>
 
-    <script src="{% static 'js/utils.js' %}"></script>
+    <script src="{% static 'utils.js' %}"></script>
 {% endblock content %}

@@ -5,7 +5,7 @@ from .models import CustomUser
 from zxcvbn import zxcvbn
 
 
-class CustomUserCreationForm(UserCreationForm):
+class RegistrationForm(UserCreationForm):
     password1 = forms.CharField(label="Master Password", widget=forms.PasswordInput, required=True)
     password2 = forms.CharField(label="Confirm Master Password", widget=forms.PasswordInput, required=True)
 
@@ -23,9 +23,33 @@ class CustomUserCreationForm(UserCreationForm):
         return password
 
 
-class CustomAuthenticationForm(AuthenticationForm):
+class LoginForm(AuthenticationForm):
     username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
     password = forms.CharField(label="Master Password", widget=forms.PasswordInput)
+
+
+class EmailUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ("email",)
+
+
+class UsernameUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ("username",)
+
+
+class SessionTimeoutUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ("session_timeout",)
+
+
+class TwoFactorToggleForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ("enable_2fa",)
 
 
 class TwoFactorVerificationForm(forms.Form):
@@ -44,19 +68,6 @@ class TwoFactorVerificationForm(forms.Form):
         if not totp.verify(otp):
             raise forms.ValidationError("Invalid OTP.")
         return otp
-
-
-class CustomUserChangeForm(forms.ModelForm):
-    class Meta:
-        model = CustomUser
-        fields = (
-            "email",
-            "username",
-            "session_timeout",
-            "enable_2fa",
-            "allow_account_update_notifications",
-            "allow_master_password_update_notifications"
-        )
 
 
 class MasterPasswordChangeForm(PasswordChangeForm):

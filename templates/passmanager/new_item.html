@@ -7,10 +7,7 @@
 {% block content %}
     {% if messages %}
         {% for message in messages %}
-            <div class="alert {% if 'error' in message.tags %}alert-danger{% endif %}
-                {% if 'success' in message.tags %}alert-success{% endif %}" role="alert">
-                {{ message }}
-            </div>
+            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
@@ -39,5 +36,5 @@
         </div>
     </form>
 
-    <script src="{% static 'js/utils.js' %}"></script>
+    <script src="{% static 'utils.js' %}"></script>
 {% endblock content %}

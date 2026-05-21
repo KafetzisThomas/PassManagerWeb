@@ -39,8 +39,6 @@ class CustomUser(AbstractUser):
     encryption_salt = models.CharField(max_length=44, blank=True, null=True)
     enable_2fa = models.BooleanField(default=False, verbose_name="Enable 2FA")
     otp_secret = models.CharField(max_length=32, blank=True, null=True)
-    allow_account_update_notifications = models.BooleanField(default=True)
-    allow_master_password_update_notifications = models.BooleanField(default=True)
     session_timeout = models.IntegerField(
         choices=[(key, value) for value, key in SESSION_TIMEOUT_CHOICES],
         default=900,  # 15 minutes
