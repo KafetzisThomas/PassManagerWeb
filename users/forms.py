@@ -56,6 +56,9 @@ class TwoFactorToggleForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ("enable_2fa",)
+        widgets = {
+            'enable_2fa': forms.CheckboxInput(attrs={'onchange': 'this.form.submit();'})
+        }
 
 
 class TwoFactorVerificationForm(forms.Form):
