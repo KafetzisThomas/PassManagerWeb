@@ -44,6 +44,12 @@ class SessionTimeoutUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ("session_timeout",)
+        labels = {
+            'session_timeout': '',
+        }
+        widgets = {
+            'session_timeout': forms.Select(attrs={'onchange': 'this.form.submit();'})
+        }
 
 
 class TwoFactorToggleForm(forms.ModelForm):

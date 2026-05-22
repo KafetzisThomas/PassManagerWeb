@@ -46,7 +46,6 @@
         {% csrf_token %}
         <input type="hidden" name="action" value="update_session">
         {{ session_form|crispy }}
-        <button type="submit" class="btn btn-primary w-100 mt-2">Update Session Timeout</button>
     </form>
 
     <h3 class="mb-3">Danger Zone</h3>
