@@ -1,12 +1,12 @@
 import csv
+import hashlib
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from .decorators import reauth_required
 from .models import Item
 from .forms import ItemForm, ImportPasswordsForm
-from .utils import check_pwned_password
 
 @login_required
 def vault(request):
@@ -106,28 +106,16 @@ def import_csv(request):
 
 @login_required
 def checkup(request):
+    return render(request, "passmanager/checkup.html")
+
+@login_required
+def checkup_api(request):
     results = []
     items = Item.objects.filter(owner=request.user)
     for item in items:
         item.decrypt_sensitive_fields()
-        password_status = check_pwned_password(item.password) if item.password else None
-        if password_status:
-            results.append(
-                {
-                    "name": item.name,
-                    "status": f"Exposed {password_status} time(s)",
-                    "recommendation": "Changing this password is recommended.",
-                    "severity": "High",
-                }
-            )
-        else:
-            results.append(
-                {
-                    "name": item.name,
-                    "status": "No breaches found.",
-                    "recommendation": "This password appears to be safe.",
-                    "severity": "Low",
-                }
-            )
+        if item.password:
+            sha1_hash = hashlib.sha1(item.password.encode("utf-8")).hexdigest().upper()
+            results.append({"name": item.name, "hash_prefix": sha1_hash[:5], "hash_suffix": sha1_hash[5:]})
 
-    return render(request, "passmanager/checkup.html", {"results": results})
+    return JsonResponse({"items": results})

@@ -9,4 +9,5 @@ urlpatterns = [
     path("csv/export/", views.export_csv, name="export_csv"),
     path("csv/import", views.import_csv, name="import_csv"),
     path("checkup/", views.checkup, name="checkup"),
+    path("checkup/api/", views.checkup_api, name="checkup_api"),
 ]
