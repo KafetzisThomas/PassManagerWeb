@@ -88,9 +88,5 @@ class Item(models.Model):
         self.notes = self.decrypt_field(key, self.notes)
         del key
 
-    def save(self, *args, **kwargs):
-        self.name = self.name.title()
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.name

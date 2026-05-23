@@ -21,17 +21,17 @@
 
     {% for item in items %}
         <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
-            <article class="media border-dark rounded shadow item-section">
+            <article class="media border border-secondary-subtle rounded shadow-sm item-section p-3 d-flex align-items-center bg-body-tertiary text-body mb-0">
                 <div class="favicon-wrapper me-md-4 me-1">
-                    <!-- favicon fetched via google's favicon service: https://www.google.com/s2/favicons -->
                     <img src="https://www.google.com/s2/favicons?sz=64&domain={{ item.url|urlsplit:'netloc' }}" alt="favicon" width="32" height="32">
                 </div>
-                <div class="media-body">
+                <div class="media-body flex-grow-1">
                     <div class="item-metadata mb-0">
-                        <small class="text-muted">{{ item.date_added }}</small>
+                        <small class="text-muted">{{ item.date_added|date:"M d, Y" }}</small>
                     </div>
-                    <h2 class="mb-0 item-name">{{ item.name }}</h2>
+                    <h2 class="mb-0 item-name h5 fw-bold">{{ item.name|title }}</h2>
                 </div>
+                <i class="bi bi-chevron-right text-muted d-none d-md-block"></i>
             </article>
         </a>
     {% empty %}
