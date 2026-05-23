@@ -10,6 +10,27 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
+
+    <script>
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const setStoredTheme = theme => localStorage.setItem('theme', theme);
+        const getPreferredTheme = () => {
+            const storedTheme = getStoredTheme();
+            if (storedTheme) {
+                return storedTheme;
+            } else {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+        };
+        const setTheme = theme => {
+            if (theme === 'auto') {
+                document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+            } else {
+                document.documentElement.setAttribute('data-bs-theme', theme);
+            }
+        };
+        setTheme(getPreferredTheme());
+    </script>
 </head>
 <body>
     <!-- navbar start (for small screens) -->
@@ -53,6 +74,16 @@
                             <a class="nav-link {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">Register</a>
                         </li>
                     {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-circle-half me-2"></i> Theme
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><button class="dropdown-item" type="button" data-bs-theme-value="light"><i class="bi bi-sun-fill me-2 opacity-50"></i> Light</button></li>
+                            <li><button class="dropdown-item" type="button" data-bs-theme-value="dark"><i class="bi bi-moon-stars-fill me-2 opacity-50"></i> Dark</button></li>
+                            <li><button class="dropdown-item" type="button" data-bs-theme-value="auto"><i class="bi bi-circle-half me-2 opacity-50"></i> Auto</button></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -107,6 +138,12 @@
                 <p><i class="bi bi-person-circle fs-5 me-2"></i> {{ request.user.email }}</p>
             </a>
             <hr class="border-light">
+            <ul class="dropdown-menu text-small shadow">
+                <li><h6 class="dropdown-header">Theme</h6></li>
+                <li><button class="dropdown-item" type="button" data-bs-theme-value="light"><i class="bi bi-sun-fill me-2 opacity-50"></i> Light</button></li>
+                <li><button class="dropdown-item" type="button" data-bs-theme-value="dark"><i class="bi bi-moon-stars-fill me-2 opacity-50"></i> Dark</button></li>
+                <li><button class="dropdown-item" type="button" data-bs-theme-value="auto"><i class="bi bi-circle-half me-2 opacity-50"></i> Auto</button></li>
+            </ul>
 
             <div class="text-secondary small mt-2">
                 <strong>&copy; <script>document.write(new Date().getFullYear());</script> KafetzisThomas</strong>
@@ -124,6 +161,16 @@
         </div>
     </main>
     <!-- custom content end -->
+
+    <script>
+        document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const theme = toggle.getAttribute('data-bs-theme-value');
+                setStoredTheme(theme);
+                setTheme(theme);
+            });
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

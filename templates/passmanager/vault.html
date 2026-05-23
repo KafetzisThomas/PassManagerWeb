@@ -12,7 +12,7 @@
 
     <form method="GET" class="mb-4">
         <div class="d-flex flex-column gap-2">
-            <input class="form-control form-control-sm" type="search" name="search_query" placeholder="Search items..." value="{{ search_query|default:'' }}">
+            <input class="form-control form-control-sm" type="search" name="search" placeholder="Search items..." value="{{ search|default:'' }}">
             <a class="btn btn-primary w-100" href="{% url 'passmanager:new_item' %}">
                 <i class="bi bi-plus-lg me-1"></i> New Item
             </a>

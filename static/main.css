@@ -19,12 +19,22 @@ body {
 .item-section {
   display: flex;
   align-items: center;
-  background: #ffffff;
+
+  /* dark mode */
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-body-color);
+
   padding: 10px 20px;
   border: 1px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* cards in dark mode */
+[data-bs-theme="dark"] .item-section {
+  background: var(--bs-tertiary-bg);
 }
 
 .item-section:hover {
@@ -38,10 +48,11 @@ body {
   border-radius: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .item-name {
-  color: #333333;
+  color: var(--bs-body-color);
   font-size: 25px;
   font-weight: bold;
   text-decoration: none;
@@ -50,7 +61,7 @@ body {
 .item-metadata {
   padding-bottom: 4px;
   margin-bottom: 8px;
-  border-bottom: 2px dashed #cccccc;
+  border-bottom: 2px dashed var(--bs-border-color);
 }
 
 .item-metadata a {
@@ -72,10 +83,6 @@ body {
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-.lengthfield-size {
-  max-width: 100px;
 }
 
 .list-results {

@@ -10,13 +10,13 @@ from .utils import check_pwned_password
 
 @login_required
 def vault(request):
-    search_query = request.GET.get("search_query")
+    search = request.GET.get("search")
     items = Item.objects.filter(owner=request.user).order_by("-date_added")
 
-    if search_query:
-        items = items.filter(name__icontains=search_query)
+    if search:
+        items = items.filter(name__icontains=search)
 
-    context = {"items": items, "search_query": search_query}
+    context = {"items": items, "search_query": search}
     return render(request, "passmanager/vault.html", context)
 
 @login_required
