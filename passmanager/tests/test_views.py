@@ -310,7 +310,7 @@ class ImportCsvViewTests(TestCase):
 
 class PasswordCheckupViewTests(TestCase):
     """
-    Test case for the password_checkup view.
+    Test case for the checkup view.
     """
     def setUp(self):
         self.user_model = get_user_model()
@@ -328,18 +328,18 @@ class PasswordCheckupViewTests(TestCase):
         self.item2.save()
 
     @patch("passmanager.views.check_pwned_password")
-    def test_password_checkup_view(self, mock_check_pwned_password):
+    def test_checkup_view(self, mock_check_pwned_password):
         """
         Test checkup verifies if password has been pwned.
         """
         mock_check_pwned_password.side_effect = lambda password: {
             "testpassword12": 4, "tEst__pA$$word": 0}.get(password, 0)
 
-        response = self.client.get(reverse("passmanager:password_checkup"))
+        response = self.client.get(reverse("passmanager:checkup"))
         results = response.context["results"]
 
         # Ensure the view uses the correct template
-        self.assertTemplateUsed(response, "passmanager/password_checkup.html")
+        self.assertTemplateUsed(response, "passmanager/checkup.html")
 
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]["name"], "Test Item 1")

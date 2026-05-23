@@ -15,9 +15,7 @@
     <!-- navbar start (for small screens) -->
     <nav class="navbar navbar-expand-lg bg-dark border-bottom border-body d-lg-none" data-bs-theme="dark">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'passmanager:vault' %}">
-                <img src="{% static 'logo.png' %}" alt="logo" width="150">
-            </a>
+            <a class="navbar-brand" href="{% url 'passmanager:vault' %}">PassManager</a>
 
             <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -26,19 +24,14 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     {% if user.is_authenticated %}
-                        {% if request.user.is_superuser == 1 %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
-                            </li>
-                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">Vault</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}">Import Data</a>
+                            <a class="nav-link {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'passmanager:checkup' %}">Checkup</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}">Checkup</a>
+                            <a class="nav-link {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}">Import Data</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/item/new/' %}active{% endif %}" href="{% url 'passmanager:new_item' %}">New Item</a>
@@ -57,7 +50,7 @@
                             <a class="nav-link {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">Sign Up</a>
+                            <a class="nav-link {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}">Register</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -67,23 +60,27 @@
     <!-- navbar end -->
 
     <!-- sidebar start -->
-    <nav class="sidebar d-none d-lg-flex flex-column flex-shrink-0 p-3 bg-dark">
+    <nav class="sidebar d-none d-lg-flex flex-column flex-shrink-0 p-3 bg-dark vh-100 border-end border-secondary">
         <a class="d-flex mx-auto mb-3 mb-md-0 text-light text-decoration-none" href="{% url 'passmanager:vault' %}">
-            <img src="{% static 'logo.png' %}" alt="logo" width="170">
+            <span class="fs-4 fw-bold">PassManager</span>
         </a>
+
         <hr class="border-light">
+
         <ul class="nav nav-pills flex-column mb-auto">
             {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link text-light {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-safe me-2"></i> Vault</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-light {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}"><i class="bi bi-upload me-2"></i> Import Data</a>
+                    <a class="nav-link text-light {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'passmanager:checkup' %}"><i class="bi bi-shield-check me-2"></i> Checkup</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-light {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'passmanager:password_checkup' %}"><i class="bi bi-shield-check me-2"></i> Checkup</a>
+                    <a class="nav-link text-light {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'passmanager:import_csv' %}"><i class="bi bi-upload me-2"></i> Import Data</a>
                 </li>
+
                 <li class="nav-item"><hr class="border-light my-2"></li>
+
                 <li class="nav-item">
                     <a class="nav-link text-light {% if request.path == '/user/account/' %}active{% endif %}" href="{% url 'users:account' %}"><i class="bi bi-person me-2"></i> Account</a>
                 </li>
@@ -100,23 +97,25 @@
                     <a class="nav-link text-light {% if request.path == '/user/login/' %}active{% endif %}" href="{% url 'passmanager:vault' %}"><i class="bi bi-door-open"></i> Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-light {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}"><i class="bi bi-person-plus"></i> Sign Up</a>
+                    <a class="nav-link text-light {% if request.path == '/user/register/' %}active{% endif %}" href="{% url 'users:register' %}"><i class="bi bi-person-plus"></i> Register</a>
                 </li>
             {% endif %}
         </ul>
-        <div class="dropdown">
+
+        <div class="dropdown dropup">
             <a href="#" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                <strong><i class="bi bi-person-circle"></i> {{ request.user.username }}</strong>
+                <p><i class="bi bi-person-circle fs-5 me-2"></i> {{ request.user.email }}</p>
             </a>
             <hr class="border-light">
-            <div class="text-light small mt-2">
+
+            <div class="text-secondary small mt-2">
                 <strong>&copy; <script>document.write(new Date().getFullYear());</script> KafetzisThomas</strong>
             </div>
         </div>
     </nav>
     <!-- sidebar end -->
 
-    <!-- main start -->
+    <!-- custom content start -->
     <main role="main" class="container">
         <div class="row justify-content-start mt-lg-3">
             <div class="col-md-8 offset-md-3 mt-3 mb-1">
@@ -124,7 +123,7 @@
             </div>
         </div>
     </main>
-    <!-- main end -->
+    <!-- custom content end -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -105,7 +105,7 @@ def import_csv(request):
     return render(request, "passmanager/import_csv.html", {"form": form})
 
 @login_required
-def password_checkup(request):
+def checkup(request):
     results = []
     items = Item.objects.filter(owner=request.user)
     for item in items:
@@ -130,4 +130,4 @@ def password_checkup(request):
                 }
             )
 
-    return render(request, "passmanager/password_checkup.html", {"results": results})
+    return render(request, "passmanager/checkup.html", {"results": results})
