@@ -1,4 +1,3 @@
-import pyotp
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from .models import CustomUser
@@ -6,6 +5,9 @@ from zxcvbn import zxcvbn
 
 
 class RegistrationForm(UserCreationForm):
+    email = forms.EmailField(label="Email Address",
+        widget=forms.EmailInput(attrs={"autofocus": "autofocus", "class": "form-control"})
+    )
     password1 = forms.CharField(label="Master Password", widget=forms.PasswordInput, required=True)
     password2 = forms.CharField(label="Confirm Master Password", widget=forms.PasswordInput, required=True)
 
@@ -24,7 +26,9 @@ class RegistrationForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.EmailField(label="Email Address", widget=forms.EmailInput)
+    username = forms.EmailField(label="Email Address",
+        widget=forms.EmailInput(attrs={"autofocus": "autofocus", "class": "form-control"})
+    )
     password = forms.CharField(label="Master Password", widget=forms.PasswordInput)
 
 
@@ -66,11 +70,15 @@ class TwoFactorToggleForm(forms.ModelForm):
 
 
 class TwoFactorVerificationForm(forms.Form):
-    otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
+    otp = forms.CharField(label="Generated OTP",
+        widget=forms.TextInput(attrs={"autofocus": "autofocus", "class": "form-control"})
+    )
 
 
 class MasterPasswordChangeForm(PasswordChangeForm):
-    old_password = forms.CharField(label="Old Master Password", widget=forms.PasswordInput)
+    old_password = forms.CharField(label="Old Master Password",
+        widget=forms.PasswordInput(attrs={"autofocus": "autofocus", "class": "form-control"})
+    )
     new_password1 = forms.CharField(label="New Master Password", widget=forms.PasswordInput)
     new_password2 = forms.CharField(label="Confirm New Master Password", widget=forms.PasswordInput)
 
@@ -85,7 +93,9 @@ class MasterPasswordChangeForm(PasswordChangeForm):
 
 
 class PasswordConfirmationForm(forms.Form):
-    password = forms.CharField(label="Confirm Master Password", widget=forms.PasswordInput(), required=True)
+    password = forms.CharField(label="Confirm Master Password", required=True,
+        widget=forms.PasswordInput(attrs={"autofocus": "autofocus", "class": "form-control"})
+    )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
