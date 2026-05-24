@@ -4,7 +4,7 @@
 {% block title %}Register{% endblock title %}
 
 {% block content %}
-    <form method="post" action="{% url 'users:register' %}" class="form">
+    <form method="post" action="{% url 'users:register' %}">
         {% csrf_token %}
         {{ form|crispy }}
 

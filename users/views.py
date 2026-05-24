@@ -1,5 +1,8 @@
 import pyotp
-from django.shortcuts import render, redirect
+import qrcode
+import base64
+from io import BytesIO
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -31,6 +34,7 @@ def register(request):
 
 @login_required
 def account(request):
+    user = request.user
     email_form = EmailUpdateForm(instance=request.user)
     username_form = UsernameUpdateForm(instance=request.user)
     session_form = SessionTimeoutUpdateForm(instance=request.user)
@@ -64,14 +68,59 @@ def account(request):
             if tfa_form.is_valid():
                 user = tfa_form.save(commit=False)
                 if user.enable_2fa:
+                    user.enable_2fa = False
                     user.otp_secret = pyotp.random_base32()
-                    messages.success(request, "2FA enabled!")
-                else:
-                    user.otp_secret = ""
-                    messages.success(request, "2FA disabled.")
+                    user.save()
 
+                    otp = pyotp.TOTP(user.otp_secret)
+                    uri = otp.provisioning_uri(name=request.user.email, issuer_name="PassManagerWeb")
+
+                    qr = qrcode.make(uri)
+                    qr = qr.resize((150, 150))
+                    buffer = BytesIO()
+                    qr.save(buffer, format="PNG")
+                    qr_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+                    user.enable_2fa = True
+                    display_form = TwoFactorToggleForm(instance=request.user)
+                    user.enable_2fa = False
+
+                    context = {
+                        "email_form": email_form,
+                        "username_form": username_form,
+                        "session_form": session_form,
+                        "show_2fa_modal": True,
+                        "qr_code": qr_base64,
+                        "otp_secret": user.otp_secret,
+                        "tfa_form": display_form,
+                    }
+                    return render(request, "users/account.html", context)
+                else:
+                    user.enable_2fa = False
+                    user.otp_secret = ""
+                    user.save()
+                    messages.success(request, "2FA disabled.")
+                    return redirect("users:account")
+
+        elif action == "confirm_2fa":
+            otp = request.POST.get('otp')
+            otp_secret = request.user.otp_secret
+
+            if otp_secret and pyotp.TOTP(otp_secret).verify(otp):
+                user.enable_2fa = True
                 user.save()
-                return redirect("users:account")
+                messages.success(request, "2FA enabled successfully!")
+            else:
+                user.otp_secret = ""
+                user.save()
+                messages.error(request, "Invalid OTP. 2FA setup failed.")
+            return redirect("users:account")
+
+        elif action == "cancel_2fa":
+            user.enable_2fa = False
+            user.otp_secret = ""
+            user.save()
+            return redirect("users:account")
 
     context = {
         "email_form": email_form,
@@ -80,6 +129,28 @@ def account(request):
         "tfa_form": tfa_form,
     }
     return render(request, "users/account.html", context)
+
+def two_factor_verification(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("users:login")
+
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == "POST":
+        form = TwoFactorVerificationForm(request.POST)
+        if form.is_valid():
+            otp = form.cleaned_data.get("otp")
+            if user.otp_secret and pyotp.TOTP(user.otp_secret).verify(otp):
+                login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                request.session.pop("user_id", None)
+                return redirect("passmanager:vault")
+            else:
+                form.add_error("otp", "Invalid OTP.")
+    else:
+        form = TwoFactorVerificationForm()
+
+    return render(request, "users/2fa_verification.html", {"form": form})
 
 @login_required
 def update_master_password(request):
@@ -132,26 +203,7 @@ class CustomLoginView(LoginView):
     authentication_form = LoginForm
     def form_valid(self, form):
         user = form.get_user()
-        if user.otp_secret:
+        if user.enable_2fa:
             self.request.session["user_id"] = user.id
             return redirect("users:2fa_verification")
         return super().form_valid(form)
-
-
-class TwoFactorVerificationView(FormView):
-    template_name = "users/2fa_verification.html"
-    form_class = TwoFactorVerificationForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        user_id = self.request.session.get("user_id")
-        kwargs["user"] = CustomUser.objects.get(id=user_id)
-        return kwargs
-
-    def form_valid(self, form):
-        user = form.user
-        backend_path = "django.contrib.auth.backends.ModelBackend"
-        login(self.request, user, backend=backend_path)
-
-        self.request.session.pop("user_id", None)
-        return redirect("passmanager:vault")

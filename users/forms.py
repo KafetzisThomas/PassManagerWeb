@@ -57,26 +57,16 @@ class TwoFactorToggleForm(forms.ModelForm):
         model = CustomUser
         fields = ("enable_2fa",)
         widgets = {
-            'enable_2fa': forms.CheckboxInput(attrs={'onchange': 'this.form.submit();'})
+            'enable_2fa': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+                'role': 'switch',
+                'onchange': 'this.form.submit();'
+            })
         }
 
 
 class TwoFactorVerificationForm(forms.Form):
     otp = forms.CharField(label="Generated OTP", widget=forms.TextInput)
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user", None)
-        super().__init__(*args, **kwargs)
-
-    def clean_otp(self):
-        otp = self.cleaned_data.get("otp")
-        if not self.user or not self.user.otp_secret:
-            raise forms.ValidationError("Invalid user or OTP configuration.")
-
-        totp = pyotp.TOTP(self.user.otp_secret)
-        if not totp.verify(otp):
-            raise forms.ValidationError("Invalid OTP.")
-        return otp
 
 
 class MasterPasswordChangeForm(PasswordChangeForm):

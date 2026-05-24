@@ -6,7 +6,9 @@
 {% block content %}
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} text-center">
+                {{ message }}
+            </div>
         {% endfor %}
     {% endif %}
 
@@ -37,8 +39,51 @@
     <form action="{% url 'users:account' %}" method="post" class="mb-4 border-bottom pb-4">    
         {% csrf_token %}
         <input type="hidden" name="action" value="toggle_2fa">
-        {{ tfa_form|crispy }}
+        <div class="form-check form-switch">
+            {{ tfa_form.enable_2fa }}
+            <label class="form-check-label" for="{{ tfa_form.enable_2fa.id_for_label }}">
+                Enable 2FA Verification
+            </label>
+        </div>
     </form>
+
+    {% if show_2fa_modal %}
+        <div class="modal fade" id="twoFactorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="twoFactorModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title" id="twoFactorModalLabel">Set up 2FA</h5>
+                        <form method="post" action="{% url 'users:account' %}" class="m-0 p-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="cancel_2fa">
+                            <button type="submit" class="btn-close" aria-label="Close"></button>
+                        </form>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p>Scan this QR code with your authenticator app:</p>
+                        <div class="mb-3">
+                            <img src="data:image/png;base64,{{ qr_code }}" alt="2fa qr code" class="img-fluid border p-2">
+                        </div>
+                        <div class="mb-3">
+                            <p class="mb-3">Manual entry key:</p>
+                            <code class="fs-5">{{ otp_secret }}</code>
+                        </div>
+
+                        <div class="alert alert-warning small">Ensure you have added this account to your app before closing this modal.</div>
+
+                        <form method="post" action="{% url 'users:account' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="confirm_2fa">
+                            <div class="form-group mb-3">
+                                <input type="text" name="otp" class="form-control text-center" placeholder="Enter 6-digit OTP" required autocomplete="off" autofocus>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Verify and Enable</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
     <h3 class="mb-4">Vault Timeout</h3>
     <form action="{% url 'users:account' %}" method="post" class="mb-4 border-bottom pb-4">    
@@ -68,4 +113,14 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modalElement = document.getElementById('twoFactorModal');
+            if (modalElement) {
+                var twoFactorModal = new bootstrap.Modal(modalElement);
+                twoFactorModal.show();
+            }
+        });
+    </script>
 {% endblock content %}

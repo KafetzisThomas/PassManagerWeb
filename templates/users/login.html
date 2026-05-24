@@ -10,7 +10,7 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'users:login' %}" method="post" class="form">
+    <form action="{% url 'users:login' %}" method="post">
         {% csrf_token %}
         {{ form|crispy }}
         <button name="submit" class="btn btn-primary w-100">Log In</button>
