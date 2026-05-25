@@ -45,6 +45,11 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     {% if user.is_authenticated %}
+                        {% if user.is_superuser == 1 %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                            </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'passmanager:vault' %}">Vault</a>
                         </li>
@@ -111,6 +116,12 @@
                 </li>
 
                 <li class="nav-item"><hr class="border-light my-2"></li>
+
+                {% if user.is_superuser == 1 %}
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{% url 'admin:index' %}"><i class="bi bi-person-gear me-2"></i> Admin</a>
+                    </li>
+                {% endif %}
 
                 <li class="nav-item">
                     <a class="nav-link text-light {% if request.path == '/user/account/' %}active{% endif %}" href="{% url 'users:account' %}"><i class="bi bi-person me-2"></i> Account</a>

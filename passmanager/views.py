@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from .decorators import reauth_required
 from .models import Item
-from .forms import ItemForm, ImportPasswordsForm
+from .forms import ItemForm, ImportDataForm
 
 @login_required
 def vault(request):
@@ -77,7 +77,7 @@ def export_csv(request):
 @login_required
 def import_csv(request):
     if request.method == "POST":
-        form = ImportPasswordsForm(request.POST, request.FILES)
+        form = ImportDataForm(request.POST, request.FILES)
         if form.is_valid():
             csv_file = form.cleaned_data["csv_file"]
             file_data = csv_file.read().decode("utf-8").splitlines()
@@ -100,7 +100,7 @@ def import_csv(request):
             messages.success(request, "Passwords imported successfully!")
             return redirect("passmanager:vault")
     else:
-        form = ImportPasswordsForm()
+        form = ImportDataForm()
 
     return render(request, "passmanager/import_csv.html", {"form": form})
 

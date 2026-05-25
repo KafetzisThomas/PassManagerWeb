@@ -12,7 +12,7 @@ class ItemForm(forms.ModelForm):
         fields = ["name", "username", "password", "url", "notes"]
 
 
-class ImportPasswordsForm(forms.Form):
+class ImportDataForm(forms.Form):
     csv_file = forms.FileField(label="Select CSV File", widget=forms.ClearableFileInput(attrs={"accept": ".csv"}))
 
     def clean_csv_file(self):
