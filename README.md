@@ -5,17 +5,14 @@
     <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker"/>
 </div>
 
-> [!IMPORTANT]
-> **This project has evolved into [LockBox](https://github.com/KafetzisThomas/LockBox).**
-> LockBox represents the next generation of this application featuring a **zero-knowledge architecture**, **client side encryption** and a high performance **FastAPI** backend. Active development continues there.
-
 ## Features
 
 - [X] **AES-256 GCM Encryption**: Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.
 - [X] **Multi-Factor Authentication**: Protect your account with your favorite authenticator app.
-- [X] **Password Health Monitoring**: Built-in tool to check the strength and health of stored passwords, identifying `weak`, `reused`, or `compromised` passwords.
-- [X] **Import/Export Data**: `Upload` data such as passwords from a CSV file or `download` your stored data in `CSV` format for easy backup or migration.
-- [X] **Automatic Logout**: Automatically logs you out after a **customizable** period of inactivity. Choose the **timeout** duration that best suits your needs.
+- [X] **Vault Management:** `Create`, `read`, `update` and `delete` vault items.
+- [X] **Password Health Monitoring**: Identify `weak` passwords across your vault.
+- [X] **Import/Export:** `Import` data from other password managers or `export` your vault to csv format.
+- [X] **Session Security:** Configurable vault **timeout** and automatic locking.
 
 ## Database Schema
 
@@ -39,6 +36,7 @@ First install `uv` and sync the project dependencies:
 cd path/to/root/directory
 pip install uv
 uv sync
+uv sync --extra dev  # for devs only
 ```
 
 Migrate database:

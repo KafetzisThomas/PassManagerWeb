@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.views.generic.edit import FormView
 from django.contrib import messages
 from .models import CustomUser
 from passmanager.models import Item
@@ -20,13 +19,17 @@ from .forms import (
     TwoFactorVerificationForm,
     SessionTimeoutUpdateForm,
 )
+from .utils import send_discord_signup_alert
 
 def register(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Account successfully created!")
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            messages.success(request, "Your account is pending approval. You'll be able to log in once approved.")
+            send_discord_signup_alert(user)
             return redirect("users:login")
     else:
         form = RegistrationForm()

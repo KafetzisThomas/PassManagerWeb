@@ -70,21 +70,6 @@ body {
   transition: color 0.3s ease;
 }
 
-.card {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  transition: transform 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
 .list-results {
   transition: transform 0.3s ease;
 }

@@ -168,3 +168,6 @@ AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "passmanager:vault"
 LOGOUT_REDIRECT_URL = "/"
+
+DISCORD_BOT_USERNAME = os.getenv("DISCORD_BOT_USERNAME")
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
