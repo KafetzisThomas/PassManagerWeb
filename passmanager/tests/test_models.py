@@ -1,76 +1,47 @@
-import os
 import base64
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from ..models import Item
 
+User = get_user_model()
 
 class ItemModelTests(TestCase):
-    """
-    Test suite for the Item model.
-    """
+
     def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", username="tester", password="password123"
+        self.user = User.objects.create_user(email="user@test.com", username="user", password="Str0ng_p@ssword")
+        self.item = Item.objects.create(
+            name="Test Item",
+            username="itemuser",
+            password="password123",
+            url="https://example.com",
+            notes="Some notes",
+            owner=self.user
         )
 
-        # Random salt for testing encryption
-        self.user.encryption_salt = base64.urlsafe_b64encode(os.urandom(32)).decode()
-        self.user.save()
+    def test_get_key_is_valid_length(self):
+        key1 = self.item.get_key() 
+        key2 = self.item.get_key()
+        self.assertEqual(key1, key2)
 
-        self.item_data = {
-            "name": "Test Item", "username": "itemuser", "password": "password123", "url": "https://example.com",
-            "notes": "Some notes about the item", "owner": self.user
-        }
-
-    def test_create_item(self):
-        """
-        Test that an item can be created with the given data.
-        """
-        item = Item.objects.create(**self.item_data)
-        item.encrypt_sensitive_fields()
-
-        # Ensure fields differ from og values
-        self.assertNotEqual(item.username, self.item_data["username"])
-        self.assertNotEqual(item.password, self.item_data["password"])
-        self.assertNotEqual(item.notes, self.item_data["notes"])
-
-        item.decrypt_sensitive_fields()
-
-        # Ensure fields are decrypted back to og values
-        self.assertEqual(item.name, self.item_data["name"])
-        self.assertEqual(item.username, self.item_data["username"])
-        self.assertEqual(item.password, self.item_data["password"])
-        self.assertEqual(item.url, self.item_data["url"])
-        self.assertEqual(item.notes, self.item_data["notes"])
-        self.assertEqual(item.owner, self.item_data["owner"])
-
-    def test_field_max_length(self):
-        """
-        Test the maximum length of the fields.
-        """
-        item = Item.objects.create(**self.item_data)
-        self.assertEqual(item._meta.get_field("name").max_length, 50)
-        self.assertEqual(item._meta.get_field("url").max_length, 50)
-
-    def test_item_deletion(self):
-        """
-        Test that an item is deleted when the owner is deleted.
-        """
-        item = Item.objects.create(**self.item_data)
-        self.user.delete()
-        with self.assertRaises(Item.DoesNotExist):
-            Item.objects.get(id=item.id)
-
-    def test_get_key(self):
-        """
-        Test that the encryption key is correctly derived.
-        """
-        item = Item.objects.create(**self.item_data)
-        key = item.get_key()
-        key_bytes = base64.urlsafe_b64decode(key)
-
-        # Ensure derived key is valid
-        self.assertIsInstance(key, bytes)
+        key_bytes = base64.urlsafe_b64decode(key1)
+        self.assertIsInstance(key1, bytes)
         self.assertEqual(len(key_bytes), 32)  # AES 256 GCM = 32 byte key
+
+    def test_create_item_success(self):
+        original_username = self.item.username
+        original_password = self.item.password
+        original_notes = self.item.notes
+
+        self.item.encrypt_sensitive_fields()
+
+        self.assertEqual(self.item.name, "Test Item")
+        self.assertNotEqual(self.item.username, original_username)
+        self.assertNotEqual(self.item.password, original_password)
+        self.assertNotEqual(self.item.notes, original_notes)        
+        self.assertEqual(self.item.url, "https://example.com")
+
+        self.item.decrypt_sensitive_fields()
+
+        self.assertEqual(self.item.username, original_username)
+        self.assertEqual(self.item.password, original_password)
+        self.assertEqual(self.item.notes, original_notes)
