@@ -3,7 +3,7 @@ import qrcode
 import base64
 from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
@@ -35,39 +35,61 @@ def register(request):
         form = RegistrationForm()
     return render(request, "users/register.html", {"form": form})
 
+def two_factor_verification(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return redirect("users:login")
+
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == "POST":
+        form = TwoFactorVerificationForm(request.POST)
+        if form.is_valid():
+            otp = form.cleaned_data.get("otp")
+            if user.otp_secret and pyotp.TOTP(user.otp_secret).verify(otp):
+                login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                request.session.pop("user_id", None)
+                return redirect("passmanager:vault")
+            else:
+                form.add_error("otp", "Invalid OTP.")
+    else:
+        form = TwoFactorVerificationForm()
+
+    return render(request, "users/2fa_verification.html", {"form": form})
+
 @login_required
 def account(request):
     user = request.user
-    email_form = EmailUpdateForm(instance=request.user)
-    username_form = UsernameUpdateForm(instance=request.user)
-    session_form = SessionTimeoutUpdateForm(instance=request.user)
-    tfa_form = TwoFactorToggleForm(instance=request.user)
+    email_form = EmailUpdateForm(instance=user)
+    username_form = UsernameUpdateForm(instance=user)
+    session_form = SessionTimeoutUpdateForm(instance=user)
+    tfa_form = TwoFactorToggleForm(instance=user)
 
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "update_email":
-            email_form = EmailUpdateForm(request.POST, instance=request.user)
+            email_form = EmailUpdateForm(request.POST, instance=user)
             if email_form.is_valid():
                 email_form.save()
                 messages.success(request, "Email updated successfully.")
                 return redirect("users:account")
 
         elif action == "update_username":
-            username_form = UsernameUpdateForm(request.POST, instance=request.user)
+            username_form = UsernameUpdateForm(request.POST, instance=user)
             if username_form.is_valid():
                 username_form.save()
                 messages.success(request, "Username updated successfully.")
                 return redirect("users:account")
 
         elif action == "update_session":
-            session_form = SessionTimeoutUpdateForm(request.POST, instance=request.user)
+            session_form = SessionTimeoutUpdateForm(request.POST, instance=user)
             if session_form.is_valid():
                 session_form.save()
                 messages.success(request, "Session timeout updated successfully.")
                 return redirect("users:account")
 
         elif action == "toggle_2fa":
-            tfa_form = TwoFactorToggleForm(request.POST, instance=request.user)
+            tfa_form = TwoFactorToggleForm(request.POST, instance=user)
             if tfa_form.is_valid():
                 user = tfa_form.save(commit=False)
                 if user.enable_2fa:
@@ -76,7 +98,7 @@ def account(request):
                     user.save()
 
                     otp = pyotp.TOTP(user.otp_secret)
-                    uri = otp.provisioning_uri(name=request.user.email, issuer_name="PassManagerWeb")
+                    uri = otp.provisioning_uri(name=user.email, issuer_name="PassManagerWeb")
 
                     qr = qrcode.make(uri)
                     qr = qr.resize((150, 150))
@@ -85,7 +107,7 @@ def account(request):
                     qr_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
                     user.enable_2fa = True
-                    display_form = TwoFactorToggleForm(instance=request.user)
+                    display_form = TwoFactorToggleForm(instance=user)
                     user.enable_2fa = False
 
                     context = {
@@ -106,8 +128,8 @@ def account(request):
                     return redirect("users:account")
 
         elif action == "confirm_2fa":
-            otp = request.POST.get('otp')
-            otp_secret = request.user.otp_secret
+            otp = request.POST.get("otp")
+            otp_secret = user.otp_secret
 
             if otp_secret and pyotp.TOTP(otp_secret).verify(otp):
                 user.enable_2fa = True
@@ -133,43 +155,15 @@ def account(request):
     }
     return render(request, "users/account.html", context)
 
-def two_factor_verification(request):
-    user_id = request.session.get("user_id")
-    if not user_id:
-        return redirect("users:login")
-
-    user = get_object_or_404(CustomUser, id=user_id)
-
-    if request.method == "POST":
-        form = TwoFactorVerificationForm(request.POST)
-        if form.is_valid():
-            otp = form.cleaned_data.get("otp")
-            if user.otp_secret and pyotp.TOTP(user.otp_secret).verify(otp):
-                login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-                request.session.pop("user_id", None)
-                return redirect("passmanager:vault")
-            else:
-                form.add_error("otp", "Invalid OTP.")
-    else:
-        form = TwoFactorVerificationForm()
-
-    return render(request, "users/2fa_verification.html", {"form": form})
-
 @login_required
 def update_master_password(request):
+    user = request.user
     if request.method == "POST":
-        form = MasterPasswordChangeForm(request.user, request.POST)
+        form = MasterPasswordChangeForm(user, request.POST)
         if form.is_valid():
-            old_password = form.cleaned_data["old_password"]
             new_password = form.cleaned_data["new_password1"]
 
-            if not request.user.check_password(old_password):
-                messages.error(request, "Old master password is incorrect.")
-                return redirect("users:update_master_password")
-
-            user = request.user
             items = Item.objects.filter(owner=user)
-
             if items.exists():
                 old_key = items.first().get_key()
                 for item in items:
@@ -179,6 +173,7 @@ def update_master_password(request):
 
             user.set_password(new_password)
             user.save()
+            update_session_auth_hash(request, user)
 
             if items.exists():
                 for item in items:
@@ -191,7 +186,7 @@ def update_master_password(request):
             messages.success(request, "Your master password was successfully updated!")
             return redirect("passmanager:vault")
     else:
-        form = MasterPasswordChangeForm(user=request.user)
+        form = MasterPasswordChangeForm(user=user)
 
     return render(request, "users/update_master_password.html", {"form": form})
 

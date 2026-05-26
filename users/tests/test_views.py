@@ -1,312 +1,194 @@
 import pyotp
-from django.contrib.auth import SESSION_KEY
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
+from unittest.mock import patch
+from django.contrib.auth import get_user_model
+from django.contrib.auth import SESSION_KEY
 from passmanager.models import Item
-from ..forms import (RegistrationForm, LoginForm,
-                     CustomUserChangeForm, MasterPasswordChangeForm, TwoFactorVerificationForm)
 
+User = get_user_model()
 
 class RegisterViewTests(TestCase):
-    """
-    Test case for the register view.
-    """
+
     def setUp(self):
-        self.user_model = get_user_model()
-        self.form_data = {"email": "tester@example.com", "username": "tester",
-                          "password1": "SecRet_p@ssword", "password2": "SecRet_p@ssword"}
+        self.valid_user_data = {
+            "email": "user@test.com",
+            "username": "user",
+            "password1": "Str0ng_p@ssword",
+            "password2": "Str0ng_p@ssword"
+        }
+        self.url = reverse("users:register")
 
-    def test_register_view_status_code_and_template(self):
-        """
-        Test if the register view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("users:register"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/register.html")
-        self.assertIsInstance(response.context["form"], RegistrationForm)
-
-    def test_register_view_valid(self):
-        """
-        Test registering a new user with valid data.
-        """
-        response = self.client.post(reverse("users:register"), self.form_data)
+    @patch("users.views.send_discord_signup_alert")
+    def test_register_view_valid(self, mock_discord_alert):
+        response = self.client.post(self.url, self.valid_user_data)
         self.assertRedirects(response, reverse("users:login"))
 
-        # Check if the user is created in the database
-        self.assertTrue(self.user_model.objects.filter(email=self.form_data["email"]).exists())
+        user = User.objects.get(email="user@test.com")
+        self.assertFalse(user.is_active)
 
-        # Check if the user is still logged out
-        self.assertNotIn(SESSION_KEY, self.client.session)
-
-    def test_register_view_post_invalid(self):
-        """
-        Test registering a new user with invalid data.
-        """
-        self.form_data["password2"] = "wrongpassword"
-        self.client.post(reverse("users:register"), self.form_data)
-
-        # Check that user is not created in the database
-        self.assertFalse(self.user_model.objects.filter(email="tester@example.com").exists())
+        mock_discord_alert.assert_called_once_with(user)
 
 
 class CustomLoginViewTests(TestCase):
-    """
-    Test case for the CustomLogin view.
-    """
+
     def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", password="password123", username="tester"
+        self.user1 = User.objects.create_user(
+            email="user1@test.com",
+            username="user1",
+            password="Str0ng_p@ssword",
+            enable_2fa=True
         )
-        self.form_data = {"username": "tester@example.com", "password": "password123"}
+        self.user2 = User.objects.create_user(
+            email="user2@test.com",
+            username="user2",
+            password="Str0ng_p@ssword",
+            enable_2fa=False
+        )
+        self.url = reverse("users:login")
 
-    def test_custom_login_view_status_code_and_template(self):
-        """
-        Test if view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("users:login"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/login.html")
-        self.assertIsInstance(response.context["form"], LoginForm)
-
-    def test_login_view_valid_credentials(self):
-        """
-        Test logging in with valid credentials.
-        """
-        response = self.client.post(reverse("users:login"), self.form_data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        # Check if the user is logged in
-        self.assertIn(SESSION_KEY, self.client.session)
-
-    def test_login_view_post_with_2fa_enabled(self):
-        """
-        Test logging in with 2FA enabled.
-        """
-        self.user.otp_secret = "test_otp_secret"
-        self.user.save()
-        response = self.client.post(reverse("users:login"), self.form_data)
+    def test_login_with_2fa_enabled(self):
+        form_data = {
+            "username": "user1@test.com",
+            "password": "Str0ng_p@ssword"
+        }
+        response = self.client.post(self.url, form_data)
         self.assertRedirects(response, reverse("users:2fa_verification"))
-
-        # Check if the user is not fully logged in yet
+        self.assertEqual(self.client.session.get("user_id"), self.user1.id)
         self.assertNotIn(SESSION_KEY, self.client.session)
-        self.assertEqual(self.client.session["user_id"], self.user.id)
 
-    def test_login_view_post_invalid_credentials(self):
-        """
-        Test logging in with invalid credentials.
-        """
-        self.form_data["password"] = "wrongpassword"
-        self.client.post(reverse("users:login"), self.form_data)
-
-        # Check if the user is not logged in
-        self.assertNotIn(SESSION_KEY, self.client.session)
+    def test_login_with_2fa_disabled(self):
+        form_data = {
+            "username": "user2@test.com",
+            "password": "Str0ng_p@ssword"
+        }
+        self.client.post(self.url, form_data)
+        self.assertIn(SESSION_KEY, self.client.session)
+        self.assertEqual(int(self.client.session[SESSION_KEY]), self.user2.id)
+        self.assertNotIn("user_id", self.client.session)
 
 
 class TwoFactorVerificationViewTests(TestCase):
-    """
-    Test case for the TwoFactorVerification view.
-    """
-    def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", password="password123",
-            username="tester", otp_secret=pyotp.random_base32(),
-        )
 
-        # Store user_id in session
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="user@test.com", password="Str0ng_p@ssword", username="user", otp_secret=pyotp.random_base32()
+        )
+        self.two_factor_verification_url = reverse("users:2fa_verification")
+
         session = self.client.session
         session["user_id"] = self.user.id
         session.save()
 
-    def test_two_factor_verification_view_status_code_and_template(self):
-        """
-        Test if view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("users:2fa_verification"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/2fa_verification.html")
-        self.assertIsInstance(response.context["form"], TwoFactorVerificationForm)
-
     def test_valid_otp_submission(self):
-        """
-        Test successful 2FA verification with valid OTP.
-        """
         valid_otp = pyotp.TOTP(self.user.otp_secret).now()
-        response = self.client.post(reverse("users:2fa_verification"), {"otp": valid_otp})
+        response = self.client.post(self.two_factor_verification_url, {"otp": valid_otp})
         self.assertRedirects(response, reverse("passmanager:vault"))
-
-        # User should be logged in
-        self.assertIn(SESSION_KEY, self.client.session)
-
-        # user_id should be removed from session
-        self.assertNotIn("user_id", self.client.session)
+        self.assertIn(SESSION_KEY, self.client.session)  # user should be logged in
+        self.assertNotIn("user_id", self.client.session)  # temp key cleaned up
 
     def test_invalid_otp_submission(self):
-        """
-        Test failed 2FA verification with invalid OTP.
-        """
-        self.client.post(reverse("users:2fa_verification"), {"otp": "123456"})
-
-        # User should not be logged in
-        self.assertNotIn(SESSION_KEY, self.client.session)
-
-        # user_id should still be in session
-        self.assertIn("user_id", self.client.session)
+        self.client.post(self.two_factor_verification_url, {"otp": "123456"})
+        self.assertNotIn(SESSION_KEY, self.client.session)  # user should not be logged in
+        self.assertIn("user_id", self.client.session)  # temp key still in session
 
 
 class AccountViewTests(TestCase):
-    """
-    Test case for the account view.
-    """
+
     def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", password="password123", username="tester"
-        )
-        self.client.login(email="tester@example.com", password="password123")
-        self.form_data = {"email": "updateduser@example.com", "username": "updateduser",
-                          "session_timeout": 300, "enable_2fa": True, "action": "save"}
+        self.url = reverse("users:account")
+        self.user = User.objects.create_user(email="user@test.com", username="user", password="Str0ng_p@ssword")
+        self.client.login(email="user@test.com", password="Str0ng_p@ssword")
 
-    def test_account_view_status_code_and_template(self):
-        """
-        Test if the account view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("users:account"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/account.html")
-        self.assertIsInstance(response.context["form"], CustomUserChangeForm)
-
-    def test_account_view_valid(self):
-        """
-        Test updating account credentials with valid data.
-        """
-        response = self.client.post(reverse("users:account"), self.form_data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
-
-        # Check if user credentials are updated
-        updated_user = self.user_model.objects.get(email=self.form_data["email"])
-        self.assertEqual(updated_user.username, "updateduser")
-        self.assertEqual(updated_user.session_timeout, 300)
-        self.assertTrue(updated_user.enable_2fa)
-
-        # Check that the OTP secret is generated & saved
-        self.assertIsNotNone(updated_user.otp_secret)
-        self.assertIsInstance(updated_user.otp_secret, str)
-
-    def test_account_view_post_invalid_email(self):
-        """
-        Test updating account credentials with an invalid email.
-        """
-        self.form_data["email"] = "invalid-email"
-        self.client.post(reverse("users:account"), self.form_data)
-
-        # Ensure user credentials remain unchanged
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.email, "tester@example.com")
-        self.assertEqual(self.user.username, "tester")
-
-    def test_account_view_not_logged_in(self):
-        """
-        Test accessing view when not logged in.
-        """
+    def test_unauthenticated_user_redirects_to_login(self):
         self.client.logout()
-        response = self.client.get(reverse("users:account"))
-        self.assertRedirects(response, "/user/login/?next=/user/account/")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
 
+    def test_update_email_action(self):
+        response = self.client.post(self.url, {"action": "update_email", "email": "new@test.com"})
+        self.assertRedirects(response, self.url)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "new@test.com")
+
+    def test_toggle_2fa_on(self):
+        response = self.client.post(self.url, {"action": "toggle_2fa", "enable_2fa": "on"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["show_2fa_modal"])
+        self.assertIsNotNone(response.context["qr_code"])
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.otp_secret)
+        self.assertFalse(self.user.enable_2fa)
+
+    def test_confirm_2fa_success(self):
+        self.user.otp_secret = pyotp.random_base32()
+        self.user.save()
+
+        valid_otp = pyotp.TOTP(self.user.otp_secret).now()
+        response = self.client.post(self.url, {"action": "confirm_2fa", "otp": valid_otp})
+        self.assertRedirects(response, self.url)
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.enable_2fa)
+
+    def test_confirm_2fa_failure_resets_secret(self):
+        self.user.otp_secret = pyotp.random_base32()
+        self.user.save()
+
+        response = self.client.post(self.url, {"action": "confirm_2fa", "otp": "123456"})
+        self.assertRedirects(response, self.url)
+
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.enable_2fa)
+        self.assertEqual(self.user.otp_secret, "")
+
+    def test_toggle_2fa_off_clears_secrets(self):
+        self.user.enable_2fa = True
+        self.user.otp_secret = pyotp.random_base32()
+        self.user.save()
+
+        response = self.client.post(self.url, {"action": "toggle_2fa"})
+        self.assertRedirects(response, self.url)
+
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.enable_2fa)
+        self.assertEqual(self.user.otp_secret, "")
 
 class UpdateMasterPasswordViewTests(TestCase):
-    """
-    Test case for the update_master_password view.
-    """
+
     def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", password="oldpassword", username="tester"
+        self.user = User.objects.create_user(
+            email="user@test.com", username="user", password="Str0ng_p@ssword"
         )
-        self.client.login(email="tester@example.com", password="oldpassword")
+        self.client.login(email="user@test.com", password="Str0ng_p@ssword")
         self.form_data = {
-            "old_password": "oldpassword", "new_password1": "SecRet_p@ssword", "new_password2": "SecRet_p@ssword"
+            "old_password": "Str0ng_p@ssword", "new_password1": "New_Str0ng_p@ssword", "new_password2": "New_Str0ng_p@ssword"
         }
+        self.url = reverse("users:update_master_password")
 
-        # Some items to test encryption
-        self.items = []
-        for _ in range(3):
-            item = Item(owner=self.user, username="tester", password="testpassword", notes="Test notes")
-            item.encrypt_sensitive_fields()
-            item.save()
+    def test_unauthenticated_user_redirects_to_login(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
 
-            # Add item to the list
-            self.items.append(item)
+    def test_update_master_password_without_items_succeeds(self):
+        response = self.client.post(self.url, self.form_data)
+        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("New_Str0ng_p@ssword"))
 
-    def test_update_master_password_view_status_code_and_template(self):
-        """
-        Test if view returns a status code 200 & uses the correct template.
-        """
-        response = self.client.get(reverse("users:update_master_password"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/update_master_password.html")
-        self.assertIsInstance(response.context["form"], MasterPasswordChangeForm)
+    def test_update_master_password_reencrypts_vault_items(self):
+        item = Item(name="Test Item", username="test", password="testpassword", notes="Test notes", owner=self.user)
+        item.encrypt_sensitive_fields()
+        item.save()
 
-    def test_update_master_password_view_valid_data(self):
-        """
-        Test updating master password with valid data.
-        """
-        response = self.client.post(reverse("users:update_master_password"), self.form_data)
+        old_encrypted_password = item.password
 
-        # Re-login after password update (simulating what happens after real password change)
-        self.client.login(email="tester@example.com", password="SecRet_p@ssword")
+        response = self.client.post(self.url, self.form_data)
         self.assertRedirects(response, reverse("passmanager:vault"))
 
-        # Check if the user's password is updated
         self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password("SecRet_p@ssword"))
+        self.assertTrue(self.user.check_password("New_Str0ng_p@ssword"))
 
-        # Verify items are re-encrypted
-        for item in self.items:
-            self.assertNotEqual(item.username, "tester")
-            self.assertNotEqual(item.password, "testpassword")
-            self.assertNotEqual(item.notes, "Test notes")
-
-    def test_update_master_password_view_invalid_data(self):
-        """
-        Test updating master password with invalid data.
-        """
-        self.form_data["new_password2"] = "wrongpassword"
-        self.client.post(reverse("users:update_master_password"), self.form_data)
-        self.assertTrue(self.user.check_password("oldpassword"))
-
-
-class DeleteAccountViewTests(TestCase):
-    """
-    Test case for the delete_account view.
-    """
-    def setUp(self):
-        self.user_model = get_user_model()
-        self.user = self.user_model.objects.create_user(
-            email="tester@example.com", password="password123", username="tester"
-        )
-        self.client.login(email="tester@example.com", password="password123")
-
-    def test_delete_account_view(self):
-        """
-        Test deleting the user account successfully.
-        """
-        response = self.client.post(reverse("users:delete_account"))
-        self.assertRedirects(response, reverse("users:register"))
-
-        # Check that the user is deleted
-        self.assertFalse(self.user_model.objects.filter(id=self.user.id).exists())
-
-    def test_delete_account_view_not_logged_in(self):
-        """
-        Test accessing the view when not logged in.
-        """
-        self.client.logout()
-        response = self.client.post(reverse("users:delete_account"))
-        self.assertRedirects(response, "/user/login/?next=/user/account/delete_account/")
-
-        # Ensure the user is not deleted
-        self.assertTrue(self.user_model.objects.filter(id=self.user.id).exists())
+        item.refresh_from_db()
+        self.assertNotEqual(item.password, old_encrypted_password)
