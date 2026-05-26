@@ -24,8 +24,6 @@ The primary goal of this project is to **provide a self-hostable,  open-source p
 While the app is available for use, my main intention is not to attract active users or compete with major applications like [Bitwarden](https://bitwarden.com/).
 Instead, I aim to offer a self-host option for those who prefer full control over their password management and to share the code, primarily written in Django, for educational or personal use.
 
-If you find this project interesting, helpful, or inspiring, please consider giving a `star`, `following`, or even `donating` to support further development.
-
 ## Usage
 
 ### Local Development
