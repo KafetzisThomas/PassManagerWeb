@@ -13,7 +13,7 @@ class ItemModelTests(TestCase):
             name="Test Item",
             username="itemuser",
             password="password123",
-            url="https://example.com",
+            domain="https://example.com",
             notes="Some notes",
             owner=self.user
         )
@@ -38,7 +38,7 @@ class ItemModelTests(TestCase):
         self.assertNotEqual(self.item.username, original_username)
         self.assertNotEqual(self.item.password, original_password)
         self.assertNotEqual(self.item.notes, original_notes)        
-        self.assertEqual(self.item.url, "https://example.com")
+        self.assertEqual(self.item.domain, "https://example.com")
 
         self.item.decrypt_sensitive_fields()
 

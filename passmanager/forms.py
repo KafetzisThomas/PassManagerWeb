@@ -5,11 +5,11 @@ from .models import Item
 class ItemForm(forms.ModelForm):
     username = forms.CharField(required=False, widget=forms.TextInput())
     password = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_password'}))
-    url = forms.URLField(required=False)
+    domain = forms.URLField(required=False)
 
     class Meta:
         model = Item
-        fields = ["name", "username", "password", "url", "notes"]
+        fields = ["name", "username", "password", "domain", "notes"]
 
 
 class ImportDataForm(forms.Form):

@@ -26,7 +26,7 @@ class Item(models.Model):
     name = models.CharField(max_length=50)
     username = models.TextField(blank=True)
     password = models.TextField(blank=True)
-    url = models.URLField(max_length=50, blank=True)
+    domain = models.URLField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)

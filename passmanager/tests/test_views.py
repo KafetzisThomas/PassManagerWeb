@@ -57,7 +57,7 @@ class NewItemViewTests(TestCase):
             "name": "Test Item",
             "username": "itemuser",
             "password": "password123",
-            "url": "https://example.com",
+            "domain": "https://example.com",
             "notes": "Test notes"
         }
 
@@ -73,7 +73,7 @@ class NewItemViewTests(TestCase):
         item = Item.objects.get(name="Test Item")
         self.assertNotEqual(item.username, "itemuser")
         self.assertNotEqual(item.password, "password123")
-        self.assertEqual(item.url, "https://example.com")
+        self.assertEqual(item.domain, "https://example.com")
         self.assertNotEqual(item.notes, "Test notes")
 
 
@@ -87,7 +87,7 @@ class EditItemViewTests(TestCase):
             name="Test Item",
             username="itemuser",
             password="password123",
-            url="https://example.com",
+            domain="https://example.com",
             notes="Test notes",
             owner=self.user1
         )
@@ -119,7 +119,7 @@ class EditItemViewTests(TestCase):
             "name": "Modified Item",
             "username": "modifieduser",
             "password": "modifiedpassword",
-            "url": "https://modified-example.com",
+            "domain": "https://modified-example.com",
             "notes": "Modified notes"
         }
         response = self.client.post(self.url, data)
@@ -151,7 +151,7 @@ class ExportCsvViewTests(TestCase):
             name="Test Item",
             username="itemuser",
             password="password123",
-            url="https://example.com",
+            domain="https://example.com",
             notes="Test notes",
             owner=self.user1
         )
@@ -176,7 +176,7 @@ class ExportCsvViewTests(TestCase):
         reader = csv.reader(StringIO(content))
         rows = list(reader)
 
-        self.assertEqual(rows[0], ["name", "username", "password", "url", "notes"])
+        self.assertEqual(rows[0], ["name", "username", "password", "domain", "notes"])
 
         self.assertEqual(len(rows), 2)  # 1 header row + 1 data row
         self.assertEqual(
@@ -198,7 +198,7 @@ class ImportCsvViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_valid_csv_import(self):
-        csv_content = b"name,username,password,url,notes\nExample Name,example_user,example_pass,example.com,example notes"
+        csv_content = b"name,username,password,domain,notes\nExample Name,example_user,example_pass,example.com,example notes"
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         response = self.client.post(self.url, data={"csv_file": file})
@@ -212,7 +212,7 @@ class ImportCsvViewTests(TestCase):
         self.assertEqual(item.name, "Example Name")
         self.assertEqual(item.username, "example_user")
         self.assertEqual(item.password, "example_pass")
-        self.assertEqual(item.url, "example.com")
+        self.assertEqual(item.domain, "example.com")
         self.assertEqual(item.notes, "example notes")
         self.assertEqual(item.owner, self.user)
 

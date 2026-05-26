@@ -65,12 +65,12 @@ def export_csv(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="passmanagerweb_passwords.csv"'
     writer = csv.writer(response)
-    writer.writerow(["name", "username", "password", "url", "notes"])
+    writer.writerow(["name", "username", "password", "domain", "notes"])
 
     data = Item.objects.filter(owner=request.user)
     for item in data:
         item.decrypt_sensitive_fields()
-        writer.writerow([item.name, item.username, item.password, item.url, item.notes])
+        writer.writerow([item.name, item.username, item.password, item.domain, item.notes])
 
     return response
 
@@ -85,15 +85,15 @@ def import_csv(request):
 
             # skip header row
             header = next(csv_reader)
-            expected_header = ["name", "username", "password", "url", "notes"]
+            expected_header = ["name", "username", "password", "domain", "notes"]
 
             if header != expected_header:
                 messages.error(request, "Invalid CSV format. Please check the column names.")
                 return redirect("passmanager:import_csv")
 
             for row in csv_reader:
-                name, username, password, url, notes = row
-                item = Item(name=name, username=username, password=password, url=url, notes=notes, owner=request.user)
+                name, username, password, domain, notes = row
+                item = Item(name=name, username=username, password=password, domain=domain, notes=notes, owner=request.user)
                 item.encrypt_sensitive_fields()
                 item.save()
 
