@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "passmanager",
     "users",
     # third party apps
+    "axes",
     "django_extensions",
     "crispy_forms",
     "crispy_bootstrap5",
@@ -61,6 +62,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "users.middleware.SessionTimeoutMiddleware",
+    "axes.middleware.AxesMiddleware",
+]
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 ROOT_URLCONF = "main.urls"
@@ -163,11 +170,17 @@ if not DEBUG:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SESSION_SAVE_EVERY_REQUEST = True
 AUTH_USER_MODEL = "users.CustomUser"
-AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
 LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = "passmanager:vault"
 LOGOUT_REDIRECT_URL = "/"
+
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1
+AXES_LOCKOUT_PARAMETERS = ["ip_address", "username"]
+
+if DEBUG:
+    AXES_ENABLED = False
 
 DISCORD_BOT_USERNAME = os.getenv("DISCORD_BOT_USERNAME")
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")

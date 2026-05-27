@@ -13,6 +13,7 @@
 - [X] **Password Health Monitoring**: Identify `weak` passwords across your vault.
 - [X] **Import/Export:** `Import` data from other password managers or `export` your vault to csv format.
 - [X] **Session Security:** Configurable vault **timeout** and automatic locking.
+- [X] Brute force login protection with **rate limiting**
 
 ## Database Schema
 
