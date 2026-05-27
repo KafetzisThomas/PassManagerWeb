@@ -5,6 +5,9 @@
     <img src="https://img.shields.io/badge/Docker-Enabled-blue?logo=docker"/>
 </div>
 
+> [!WARNING]
+> This project should not be considered a replacement for professionally audited password managers. If you need a production ready solution for storing sensitive passwords there are more mature and tested alternatives available.
+
 ## Features
 
 - [X] **AES-256 GCM encryption** with per-user keys derived from the `master password` and `salt`
@@ -20,12 +23,6 @@
 ## Database Schema
 
 ![Database Schema](assets/db_schema.png)
-
-## Purpose
-
-The primary goal of this project is to **provide a self-hostable,  open-source password manager that anyone can use and learn from**.
-While the app is available for use, my main intention is not to attract active users or compete with major applications like [Bitwarden](https://bitwarden.com/).
-Instead, I aim to offer a self-host option for those who prefer full control over their password management and to share the code, primarily written in Django, for educational or personal use.
 
 ## Usage
 
