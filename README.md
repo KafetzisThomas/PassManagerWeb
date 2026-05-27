@@ -7,13 +7,15 @@
 
 ## Features
 
-- [X] **AES-256 GCM Encryption**: Each user's data is encrypted using a **unique encryption key** derived from their `master password` and a user-specific `salt`, ensuring isolation between accounts.
-- [X] **Multi-Factor Authentication**: Protect your account with your favorite authenticator app.
-- [X] **Vault Management:** `Create`, `read`, `update` and `delete` vault items.
-- [X] **Password Health Monitoring**: Identify `weak` passwords across your vault.
-- [X] **Import/Export:** `Import` data from other password managers or `export` your vault to csv format.
-- [X] **Session Security:** Configurable vault **timeout** and automatic locking.
+- [X] **AES-256 GCM encryption** with per-user keys derived from the `master password` and `salt`
+- [X] **Multi-factor authentication** for extra account protection
+- [X] `Create`, `read`, `update` and `delete` vault items
+- [X] Vault **search**
+- [X] Detect `weak` passwords across your vault
+- [X] `Import` and `export` vault data in csv format
+- [X] Configurable vault **timeout** with automatic locking
 - [X] Brute force login protection with **rate limiting**
+- [X] Automated **discord webhook** alerts for new account registrations
 
 ## Database Schema
 
