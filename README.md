@@ -77,17 +77,17 @@ uv run manage.py test
 
 ## Demo Images
 
-![Vault](assets/vault_page.png)
+![Vault](assets/vault.png)
 
-![New Item](assets/new_item_page.png)
+![New Item](assets/new_item.png)
 
-![Edit Item](assets/edit_item_page.png)
+![Edit Item](assets/edit_item.png)
 
-![Import Data](assets/import_data_page.png)
+![Password Checkup](assets/password_checkup.png)
 
-![Password Checkup](assets/password_checkup_page.png)
+![Import Data](assets/import_data.png)
 
-![Account Settings](assets/account_page.png)
+![Account Settings](assets/account.png)
 
 ## Contributing Guidelines
 
