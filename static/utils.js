@@ -18,3 +18,12 @@ function generatePassword() {
     }
     passwordField.value = password;
 };
+
+function openDomain() {
+    const domainField = document.getElementById('id_domain');
+    let url = domainField.value.trim();
+    if (!url) {
+        return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+}

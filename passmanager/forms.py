@@ -5,7 +5,7 @@ from .models import Item
 class ItemForm(forms.ModelForm):
     username = forms.CharField(required=False, widget=forms.TextInput())
     password = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_password'}))
-    domain = forms.URLField(required=False)
+    domain = forms.URLField(required=False, widget=forms.URLInput(attrs={'class': 'form-control', 'id': 'id_domain'}))
 
     class Meta:
         model = Item

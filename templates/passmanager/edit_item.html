@@ -31,7 +31,18 @@
             </div>
         </div>
 
-        {{ form.domain|as_crispy_field }}
+        <div class="mb-3">
+            <label for="{{ form.domain.id_for_label }}" class="form-label">
+                {{ form.domain.label }}
+            </label>
+            <div class="input-group">
+                {{ form.domain }}
+                <a class="btn btn-outline-secondary" id="openDomainBtn" title="open domain" href="#" onclick="openDomain()">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+            </div>
+        </div>
+
         {{ form.notes|as_crispy_field }}
 
         <p class="text-muted mt-3 mb-4 small d-flex justify-content-between w-100">
