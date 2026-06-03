@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "asgiref==3.11.1",
     "beautifulsoup4==4.14.3",
-    "boto3>=1.43.15",
+    "boto3>=1.43.21",
     "brotli==1.2.0",
     "cffi==2.0.0",
     "click==8.3.3",
