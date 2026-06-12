@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('passmanager', '0006_alter_item_name_alter_item_notes_alter_item_password_and_more'),
+        ('vault', '0006_alter_item_name_alter_item_notes_alter_item_password_and_more'),
     ]
 
     operations = [

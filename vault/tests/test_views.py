@@ -13,7 +13,7 @@ User = get_user_model()
 class VaultViewTests(TestCase):
 
     def setUp(self):
-        self.url = reverse("passmanager:vault")
+        self.url = reverse("vault:vault")
         self.user1 = User.objects.create_user(
             email="user1@test.com", username="user1", password="Str0ng_p@ssword"
         )
@@ -50,7 +50,7 @@ class VaultViewTests(TestCase):
 class NewItemViewTests(TestCase):
 
     def setUp(self):
-        self.url = reverse("passmanager:new_item")
+        self.url = reverse("vault:new_item")
         self.user = User.objects.create_user(email="user@test.com", username="user", password="Str0ng_p@ssword")
         self.client.login(email="user@test.com", password="Str0ng_p@ssword")
         self.form_data = {
@@ -68,7 +68,7 @@ class NewItemViewTests(TestCase):
 
     def test_new_item_view_save(self):
         response = self.client.post(self.url, self.form_data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
 
         item = Item.objects.get(name="Test Item")
         self.assertNotEqual(item.username, "itemuser")
@@ -94,7 +94,7 @@ class EditItemViewTests(TestCase):
         self.item.encrypt_sensitive_fields()
         self.item.save()
 
-        self.url = reverse("passmanager:edit_item", kwargs={"item_id": self.item.id})
+        self.url = reverse("vault:edit_item", kwargs={"item_id": self.item.id})
 
     def test_unauthenticated_user_redirects_to_login(self):
         self.client.logout()
@@ -123,7 +123,7 @@ class EditItemViewTests(TestCase):
             "notes": "Modified notes"
         }
         response = self.client.post(self.url, data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
 
         self.item.refresh_from_db()
         self.assertNotEqual(self.item.password, "modifiedpassword")
@@ -135,7 +135,7 @@ class EditItemViewTests(TestCase):
     def test_edit_item_view_delete_action(self):
         data = {"action": "delete"}
         response = self.client.post(self.url, data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
         with self.assertRaises(Item.DoesNotExist):
             Item.objects.get(id=self.item.id)
 
@@ -143,7 +143,7 @@ class EditItemViewTests(TestCase):
 class ExportCsvViewTests(TestCase):
 
     def setUp(self):
-        self.url = reverse("passmanager:export_csv")
+        self.url = reverse("vault:export_csv")
         self.user1 = User.objects.create_user(email="user@test.com", username="user", password="Str0ng_p@ssword")
         self.user2 = User.objects.create_user(email="user2@test.com", username="user2", password="Str0ng_p@ssword")
         self.client.login(email="user@test.com", password="Str0ng_p@ssword")
@@ -188,7 +188,7 @@ class ExportCsvViewTests(TestCase):
 class ImportCsvViewTests(TestCase):
 
     def setUp(self):
-        self.url = reverse("passmanager:import_csv")
+        self.url = reverse("vault:import_csv")
         self.user = User.objects.create_user(email="user@test.com", username="user", password="Str0ng_p@ssword")
         self.client.login(email="user@test.com", password="Str0ng_p@ssword")
 
@@ -202,7 +202,7 @@ class ImportCsvViewTests(TestCase):
         file = SimpleUploadedFile("test.csv", csv_content, content_type="text/csv")
 
         response = self.client.post(self.url, data={"csv_file": file})
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
         self.assertEqual(Item.objects.count(), 1)
 
         item = Item.objects.first()
@@ -252,7 +252,7 @@ class PasswordCheckupViewTests(TestCase):
 
         Item.objects.create(name="Test Item 3", owner=self.user2)
 
-        self.url = reverse("passmanager:checkup_api")
+        self.url = reverse("vault:checkup_api")
 
     def test_unauthenticated_user_redirects_to_login(self):
         self.client.logout()

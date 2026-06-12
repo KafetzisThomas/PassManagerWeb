@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load url_filters %}
+{% load split_url %}
 
 {% block title %}My Vault{% endblock title %}
 
@@ -13,17 +13,17 @@
     <form method="GET" class="mb-4">
         <div class="d-flex flex-column gap-2">
             <input class="form-control form-control-sm" type="search" name="search" placeholder="Search items..." value="{{ search|default:'' }}">
-            <a class="btn btn-primary w-100" href="{% url 'passmanager:new_item' %}">
+            <a class="btn btn-primary w-100" href="{% url 'vault:new_item' %}">
                 <i class="bi bi-plus-lg me-1"></i> New Item
             </a>
         </div>
     </form>
 
     {% for item in items %}
-        <a href="{% url 'passmanager:edit_item' item.id %}" class="text-decoration-none">
+        <a href="{% url 'vault:edit_item' item.id %}" class="text-decoration-none">
             <article class="media border border-secondary-subtle rounded shadow-sm item-section p-3 d-flex align-items-center bg-body-tertiary text-body mb-2">
                 <div class="favicon-wrapper me-md-4 me-1">
-                    <img src="https://www.google.com/s2/favicons?sz=64&domain={{ item.domain|urlsplit:'netloc' }}" alt="favicon" width="32" height="32">
+                    <img src="https://www.google.com/s2/favicons?sz=64&domain={{ item.domain|split_url:'netloc' }}" alt="favicon" width="32" height="32">
                 </div>
                 <div class="media-body flex-grow-1">
                     <div class="item-metadata mb-0">

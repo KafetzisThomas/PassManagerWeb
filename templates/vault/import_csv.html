@@ -5,11 +5,10 @@
 
 {% block content %}
     <h2>Import Data</h2>
-    <form action="{% url 'passmanager:import_csv' %}" method="post" enctype="multipart/form-data" class="mt-3">
+    <form action="{% url 'vault:import_csv' %}" method="post" enctype="multipart/form-data" class="mt-3">
         {% csrf_token %}
         {{ form|crispy }}
         <p class="text-muted small">Import your CSV file with the following columns: <strong>name, username, password, website, notes</strong>.</p>    
         <button name="submit" class="btn btn-primary w-100">Import</button>
-        <input type="hidden" name="next" value="{% url 'passmanager:vault' %}" />
     </form>
 {% endblock content %}

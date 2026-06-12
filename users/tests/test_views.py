@@ -4,7 +4,7 @@ from django.urls import reverse
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.contrib.auth import SESSION_KEY
-from passmanager.models import Item
+from vault.models import Item
 
 User = get_user_model()
 
@@ -83,7 +83,7 @@ class TwoFactorVerificationViewTests(TestCase):
     def test_valid_otp_submission(self):
         valid_otp = pyotp.TOTP(self.user.otp_secret).now()
         response = self.client.post(self.two_factor_verification_url, {"otp": valid_otp})
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
         self.assertIn(SESSION_KEY, self.client.session)  # user should be logged in
         self.assertNotIn("user_id", self.client.session)  # temp key cleaned up
 
@@ -173,7 +173,7 @@ class UpdateMasterPasswordViewTests(TestCase):
 
     def test_update_master_password_without_items_succeeds(self):
         response = self.client.post(self.url, self.form_data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("New_Str0ng_p@ssword"))
 
@@ -185,7 +185,7 @@ class UpdateMasterPasswordViewTests(TestCase):
         old_encrypted_password = item.password
 
         response = self.client.post(self.url, self.form_data)
-        self.assertRedirects(response, reverse("passmanager:vault"))
+        self.assertRedirects(response, reverse("vault:vault"))
 
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("New_Str0ng_p@ssword"))

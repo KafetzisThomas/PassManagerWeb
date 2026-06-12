@@ -11,7 +11,7 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'passmanager:new_item' %}" method='POST'>
+    <form action="{% url 'vault:new_item' %}" method='POST'>
         {% csrf_token %}
         {{ form.name|as_crispy_field }}
         {{ form.username|as_crispy_field }}

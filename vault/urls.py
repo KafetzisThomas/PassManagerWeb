@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = "passmanager"
+app_name = "vault"
 urlpatterns = [
     path("", views.vault, name="vault"),
     path("item/new/", views.new_item, name="new_item"),

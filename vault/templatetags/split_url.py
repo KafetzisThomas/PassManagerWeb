@@ -1,10 +1,10 @@
-from urllib.parse import urlparse
 from django import template
+from urllib.parse import urlparse
 
 register = template.Library()
 
 @register.filter
-def urlsplit(value: str, part: str) -> str:
+def split_url(value: str, part: str) -> str:
     """
     Extract a specific part from a URL.
     """

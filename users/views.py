@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from .models import CustomUser
-from passmanager.models import Item
+from vault.models import Item
 from .forms import (
     RegistrationForm,
     LoginForm,
@@ -49,7 +49,7 @@ def two_factor_verification(request):
             if user.otp_secret and pyotp.TOTP(user.otp_secret).verify(otp):
                 login(request, user, backend="django.contrib.auth.backends.ModelBackend")
                 request.session.pop("user_id", None)
-                return redirect("passmanager:vault")
+                return redirect("vault:vault")
             else:
                 form.add_error("otp", "Invalid OTP.")
     else:
@@ -184,7 +184,7 @@ def update_master_password(request):
                     item.save()
 
             messages.success(request, "Your master password was successfully updated!")
-            return redirect("passmanager:vault")
+            return redirect("vault:vault")
     else:
         form = MasterPasswordChangeForm(user=user)
 

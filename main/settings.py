@@ -37,7 +37,7 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://127.0.0.1").sp
 
 INSTALLED_APPS = [
     # my apps
-    "passmanager",
+    "vault",
     "users",
     # third party apps
     "axes",
@@ -172,7 +172,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 AUTH_USER_MODEL = "users.CustomUser"
 
 LOGIN_URL = "users:login"
-LOGIN_REDIRECT_URL = "passmanager:vault"
+LOGIN_REDIRECT_URL = "vault:vault"
 LOGOUT_REDIRECT_URL = "/"
 
 AXES_FAILURE_LIMIT = 5

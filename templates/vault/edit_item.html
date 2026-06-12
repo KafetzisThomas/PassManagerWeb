@@ -11,7 +11,7 @@
         {% endfor %}
     {% endif %}
 
-    <form action="{% url 'passmanager:edit_item' item.id %}" method='POST'>
+    <form action="{% url 'vault:edit_item' item.id %}" method='POST'>
         {% csrf_token %}
         {{ form.name|as_crispy_field }}
         {{ form.username|as_crispy_field }}
@@ -65,7 +65,7 @@
                 </div>
                 <div class="modal-body">Are you sure you want to delete this item?</div>
                 <div class="modal-footer">
-                    <form method="post" action="{% url 'passmanager:edit_item' item.id %}" class="d-flex gap-2 w-100">
+                    <form method="post" action="{% url 'vault:edit_item' item.id %}" class="d-flex gap-2 w-100">
                         {% csrf_token %}
                         <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-danger flex-fill" name="action" value="delete">Delete Item</button>

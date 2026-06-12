@@ -63,7 +63,7 @@
             list.innerHTML = "";
             emptyState.style.display = "none";
 
-            const res = await fetch("{% url 'passmanager:checkup_api' %}");
+            const res = await fetch("{% url 'vault:checkup_api' %}");
             const { items } = await res.json();
 
             loading.style.display = "none";

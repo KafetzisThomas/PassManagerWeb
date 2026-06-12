@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('passmanager', '0004_rename_website_item_url'),
+        ('vault', '0004_rename_website_item_url'),
     ]
 
     operations = [

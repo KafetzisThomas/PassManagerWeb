@@ -17,7 +17,7 @@ def vault(request):
         items = items.filter(name__icontains=search)
 
     context = {"items": items, "search_query": search}
-    return render(request, "passmanager/vault.html", context)
+    return render(request, "vault/vault.html", context)
 
 @login_required
 def new_item(request):
@@ -30,11 +30,11 @@ def new_item(request):
             obj.save()
             
             messages.success(request, "Item created successfully.")
-            return redirect("passmanager:vault")
+            return redirect("vault:vault")
     else:
         form = ItemForm()
 
-    return render(request, "passmanager/new_item.html", {"form": form})
+    return render(request, "vault/new_item.html", {"form": form})
 
 @login_required
 def edit_item(request, item_id):
@@ -43,7 +43,7 @@ def edit_item(request, item_id):
         if request.POST.get("action") == "delete":
             item.delete()
             messages.success(request, "Item deleted successfully.")
-            return redirect("passmanager:vault")
+            return redirect("vault:vault")
 
         form = ItemForm(instance=item, data=request.POST)
         if form.is_valid():
@@ -52,12 +52,12 @@ def edit_item(request, item_id):
             obj.encrypt_sensitive_fields()
             obj.save()
             messages.success(request, "Item modified successfully.")
-            return redirect("passmanager:vault")
+            return redirect("vault:vault")
     else:
         item.decrypt_sensitive_fields()
         form = ItemForm(instance=item)
 
-    return render(request, "passmanager/edit_item.html", {"item": item, "form": form})
+    return render(request, "vault/edit_item.html", {"item": item, "form": form})
 
 @login_required
 @reauth_required
@@ -89,7 +89,7 @@ def import_csv(request):
 
             if header != expected_header:
                 messages.error(request, "Invalid CSV format. Please check the column names.")
-                return redirect("passmanager:import_csv")
+                return redirect("vault:import_csv")
 
             for row in csv_reader:
                 name, username, password, domain, notes = row
@@ -98,15 +98,15 @@ def import_csv(request):
                 item.save()
 
             messages.success(request, "Passwords imported successfully!")
-            return redirect("passmanager:vault")
+            return redirect("vault:vault")
     else:
         form = ImportDataForm()
 
-    return render(request, "passmanager/import_csv.html", {"form": form})
+    return render(request, "vault/import_csv.html", {"form": form})
 
 @login_required
 def checkup(request):
-    return render(request, "passmanager/checkup.html")
+    return render(request, "vault/checkup.html")
 
 @login_required
 def checkup_api(request):
