@@ -7,7 +7,6 @@ requires-python = ">=3.12"
 dependencies = [
     "asgiref==3.11.1",
     "beautifulsoup4==4.14.3",
-    "boto3>=1.43.21",
     "brotli==1.2.0",
     "cffi==2.0.0",
     "click==8.4.1",
@@ -18,7 +17,6 @@ dependencies = [
     "django-appconf==1.2.0",
     "django-axes[ipware]>=8.3.1",
     "django-crispy-forms==2.6",
-    "django-storages>=1.14.6",
     "gunicorn==26.0.0",
     "h11==0.16.0",
     "packaging==26.2",
@@ -32,6 +30,7 @@ dependencies = [
     "sqlparse==0.5.5",
     "typing-extensions==4.15.0",
     "uvicorn==0.46.0",
+    "whitenoise[brotli]>=6.12.0",
     "zxcvbn>=4.5.0",
 ]
 
