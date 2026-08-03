@@ -57,9 +57,6 @@
                             <a class="nav-link {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'vault:checkup' %}">Checkup</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'vault:import_csv' %}">Import Data</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link {% if request.path == '/item/new/' %}active{% endif %}" href="{% url 'vault:new_item' %}">New Item</a>
                         </li>
                         <li class="nav-item">
@@ -110,9 +107,6 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-light {% if request.path == '/checkup/' %}active{% endif %}" href="{% url 'vault:checkup' %}"><i class="bi bi-shield-check me-2"></i> Checkup</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-light {% if request.path == '/csv/import' %}active{% endif %}" href="{% url 'vault:import_csv' %}"><i class="bi bi-upload me-2"></i> Import Data</a>
                 </li>
 
                 <li class="nav-item"><hr class="border-light my-2"></li>
