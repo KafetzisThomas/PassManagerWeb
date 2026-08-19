@@ -26,7 +26,7 @@ dependencies = [
     "qrcode[pil]>=8.2",
     "requests>=2.34.2",
     "soupsieve==2.9.1",
-    "sqlparse==0.5.5",
+    "sqlparse==0.6.0",
     "typing-extensions==4.16.0",
     "uvicorn==0.49.0",
     "whitenoise[brotli]>=6.12.0",
