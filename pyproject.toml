@@ -14,7 +14,7 @@ dependencies = [
     "gunicorn==26.0.0",
     "psycopg2-binary==2.9.12",
     "pyotp==2.9.0",
-    "python-dotenv==1.2.2",
+    "python-dotenv==1.2.3",
     "qrcode[pil]>=8.2",
     "requests>=2.34.2",
     "uvicorn==0.49.0",
