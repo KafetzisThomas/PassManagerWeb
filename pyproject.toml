@@ -12,7 +12,7 @@ dependencies = [
     "django-axes[ipware]>=8.3.1",
     "django-crispy-forms==2.7",
     "gunicorn==26.2.0",
-    "psycopg2-binary==2.9.12",
+    "psycopg2-binary==2.9.13",
     "pyotp==2.10.0",
     "python-dotenv==1.2.3",
     "qrcode[pil]>=8.2",
