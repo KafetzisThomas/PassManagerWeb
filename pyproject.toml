@@ -26,4 +26,8 @@ dependencies = [
 dev = [
     "django-extensions>=4.1",
     "pydotplus>=2.0.2",
+    "ruff>=0.16.10",
 ]
+
+[tool.ruff.lint]
+extend-ignore = ["RUF012"]

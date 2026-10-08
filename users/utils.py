@@ -1,6 +1,8 @@
 import json
+
 import requests
 from django.conf import settings
+
 
 def send_discord_signup_alert(user):
     if settings.DEBUG:

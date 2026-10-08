@@ -1,5 +1,6 @@
-from django import template
 from urllib.parse import urlparse
+
+from django import template
 
 register = template.Library()
 
@@ -10,5 +11,5 @@ def split_url(value: str, part: str) -> str:
     """
     try:
         return getattr(urlparse(value), part)
-    except Exception:
+    except (AttributeError, ValueError):
         return ""

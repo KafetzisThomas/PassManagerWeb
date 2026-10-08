@@ -1,5 +1,7 @@
 from django.shortcuts import render
+
 from users.forms import PasswordConfirmationForm
+
 
 def reauth_required(view_func):
     def wrapper(request, *args, **kwargs):

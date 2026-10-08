@@ -1,7 +1,8 @@
-import os
 import base64
-from django.db import models
+import os
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 from django.utils.translation import gettext as _
 
 SESSION_TIMEOUT_CHOICES = (

@@ -1,25 +1,29 @@
-import pyotp
-import qrcode
 import base64
 from io import BytesIO
-from django.shortcuts import render, redirect, get_object_or_404
+
+import pyotp
+import qrcode
+from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.contrib import messages
-from .models import CustomUser
+from django.shortcuts import get_object_or_404, redirect, render
+
 from vault.models import Item
+
 from .forms import (
-    RegistrationForm,
-    LoginForm,
     EmailUpdateForm,
-    UsernameUpdateForm,
+    LoginForm,
     MasterPasswordChangeForm,
+    RegistrationForm,
+    SessionTimeoutUpdateForm,
     TwoFactorToggleForm,
     TwoFactorVerificationForm,
-    SessionTimeoutUpdateForm,
+    UsernameUpdateForm,
 )
+from .models import CustomUser
 from .utils import send_discord_signup_alert
+
 
 def register(request):
     if request.method == "POST":
