@@ -20,6 +20,29 @@
 - [X] Brute force login protection with **rate limiting**
 - [X] Automated **discord webhook** alerts for new account registrations
 
+## System Architecture
+
+```mermaid
+flowchart TD
+    User["User (Browser)"]
+    Auth["Auth & 2FA"]
+    Encryption["AES-256 GCM encryption"]
+    Vault["Vault Manager"]
+    Checkup["Password Checkup (SHA-1)"]
+    DB[("Database (PostgreSQL)")]
+    Discord["Discord Webhook"]
+
+    User -->|"Authenticates (Password + TOTP)"| Auth
+    User -->|"Manages items & imports/exports"| Vault
+
+    Auth -->|"Sends new registration alerts"| Discord
+    Auth -->|"Validates sessions"| DB
+
+    Vault -->|"Detects weak passwords"| Checkup
+    Vault <-->|"Encrypts/Decrypts fields"| Encryption
+    Vault <-->|"Stores encrypted items"| DB
+```
+
 ## Database Schema
 
 ![Database Schema](assets/db_schema.png)
