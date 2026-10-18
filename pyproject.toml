@@ -24,8 +24,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "django-extensions>=4.1",
-    "pydotplus>=2.0.2",
     "ruff>=0.16.10",
 ]
 

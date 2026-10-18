@@ -45,7 +45,39 @@ flowchart TD
 
 ## Database Schema
 
-![Database Schema](assets/db_schema.png)
+```mermaid
+erDiagram
+    direction LR
+    User ||--o{ Item : "owns"
+
+    User {
+        BIGINT id PK
+        VARCHAR email UK
+        VARCHAR username
+        VARCHAR password
+        VARCHAR encryption_salt
+        BOOLEAN enable_2fa
+        VARCHAR otp_secret
+        INTEGER session_timeout
+        BOOLEAN is_active
+        BOOLEAN is_staff
+        BOOLEAN is_superuser
+        TIMESTAMP last_login
+        TIMESTAMP date_joined
+    }
+
+    Item {
+        BIGINT id PK
+        BIGINT owner_id FK
+        VARCHAR name
+        TEXT username
+        TEXT password
+        VARCHAR domain
+        TEXT notes
+        TIMESTAMP date_added
+        TIMESTAMP last_modified
+    }
+```
 
 ## Usage
 
