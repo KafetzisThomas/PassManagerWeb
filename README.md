@@ -26,21 +26,33 @@
 flowchart TD
     User["User (Browser)"]
     Auth["Auth & 2FA"]
-    Encryption["AES-256 GCM encryption"]
     Vault["Vault Manager"]
     Checkup["Password Checkup (SHA-1)"]
     DB[("Database (PostgreSQL)")]
     Discord["Discord Webhook"]
 
-    User -->|"Authenticates (Password + TOTP)"| Auth
-    User -->|"Manages items & imports/exports"| Vault
+    subgraph EncryptionFlow ["Encryption Flow (no key saved to db)"]
+        direction TB
+        MasterPassword["Master Password (user form input)"]
+        MasterHash["Master Hash (django hash)"]
+        MasterKey["Master Key (PBKDF2HMAC, in-memory only)"]
+        AES["AES-256 GCM (encrypt/decrypt)"]
 
-    Auth -->|"Sends new registration alerts"| Discord
-    Auth -->|"Validates sessions"| DB
+        MasterPassword -->|"django set_password()"| MasterHash
+        MasterHash -->|"derive_key_from_master_password() + salt"| MasterKey
+        MasterKey -->|"encrypts/decrypts items"| AES
+    end
 
-    Vault -->|"Detects weak passwords"| Checkup
-    Vault <-->|"Encrypts/Decrypts fields"| Encryption
-    Vault <-->|"Stores encrypted items"| DB
+    User -->|"submits credentials (password + TOTP)"| Auth
+    User -->|"manages items & imports/exports"| Vault
+
+    Auth -->|"master password input"| MasterPassword
+    Auth -->|"sends new registration alerts"| Discord
+    Auth -->|"stores master hash & validates sessions"| DB
+
+    Vault -->|"detects weak passwords"| Checkup
+    Vault <-->|"encrypts/decrypts fields"| AES
+    Vault <-->|"stores encrypted items"| DB
 ```
 
 ## Database Schema
