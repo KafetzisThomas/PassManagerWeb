@@ -24,8 +24,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pre-commit>=4.7.0",
     "ruff>=0.16.10",
 ]
 
+[tool.ruff]
+line-length = 120
+
 [tool.ruff.lint]
+extend-select = ["I"]
 extend-ignore = ["RUF012"]
