@@ -98,19 +98,14 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if DEBUG:
-    # sqlite for dev
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
-else:
-    # postgresql for prod
-    DATABASES = {
-        "default": dj_database_url.parse(os.getenv("DATABASE_URL"), conn_max_age=600, ssl_require=True),
-    }
+
+DATABASES = {
+    "default": dj_database_url.parse(
+        os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/passmanagerweb"),
+        conn_max_age=600 if not DEBUG else 0,
+        ssl_require=not DEBUG,
+    ),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
