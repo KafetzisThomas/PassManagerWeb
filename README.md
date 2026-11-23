@@ -107,10 +107,22 @@ uv sync --group dev
 uv run pre-commit install
 ```
 
+Start PostgreSQL service:
+
+```bash
+docker compose up -d
+```
+
 Migrate database:
 
 ```bash
 uv run manage.py migrate
+```
+
+Create a superuser for admin and accepting new users:
+
+```bash
+uv run manage.py createsuperuser
 ```
 
 Run Django server:
@@ -121,26 +133,12 @@ uv run manage.py runserver
 
 Access web application at `http://127.0.0.1:8000` or `http://localhost:8000`.
 
-### Production Deployment (Docker)
-
-Set up your environment variables:
-
-```bash
-cp .env.prod .env
-nano .env  # modify file, instructions inside
-```
-
-Build and start the container in the background:
-
-```bash
-docker compose up -d --build
-```
-
-Access web application at `http://127.0.0.1:8000` or `http://localhost:8000`.
-
 ## Run Tests
 
+Ensure the PostgreSQL service is running, then run tests:
+
 ```bash
+docker compose up -d
 uv run manage.py test
 ```
 
